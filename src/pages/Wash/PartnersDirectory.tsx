@@ -156,7 +156,7 @@ export default function PartnersDirectory() {
   return (
     <>
       <PageMeta
-        title="Partners Directory | WASH Sector North East Nigeria"
+        title="Partners | WASH Sector North East Nigeria"
         description="Active WASH humanitarian reporting partners across Borno, Adamawa, and Yobe"
       />
 
@@ -175,11 +175,11 @@ export default function PartnersDirectory() {
               <span>Humanitarian Coordination</span>
               <span>·</span>
               <span className="text-clay-600 dark:text-clay-400">
-                {isCoordinator ? `${userStateScope} State Partners Desk` : "Sector Partners"}
+                {isCoordinator ? `${userStateScope} State Partners` : "Sector Partners"}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              WASH Reporting Partners Directory ({filteredPartners.length})
+              Partners ({filteredPartners.length})
             </h1>
           </div>
 

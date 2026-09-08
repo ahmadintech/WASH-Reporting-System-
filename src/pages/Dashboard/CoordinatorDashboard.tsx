@@ -183,12 +183,6 @@ export default function CoordinatorDashboard() {
         >
           <span>View Coverage Matrix</span>
         </Link>
-        <Link
-          to="/partners"
-          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all"
-        >
-          <span>Manage {coordState} Partners</span>
-        </Link>
         <button
           type="button"
           onClick={() => setIsRegisterPartnerOpen(true)}

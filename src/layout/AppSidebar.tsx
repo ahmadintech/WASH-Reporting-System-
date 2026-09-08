@@ -115,7 +115,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         },
         {
           icon: <GroupIcon />,
-          name: "Partners Directory",
+          name: "Partners",
           path: "/partners",
         },
       ];
