@@ -9,6 +9,7 @@ export interface UserProfile {
   organization: string;
   organizationType: string;
   state?: string;
+  lga?: string;
   avatar?: string;
 }
 
@@ -71,6 +72,79 @@ export const LGA_BY_STATE: Record<'Borno' | 'Adamawa' | 'Yobe', string[]> = {
     "Bade", "Bursari", "Damaturu", "Fika", "Fune", "Geidam", "Gujba", "Gulani", 
     "Jakusko", "Karasuwa", "Machina", "Nangere", "Nguru", "Potiskum", "Tarmuwa", 
     "Yunusari", "Yusufari"
+  ]
+};
+
+export const INITIAL_WARDS_BY_LGA: Record<string, string[]> = {
+  // Borno State
+  "Maiduguri": [
+    "Bolori I", "Bolori II", "Gwange I", "Gwange II", "Gwange III", 
+    "Hausari", "Galtimari", "Shehuri North", "Shehuri South", 
+    "Mafoni", "Maisandari", "Lamisula", "Gamboru", "Fezzan"
+  ],
+  "Jere": [
+    "Old Maiduguri", "Maimusari", "Mashamari", "Dusuman", "Gongulong", 
+    "Bale Galtimari", "Tuba", "Alau", "Dala Alamderi"
+  ],
+  "Bama": [
+    "Shehuri", "Kasugula", "General Hospital Ward", "Sabsabwa", "Gulumba", 
+    "Lawanti", "Dipcharima", "Woloji"
+  ],
+  "Gwoza": [
+    "Gwoza Wakane", "Pulka/Bokko", "Guduf", "Kirawa/Jimini", "Kuranabasa", "Madagali Border"
+  ],
+  "Monguno": [
+    "Monguno Central", "Kumalia", "Sure", "Ngurno", "Kaguram"
+  ],
+  "Damboa": [
+    "Damboa Central", "Gumsuri", "Wawa", "Abba", "Azir"
+  ],
+  "Dikwa": [
+    "Dikwa Central", "Boboshe", "Gajibo", "Mallam Maja"
+  ],
+  "Ngala": [
+    "Gamboru 'A'", "Gamboru 'B'", "Gamboru 'C'", "Ngala Central", "Wulgo"
+  ],
+  "Konduga": [
+    "Konduga Central", "Auno", "Dalori", "Malari", "Kawuri"
+  ],
+  "Biu": [
+    "Biu Central", "Galdimare", "Zarawuyaku", "Miringa", "Yawi"
+  ],
+  // Adamawa State
+  "Yola North": [
+    "Ajiya", "Alkalawa", "Doubeli", "Gwadabawa", "Jambutu", "Karewa", "Limawa", "Nassarawa"
+  ],
+  "Yola South": [
+    "Adarawo", "Bako", "Bole", "Chobboro", "Makama 'A'", "Makama 'B'", "Mbamba", "Toungo"
+  ],
+  "Mubi North": [
+    "Bahuli", "Betso", "Digil", "Kolere", "Lokuwa", "Mayo Bani", "Mijilu", "Sabon Layi", "Yelwa"
+  ],
+  "Mubi South": [
+    "Dirbishi", "Duvu", "Gella", "Gude", "Kwaja", "Lamorde", "Mugulbu", "Nasarawa"
+  ],
+  "Michika": [
+    "Bazza", "Futudou", "Garta", "Jigalambu", "Michika I", "Michika II", "Moda", "Sina"
+  ],
+  "Madagali": [
+    "Madagali", "Gulak", "Hyambula", "Pallam", "Vapra", "Waga"
+  ],
+  // Yobe State
+  "Damaturu": [
+    "Damaturu Central", "Njiwaji", "Maisandari", "Kukareta", "Sasawa", "Bindigari"
+  ],
+  "Potiskum": [
+    "Bolewa 'A'", "Bolewa 'B'", "Hausawa", "Mamudo", "Ngojin", "Yerimaram", "Dogo Tebo"
+  ],
+  "Bade": [
+    "Gashua Central", "Katuzu", "Lawna", "Sarki Hausawa", "Zango"
+  ],
+  "Geidam": [
+    "Geidam Central", "Hausari", "Asheikri", "Gumsa", "Kusur"
+  ],
+  "Gujba": [
+    "Buni Yadi", "Gujba Central", "Bunigari", "Goniri", "Wagir"
   ]
 };
 
@@ -439,5 +513,67 @@ export const INITIAL_WASH_REPORTS: WashReport[] = [
     boys: 320,
     girls: 460,
     total: 2120
+  },
+  {
+    id: "r_1010",
+    submittedAt: "2026-08-27T11:20:00Z",
+    submittedByRole: "partner",
+    submittedByEmail: "partner@solidarites.org",
+    orgName: "Solidarités International",
+    orgType: "International NGO",
+    focalPoint: "Ibrahim Mustapha",
+    email: "imustapha@solidarites-nigeria.org",
+    donor: "BHA / USAID",
+    activityType: "Emergency latrine construction",
+    quantity: 30,
+    unit: "Latrine stances",
+    indicatorDesc: "Gender-segregated emergency pit latrines with solar lighting and handwashing stations in Bakassi Extension.",
+    state: "Borno",
+    lga: "Maiduguri",
+    ward: "Bolori II",
+    settlement: "Bakassi IDP Camp Extension",
+    locationType: "IDP camp / camp-like setting",
+    period: "2026-08",
+    status: "Ongoing",
+    startDate: "2026-08-12",
+    endDate: "2026-09-10",
+    populationGroup: "IDPs in camps",
+    pwd: 45,
+    men: 820,
+    women: 980,
+    boys: 710,
+    girls: 890,
+    total: 3400
+  },
+  {
+    id: "r_1011",
+    submittedAt: "2026-08-25T09:45:00Z",
+    submittedByRole: "partner",
+    submittedByEmail: "partner@solidarites.org",
+    orgName: "Solidarités International",
+    orgType: "International NGO",
+    focalPoint: "Ibrahim Mustapha",
+    email: "imustapha@solidarites-nigeria.org",
+    donor: "NHF (Nigeria Humanitarian Fund)",
+    activityType: "Hygiene promotion session",
+    quantity: 60,
+    unit: "Sessions",
+    indicatorDesc: "Door-to-door hygiene promotion and water storage disinfection campaigns across Bolori II community.",
+    state: "Borno",
+    lga: "Maiduguri",
+    ward: "Bolori II",
+    settlement: "Hausari Community",
+    locationType: "Host community",
+    period: "2026-08",
+    status: "Completed",
+    startDate: "2026-08-03",
+    endDate: "2026-08-20",
+    populationGroup: "Host community",
+    pwd: 60,
+    men: 1200,
+    women: 1650,
+    boys: 1100,
+    girls: 1450,
+    total: 5400
   }
 ];

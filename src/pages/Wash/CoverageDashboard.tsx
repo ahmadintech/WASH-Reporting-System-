@@ -7,12 +7,14 @@ import { WashReport, ALL_ACTIVITIES } from "../../types/wash";
 export default function CoverageDashboard() {
   const { reports, deleteReport, exportCsv } = useWashData();
   const { currentUser } = useAuth();
+  const isPartner = currentUser.role === "partner";
 
-  // Filters state
-  const [filterState, setFilterState] = useState<string>("");
+  // Filters state - targeted on state & community for partners
+  const [filterState, setFilterState] = useState<string>(isPartner ? (currentUser.state || "Borno") : "");
+  const [filterLga, setFilterLga] = useState<string>(isPartner ? (currentUser.lga || "Maiduguri") : "");
   const [filterActivity, setFilterActivity] = useState<string>("");
   const [filterPeriod, setFilterPeriod] = useState<string>("");
-  const [filterOrg, setFilterOrg] = useState<string>("");
+  const [filterOrg, setFilterOrg] = useState<string>(isPartner ? currentUser.organization : "");
 
   // Modal detail view
   const [selectedReport, setSelectedReport] = useState<WashReport | null>(null);
@@ -26,12 +28,13 @@ export default function CoverageDashboard() {
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
       if (filterState && r.state !== filterState) return false;
+      if (filterLga && r.lga.toLowerCase() !== filterLga.toLowerCase()) return false;
       if (filterActivity && r.activityType !== filterActivity) return false;
       if (filterPeriod && r.period !== filterPeriod) return false;
       if (filterOrg && !r.orgName.toLowerCase().includes(filterOrg.trim().toLowerCase())) return false;
       return true;
     });
-  }, [reports, filterState, filterActivity, filterPeriod, filterOrg]);
+  }, [reports, filterState, filterLga, filterActivity, filterPeriod, filterOrg]);
 
   // Filtered stats
   const statReports = filteredReports.length;
@@ -67,10 +70,11 @@ export default function CoverageDashboard() {
   const maxActivityCount = Math.max(...activityCounts.map((a) => a[1]), 1);
 
   const handleClearFilters = () => {
-    setFilterState("");
+    setFilterState(isPartner ? (currentUser.state || "Borno") : "");
+    setFilterLga(isPartner ? (currentUser.lga || "Maiduguri") : "");
     setFilterActivity("");
     setFilterPeriod("");
-    setFilterOrg("");
+    setFilterOrg(isPartner ? currentUser.organization : "");
   };
 
   const handleDelete = (r: WashReport) => {
@@ -93,8 +97,8 @@ export default function CoverageDashboard() {
   return (
     <>
       <PageMeta
-        title="Coverage Dashboard | WASH Sector North East Nigeria"
-        description="Filter and analyze 5W response coverage data across Borno, Adamawa, and Yobe"
+        title="Analytics | WASH Sector North East Nigeria"
+        description="Filter and analyze 5W response coverage and humanitarian interventions"
       />
 
       <div className="space-y-6">
@@ -103,11 +107,17 @@ export default function CoverageDashboard() {
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 mb-1">
               <span>Response Coverage & Monitoring</span>
-              <span>·</span>
-              <span className="text-clay-600 dark:text-clay-400">Borno · Adamawa · Yobe</span>
+              {isPartner && (
+                <>
+                  <span>·</span>
+                  <span className="text-emerald-700 dark:text-emerald-300 font-semibold">
+                    {currentUser.organization} Community Operations ({currentUser.lga || "Maiduguri"}, {currentUser.state || "Borno"})
+                  </span>
+                </>
+              )}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              WASH 5W Coverage Dashboard
+              Analytics
             </h1>
           </div>
 
@@ -124,7 +134,7 @@ export default function CoverageDashboard() {
           </div>
         </div>
 
-        {/* Filter Bar matching wash-5w-reporting-platform.html */}
+        {/* Filter Bar */}
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
             <div>
@@ -134,9 +144,10 @@ export default function CoverageDashboard() {
               <select
                 value={filterState}
                 onChange={(e) => setFilterState(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-white focus:border-brand-500 focus:outline-none"
+                disabled={isPartner}
+                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-white focus:border-brand-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                <option value="">All States</option>
+                {!isPartner && <option value="">All States</option>}
                 <option value="Borno">Borno</option>
                 <option value="Adamawa">Adamawa</option>
                 <option value="Yobe">Yobe</option>

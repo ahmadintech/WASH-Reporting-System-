@@ -1,14 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import React, { useEffect, useRef } from "react";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import { RoleSwitcher } from "../components/common/RoleSwitcher";
 import { WashLogo } from "../components/common/WashLogo";
 
 const AppHeader: React.FC = () => {
-  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
@@ -17,10 +14,6 @@ const AppHeader: React.FC = () => {
     } else {
       toggleMobileSidebar();
     }
-  };
-
-  const toggleApplicationMenu = () => {
-    setApplicationMenuOpen(!isApplicationMenuOpen);
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,11 +76,7 @@ const AppHeader: React.FC = () => {
         </div>
 
         {/* Header Right Items */}
-        <div
-          className={`${
-            isApplicationMenuOpen ? "flex" : "hidden"
-          } items-center justify-between w-full gap-3 px-5 py-3 lg:flex lg:justify-end lg:px-0`}
-        >
+        <div className="flex items-center justify-end gap-3 px-3 py-2 lg:px-0">
           <div className="flex items-center gap-2">
             <ThemeToggleButton />
             <NotificationDropdown />

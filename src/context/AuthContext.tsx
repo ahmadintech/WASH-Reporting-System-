@@ -1,12 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserRole, UserProfile } from "../types/wash";
 
+export interface UserPermissions {
+  canApproveReports: boolean;
+  canExportMasterData: boolean;
+  canConfigureSettings: boolean;
+  canManageUsers: boolean;
+  canSubmit5W: boolean;
+}
+
+export interface ManagedUser extends UserProfile {
+  status: "Active" | "Suspended";
+  permissions: UserPermissions;
+  createdAt: string;
+}
+
 interface AuthContextType {
   currentUser: UserProfile;
   login: (email: string, role?: UserRole) => boolean;
+  loginAsRole: (role: UserRole) => boolean;
   logout: () => void;
   switchRole: (role: UserRole) => void;
   isAuthenticated: boolean;
+  users: ManagedUser[];
+  addUser: (user: Omit<ManagedUser, "id" | "createdAt">) => ManagedUser;
+  updateUser: (id: string, updates: Partial<ManagedUser>) => void;
+  updateCurrentUser: (updates: Partial<UserProfile>) => void;
+  deleteUser: (id: string) => void;
+  toggleUserStatus: (id: string) => void;
 }
 
 export const PRESET_USERS: Record<UserRole, UserProfile> = {
@@ -18,7 +39,8 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     roleTitle: "Sector Administrator",
     organization: "WASH Sector North East Nigeria",
     organizationType: "Government / UN Co-Lead",
-    state: "Borno (Regional Hub)",
+    state: "Borno",
+    lga: "Maiduguri",
     avatar: "/images/user/owner.jpg"
   },
   coordinator: {
@@ -29,7 +51,8 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     roleTitle: "State Coordinator",
     organization: "WASH Cluster Coordination Desk",
     organizationType: "UN / Coordination Desk",
-    state: "Borno · Adamawa · Yobe",
+    state: "Borno",
+    lga: "Maiduguri",
     avatar: "/images/user/owner.jpg"
   },
   partner: {
@@ -41,9 +64,89 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organization: "Solidarités International",
     organizationType: "International NGO",
     state: "Borno",
+    lga: "Maiduguri",
     avatar: "/images/user/owner.jpg"
   }
 };
+
+export const INITIAL_MANAGED_USERS: ManagedUser[] = [
+  {
+    ...PRESET_USERS.admin,
+    status: "Active",
+    createdAt: "2026-01-10",
+    permissions: {
+      canApproveReports: true,
+      canExportMasterData: true,
+      canConfigureSettings: true,
+      canManageUsers: true,
+      canSubmit5W: false,
+    },
+  },
+  {
+    ...PRESET_USERS.coordinator,
+    status: "Active",
+    createdAt: "2026-01-15",
+    permissions: {
+      canApproveReports: true,
+      canExportMasterData: true,
+      canConfigureSettings: false,
+      canManageUsers: false,
+      canSubmit5W: false,
+    },
+  },
+  {
+    ...PRESET_USERS.partner,
+    status: "Active",
+    createdAt: "2026-02-01",
+    permissions: {
+      canApproveReports: false,
+      canExportMasterData: false,
+      canConfigureSettings: false,
+      canManageUsers: false,
+      canSubmit5W: true,
+    },
+  },
+  {
+    id: "usr_unicef",
+    name: "Grace Adebayo",
+    email: "gadebayo@unicef.org",
+    role: "partner",
+    roleTitle: "WASH Emergency Specialist",
+    organization: "UNICEF Nigeria",
+    organizationType: "UN Agency",
+    state: "Borno",
+    lga: "Jere",
+    status: "Active",
+    createdAt: "2026-02-10",
+    permissions: {
+      canApproveReports: false,
+      canExportMasterData: false,
+      canConfigureSettings: false,
+      canManageUsers: false,
+      canSubmit5W: true,
+    },
+  },
+  {
+    id: "usr_acf",
+    name: "Tariq Mansoor",
+    email: "tmansoor@actionagainsthunger.org",
+    role: "partner",
+    roleTitle: "Field Coordinator",
+    organization: "Action Against Hunger (ACF)",
+    organizationType: "International NGO",
+    state: "Borno",
+    lga: "Monguno",
+    status: "Active",
+    createdAt: "2026-02-14",
+    permissions: {
+      canApproveReports: false,
+      canExportMasterData: false,
+      canConfigureSettings: false,
+      canManageUsers: false,
+      canSubmit5W: true,
+    },
+  },
+];
 
 const AUTH_STORAGE_KEY = "wash-auth-user";
 
@@ -54,7 +157,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const saved = localStorage.getItem(AUTH_STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.role && (parsed.role === "admin" || parsed.role === "coordinator" || parsed.role === "partner")) {
+          return { ...PRESET_USERS[parsed.role as UserRole], ...parsed };
+        }
       }
     } catch {
       // ignore
@@ -94,6 +200,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
+  const loginAsRole = (role: UserRole): boolean => {
+    const user = PRESET_USERS[role];
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    localStorage.setItem("wash-auth-token", "true");
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    return true;
+  };
+
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("wash-auth-token");
@@ -104,6 +219,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(user);
     setIsAuthenticated(true);
     localStorage.setItem("wash-auth-token", "true");
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+  };
+
+  const USERS_STORAGE_KEY = "wash-managed-users";
+
+  const [users, setUsers] = useState<ManagedUser[]>(() => {
+    try {
+      const saved = localStorage.getItem(USERS_STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return INITIAL_MANAGED_USERS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    } catch {
+      // ignore
+    }
+  }, [users]);
+
+  const addUser = (userData: Omit<ManagedUser, "id" | "createdAt">): ManagedUser => {
+    const newUser: ManagedUser = {
+      ...userData,
+      id: "usr_" + Date.now().toString(36),
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+    setUsers((prev) => [newUser, ...prev]);
+    return newUser;
+  };
+
+  const updateUser = (id: string, updates: Partial<ManagedUser>) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === id) {
+          const updated = { ...u, ...updates };
+          // If current logged-in user is updated, update currentUser as well
+          if (currentUser.id === id) {
+            setCurrentUser(updated);
+          }
+          return updated;
+        }
+        return u;
+      })
+    );
+  };
+
+  const deleteUser = (id: string) => {
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
+  const toggleUserStatus = (id: string) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === id) {
+          return { ...u, status: u.status === "Active" ? "Suspended" : "Active" };
+        }
+        return u;
+      })
+    );
+  };
+
+  const updateCurrentUser = (updates: Partial<UserProfile>) => {
+    setCurrentUser((prev) => {
+      const updated = { ...prev, ...updates };
+      try {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
   };
 
   return (
@@ -111,9 +300,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         currentUser,
         login,
+        loginAsRole,
         logout,
         switchRole,
         isAuthenticated,
+        users,
+        addUser,
+        updateUser,
+        updateCurrentUser,
+        deleteUser,
+        toggleUserStatus,
       }}
     >
       {children}

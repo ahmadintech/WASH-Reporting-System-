@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useAuth } from "../../context/AuthContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { currentUser, logout, switchRole } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
   function toggleDropdown() {
@@ -33,11 +33,8 @@ export default function UserDropdown() {
         </div>
 
         <div className="hidden text-left xl:block mr-2">
-          <span className="block text-xs font-bold text-gray-800 dark:text-gray-200 truncate max-w-[120px]">
+          <span className="block text-xs font-bold text-gray-800 dark:text-gray-200 truncate max-w-[150px]">
             {currentUser.name}
-          </span>
-          <span className="block text-[10px] font-semibold text-clay-600 dark:text-clay-400 uppercase tracking-wider">
-            {currentUser.role}
           </span>
         </div>
 
@@ -83,52 +80,32 @@ export default function UserDropdown() {
           </span>
         </div>
 
-        {/* Quick Role Switch in User Profile */}
-        <div className="py-2.5 border-b border-gray-100 dark:border-gray-700">
-          <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-1.5">
-            Switch Current Role:
-          </span>
-          <div className="grid grid-cols-3 gap-1">
-            <button
-              onClick={() => {
-                switchRole("admin");
-                closeDropdown();
-              }}
-              className={`py-1 text-[11px] font-bold rounded ${
-                currentUser.role === "admin"
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
-              }`}
+        {/* Navigation links: Profile (for all), Settings (for Admin) */}
+        <div className="py-2 space-y-1 border-b border-gray-100 dark:border-gray-700">
+          <Link
+            to="/profile"
+            onClick={closeDropdown}
+            className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Profile</span>
+          </Link>
+
+          {currentUser.role === "admin" && (
+            <Link
+              to="/admin/settings"
+              onClick={closeDropdown}
+              className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
             >
-              Admin
-            </button>
-            <button
-              onClick={() => {
-                switchRole("coordinator");
-                closeDropdown();
-              }}
-              className={`py-1 text-[11px] font-bold rounded ${
-                currentUser.role === "coordinator"
-                  ? "bg-brand-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Coordinator
-            </button>
-            <button
-              onClick={() => {
-                switchRole("partner");
-                closeDropdown();
-              }}
-              className={`py-1 text-[11px] font-bold rounded ${
-                currentUser.role === "partner"
-                  ? "bg-clay-500 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Partner
-            </button>
-          </div>
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Settings</span>
+            </Link>
+          )}
         </div>
 
         <button

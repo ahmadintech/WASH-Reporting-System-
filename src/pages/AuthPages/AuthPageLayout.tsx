@@ -16,7 +16,7 @@ export default function AuthLayout({
       <div className="w-full"></div>
 
       {/* Centered Login Card */}
-      <div className="w-full max-w-lg relative z-10 my-auto">
+      <div className="w-full max-w-2xl relative z-10 my-auto">
         {children}
       </div>
 

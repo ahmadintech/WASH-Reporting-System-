@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router";
 
 import {
   GridIcon,
-  ListIcon,
   PieChartIcon,
   TableIcon,
   UserCircleIcon,
@@ -11,46 +10,117 @@ import {
   PlusIcon,
   ChevronDownIcon,
   HorizontaLDots,
+  UserIcon,
+  PlugInIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
-import { RoleSwitcher } from "../components/common/RoleSwitcher";
-import { WashLogo } from "../components/common/WashLogo";
+import { UserRole } from "../types/wash";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
+  badge?: string;
+  badgeColor?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Sector Overview",
-    path: "/",
-  },
-  {
-    icon: <PlusIcon />,
-    name: "Submit 5W Report",
-    path: "/submit-report",
-  },
-  {
-    icon: <PieChartIcon />,
-    name: "Coverage Dashboard",
-    path: "/coverage-dashboard",
-  },
-  {
-    icon: <TableIcon />,
-    name: "5W Submissions",
-    path: "/reports-list",
-  },
-  {
-    icon: <GroupIcon />,
-    name: "Partners Directory",
-    path: "/partners",
-  },
-];
+const getRoleNavItems = (role: UserRole): NavItem[] => {
+  switch (role) {
+    case "admin":
+      return [
+        {
+          icon: <GridIcon />,
+          name: "Dashboard",
+          path: "/",
+        },
+        {
+          icon: <TableIcon />,
+          name: "Reports",
+          path: "/reports-list",
+          badge: "Queue",
+          badgeColor: "bg-rose-500",
+        },
+        {
+          icon: <GroupIcon />,
+          name: "Partner Accreditation",
+          path: "/partners",
+        },
+        {
+          icon: <PieChartIcon />,
+          name: "Coverage & Analytics",
+          path: "/coverage-dashboard",
+        },
+        {
+          icon: <UserIcon />,
+          name: "User Management",
+          path: "/admin/users",
+          badge: "Security",
+          badgeColor: "bg-purple-600",
+        },
+        {
+          icon: <PlugInIcon />,
+          name: "Settings",
+          path: "/admin/settings",
+        },
+      ];
+    case "coordinator":
+      return [
+        {
+          icon: <GridIcon />,
+          name: "Dashboard",
+          path: "/",
+        },
+        {
+          icon: <PieChartIcon />,
+          name: "Analytics",
+          path: "/coverage-dashboard",
+          badge: "HNRP",
+          badgeColor: "bg-brand-500",
+        },
+        {
+          icon: <TableIcon />,
+          name: "Submissions",
+          path: "/reports-list",
+        },
+        {
+          icon: <GroupIcon />,
+          name: "Partners Directory",
+          path: "/partners",
+        },
+      ];
+    case "partner":
+    default:
+      return [
+        {
+          icon: <GridIcon />,
+          name: "Dashboard",
+          path: "/",
+        },
+        {
+          icon: <PlusIcon />,
+          name: "Report",
+          path: "/submit-report",
+        },
+        {
+          icon: <TableIcon />,
+          name: "My Submissions",
+          path: "/reports-list",
+        },
+        {
+          icon: <PieChartIcon />,
+          name: "Analytics",
+          path: "/coverage-dashboard",
+        },
+        {
+          icon: <GroupIcon />,
+          name: "Partners Directory",
+          path: "/partners",
+        },
+      ];
+  }
+};
 
 const othersItems: NavItem[] = [
   {
@@ -58,20 +128,14 @@ const othersItems: NavItem[] = [
     name: "User Profile",
     path: "/profile",
   },
-  {
-    icon: <ListIcon />,
-    name: "Forms & Guides",
-    subItems: [
-      { name: "Submit 5W", path: "/submit-report", new: true },
-      { name: "Form Elements", path: "/form-elements", pro: false },
-    ],
-  },
 ];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { currentUser } = useAuth();
   const location = useLocation();
+
+  const navItems = getRoleNavItems(currentUser.role);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -198,9 +262,13 @@ const AppSidebar: React.FC = () => {
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span className="menu-item-text">{nav.name}</span>
                 )}
-                {nav.name === "Submit 5W Report" && (isExpanded || isHovered || isMobileOpen) && (
-                  <span className="ml-auto text-[10px] uppercase font-bold bg-clay-500 text-white px-1.5 py-0.5 rounded">
-                    5W
+                {nav.badge && (isExpanded || isHovered || isMobileOpen) && (
+                  <span
+                    className={`ml-auto text-[10px] uppercase font-bold text-white px-1.5 py-0.5 rounded shadow-xs ${
+                      nav.badgeColor || "bg-brand-500"
+                    }`}
+                  >
+                    {nav.badge}
                   </span>
                 )}
               </Link>
@@ -324,37 +392,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-
-        {/* Active Role Card at Sidebar Bottom */}
-        {(isExpanded || isHovered || isMobileOpen) && (
-          <div className="mt-6 rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-gray-700/80 dark:bg-gray-800/80 p-3.5 shadow-xs">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400">
-                Logged In Role
-              </span>
-              <span
-                className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                  currentUser.role === "admin"
-                    ? "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300"
-                    : currentUser.role === "coordinator"
-                    ? "bg-brand-100 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300"
-                    : "bg-clay-100 text-clay-700 dark:bg-clay-950/60 dark:text-clay-300"
-                }`}
-              >
-                {currentUser.role}
-              </span>
-            </div>
-            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-              {currentUser.name}
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-              {currentUser.organization}
-            </p>
-            <div className="mt-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
-              <RoleSwitcher compact />
-            </div>
-          </div>
-        )}
       </div>
     </aside>
   );

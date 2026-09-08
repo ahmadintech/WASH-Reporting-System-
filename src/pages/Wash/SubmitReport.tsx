@@ -5,15 +5,21 @@ import { useWashData } from "../../context/WashDataContext";
 import { useAuth } from "../../context/AuthContext";
 import {
   LGA_BY_STATE,
-  ACTIVITY_CATEGORIES,
-  POPULATION_GROUPS,
-  LOCATION_TYPES,
-  UNITS,
   ORG_TYPES,
 } from "../../types/wash";
 
 export default function SubmitReport() {
-  const { addReport } = useWashData();
+  const {
+    addReport,
+    activityCategories,
+    units,
+    locationTypes,
+    populationGroups,
+    reportingConfig,
+    states,
+    getLgasForState,
+    getWardsForLga,
+  } = useWashData();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -36,12 +42,47 @@ export default function SubmitReport() {
   const [unit, setUnit] = useState("");
   const [indicatorDesc, setIndicatorDesc] = useState("");
 
-  // 03 WHERE
-  const [state, setState] = useState<"Borno" | "Adamawa" | "Yobe">("Borno");
-  const [lga, setLga] = useState("");
-  const [ward, setWard] = useState("");
+  // 03 WHERE - State is automatically selected and locked to currentUser's assigned state
+  const userAssignedState = (() => {
+    if (currentUser.state) {
+      const exact = states.find((s) => s.toLowerCase() === currentUser.state?.toLowerCase());
+      if (exact) return exact;
+      const partial = states.find((s) => currentUser.state?.toLowerCase().includes(s.toLowerCase()));
+      if (partial) return partial;
+    }
+    return states[0] || "Borno";
+  })();
+
+  const [state] = useState<"Borno" | "Adamawa" | "Yobe">(userAssignedState as any);
+
+  // Available LGAs strictly for user's locked state
+  const availableLgas = getLgasForState(state);
+
+  const initialLga = (() => {
+    if (currentUser.lga && availableLgas.includes(currentUser.lga)) {
+      return currentUser.lga;
+    }
+    return availableLgas[0] || "";
+  })();
+
+  const [lga, setLga] = useState(initialLga);
+
+  // Dynamic Wards based on selected LGA
+  const availableWards = getWardsForLga(state, lga);
+  const [ward, setWard] = useState<string>(availableWards[0] || "");
+  const [isCustomWard, setIsCustomWard] = useState<boolean>(false);
+  const [customWardText, setCustomWardText] = useState<string>("");
   const [settlement, setSettlement] = useState("");
   const [locationType, setLocationType] = useState("IDP camp / camp-like setting");
+
+  // Handler when user changes LGA (updates Ward dropdown automatically)
+  const handleLgaChange = (selectedLga: string) => {
+    setLga(selectedLga);
+    const wards = getWardsForLga(state, selectedLga);
+    setWard(wards[0] || "");
+    setIsCustomWard(false);
+    setCustomWardText("");
+  };
 
   // 04 WHEN
   const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
@@ -66,13 +107,11 @@ export default function SubmitReport() {
   const pctBoys = totalBeneficiaries > 0 ? Math.round(((Number(boys) || 0) / totalBeneficiaries) * 100) : 0;
   const pctGirls = totalBeneficiaries > 0 ? Math.max(0, 100 - (pctMen + pctWomen + pctBoys)) : 0;
 
-  const availableLgas = LGA_BY_STATE[state] || [];
-
   // Validation status for each of the 5 sections
   const isSec1Valid = Boolean(orgName.trim() && orgType && focalPoint.trim() && email.trim());
   const isSec2Valid = Boolean(activityType && (activityType !== "Other" || activityOther.trim()) && Number(quantity) > 0 && unit);
   const isSec3Valid = Boolean(state && lga && locationType);
-  const isSec4Valid = Boolean(period && status);
+  const isSec4Valid = Boolean(status);
   const isSec5Valid = Boolean(populationGroup && totalBeneficiaries > 0);
 
   const completedSectionsCount = [isSec1Valid, isSec2Valid, isSec3Valid, isSec4Valid, isSec5Valid].filter(Boolean).length;
@@ -169,8 +208,47 @@ export default function SubmitReport() {
     setToastMessage("5W Activity Report submitted successfully!");
     setTimeout(() => {
       setToastMessage(null);
-      navigate("/coverage-dashboard");
-    }, 1200);
+      navigate("/reports-list");
+    }, 1000);
+  };
+
+  const handleSaveDraft = () => {
+    addReport({
+      orgName: orgName.trim() || currentUser.organization,
+      orgType: orgType || currentUser.organizationType,
+      focalPoint: focalPoint.trim() || currentUser.name,
+      email: email.trim() || currentUser.email,
+      donor: donor.trim(),
+      activityType: activityType || "Emergency WASH intervention",
+      activityOther: activityOther.trim(),
+      quantity: Number(quantity) || 0,
+      unit: unit || "Items",
+      indicatorDesc: indicatorDesc.trim(),
+      state,
+      lga: lga || currentUser.lga || "Maiduguri",
+      ward: ward.trim(),
+      settlement: settlement.trim(),
+      locationType,
+      period: period || reportingConfig.activeCycle,
+      status: "Planned",
+      startDate,
+      endDate,
+      populationGroup: populationGroup || "Host community",
+      pwd: Number(pwd) || 0,
+      men: Number(men) || 0,
+      women: Number(women) || 0,
+      boys: Number(boys) || 0,
+      girls: Number(girls) || 0,
+      total: totalBeneficiaries,
+      submittedByRole: currentUser.role,
+      submittedByEmail: currentUser.email,
+    });
+
+    setToastMessage("Report saved as Draft successfully!");
+    setTimeout(() => {
+      setToastMessage(null);
+      navigate("/reports-list");
+    }, 1000);
   };
 
   const sectionsNav = [
@@ -199,6 +277,52 @@ export default function SubmitReport() {
             <div>
               <div className="text-sm font-bold">{toastMessage}</div>
               <div className="text-xs text-emerald-100">Redirecting to Coverage Dashboard...</div>
+            </div>
+          </div>
+        )}
+
+        {/* Administrator Notice (if viewed by Admin) */}
+        {currentUser.role === "admin" && (
+          <div className="mb-4 rounded-2xl border border-amber-300 dark:border-amber-700/60 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 p-4 shadow-sm">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shrink-0">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1 text-sm text-amber-950 dark:text-amber-200">
+                <div className="font-bold flex items-center gap-2">
+                  <span>Sector Administrator Preview Notice</span>
+                  <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-800/60 text-amber-900 dark:text-amber-200">
+                    Implementing Partners Portal Form
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-amber-900/90 dark:text-amber-300">
+                  5W field operational entries are strictly reported by accredited field partners. You are previewing the form configured by your sector settings. To customize activities, units, locations, or reporting cutoff dates, visit{" "}
+                  <a href="/admin/settings" className="font-bold underline hover:text-brand-600">
+                    Sector Settings
+                  </a>{" "}
+                  or inspect submissions in{" "}
+                  <a href="/reports-list" className="font-bold underline hover:text-brand-600">
+                    Reports
+                  </a>
+                  .
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reporting Freeze Alert if Active */}
+        {reportingConfig.isFreezeActive && (
+          <div className="mb-4 rounded-2xl border border-red-300 dark:border-red-700/60 bg-red-50 dark:bg-red-950/40 p-4 shadow-sm flex items-center gap-3 text-red-900 dark:text-red-200">
+            <div className="p-2 rounded-xl bg-red-100 dark:bg-red-900/60 text-red-600 shrink-0">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div className="text-xs sm:text-sm">
+              <span className="font-bold">Reporting Cycle Freeze in Effect ({reportingConfig.activeCycle}):</span> Submissions are temporarily locked by the Sector Administrator pending validation and cluster reporting cutoff.
             </div>
           </div>
         )}
@@ -435,7 +559,7 @@ export default function SubmitReport() {
                   className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm font-medium text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 >
                   <option value="">Select standard WASH intervention</option>
-                  {ACTIVITY_CATEGORIES.map((cat) => (
+                  {activityCategories.map((cat) => (
                     <optgroup key={cat.category} label={cat.category}>
                       {cat.activities.map((act) => (
                         <option key={act} value={act}>
@@ -474,7 +598,7 @@ export default function SubmitReport() {
                   className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 >
                   <option value="">Select Unit</option>
-                  {UNITS.map((u) => (
+                  {units.map((u) => (
                     <option key={u} value={u}>
                       {u}
                     </option>
@@ -550,35 +674,30 @@ export default function SubmitReport() {
               </div>
             </div>
 
-            {/* Quick State Selector Buttons */}
-            <div className="mb-5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2">
-                Operational State <span className="text-red-500">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {(["Borno", "Adamawa", "Yobe"] as const).map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => handleStateChange(st)}
-                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-                      state === st
-                        ? "bg-brand-600 text-white border-brand-600 shadow-sm"
-                        : "bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <span>{st}</span>
-                    <span
-                      className={`text-[11px] px-1.5 py-0.5 rounded-full font-mono ${
-                        state === st
-                          ? "bg-white/20 text-white"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                      }`}
-                    >
-                      {LGA_BY_STATE[st].length} LGAs
+            {/* Automatic Locked Operational State Notice */}
+            <div className="mb-6 p-4 rounded-2xl border border-brand-200 dark:border-brand-900/60 bg-gradient-to-r from-brand-50/70 via-gray-50/50 to-emerald-50/50 dark:from-brand-950/40 dark:via-gray-900/50 dark:to-emerald-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Operational State
                     </span>
-                  </button>
-                ))}
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                      Locked to Account
+                    </span>
+                  </div>
+                  <div className="text-base font-extrabold text-gray-900 dark:text-white">
+                    {state} State Hub
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 max-w-sm sm:text-right">
+                Assigned to <strong className="text-gray-800 dark:text-gray-200">{currentUser.name}</strong> ({currentUser.organization}). You can select any LGA and Ward within {state}.
               </div>
             </div>
 
@@ -590,7 +709,7 @@ export default function SubmitReport() {
                 <select
                   required
                   value={lga}
-                  onChange={(e) => setLga(e.target.value)}
+                  onChange={(e) => handleLgaChange(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 >
                   <option value="">Select LGA ({availableLgas.length} available)</option>
@@ -612,7 +731,7 @@ export default function SubmitReport() {
                   onChange={(e) => setLocationType(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 >
-                  {LOCATION_TYPES.map((lt) => (
+                  {locationTypes.map((lt) => (
                     <option key={lt} value={lt}>
                       {lt}
                     </option>
@@ -621,16 +740,71 @@ export default function SubmitReport() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Ward
-                </label>
-                <input
-                  type="text"
-                  value={ward}
-                  onChange={(e) => setWard(e.target.value)}
-                  placeholder="e.g. Bolori II, Hausari, Galtimari"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                    Ward in {lga || "LGA"} <span className="text-red-500">*</span>
+                  </label>
+                  {!isCustomWard ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomWard(true);
+                        setCustomWardText("");
+                      }}
+                      className="text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline cursor-pointer"
+                    >
+                      + Custom Ward
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCustomWard(false);
+                        const wards = getWardsForLga(state, lga);
+                        setWard(wards[0] || "");
+                      }}
+                      className="text-[11px] font-semibold text-gray-500 hover:underline cursor-pointer"
+                    >
+                      ← Standard List
+                    </button>
+                  )}
+                </div>
+
+                {!isCustomWard ? (
+                  <select
+                    required
+                    value={ward}
+                    onChange={(e) => {
+                      if (e.target.value === "__custom__") {
+                        setIsCustomWard(true);
+                        setCustomWardText("");
+                      } else {
+                        setWard(e.target.value);
+                      }
+                    }}
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                  >
+                    <option value="">Select Ward in {lga || "LGA"}</option>
+                    {availableWards.map((w) => (
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
+                    ))}
+                    <option value="__custom__">+ Enter Custom Ward...</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    value={customWardText}
+                    onChange={(e) => {
+                      setCustomWardText(e.target.value);
+                      setWard(e.target.value);
+                    }}
+                    placeholder="Type custom ward name (e.g. Bolori II, Hausari, Galtimari)"
+                    className="w-full rounded-xl border border-brand-500 bg-white dark:bg-gray-900 px-4 py-3 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                  />
+                )}
               </div>
 
               <div className="col-span-full">
@@ -685,20 +859,7 @@ export default function SubmitReport() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Reporting Month <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="month"
-                  required
-                  value={period}
-                  onChange={(e) => setPeriod(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm font-medium text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
-                />
-              </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
                   Implementation Status <span className="text-red-500">*</span>
@@ -799,7 +960,7 @@ export default function SubmitReport() {
                   onChange={(e) => setPopulationGroup(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 px-4 py-3 text-sm font-medium text-gray-900 dark:text-white focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 >
-                  {POPULATION_GROUPS.map((pg) => (
+                  {populationGroups.map((pg) => (
                     <option key={pg} value={pg}>
                       {pg}
                     </option>
@@ -956,16 +1117,30 @@ export default function SubmitReport() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full sm:w-auto rounded-xl border border-gray-300 dark:border-gray-700 px-5 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-full sm:w-auto rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Clear Form
               </button>
+
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="w-full sm:w-auto rounded-xl border border-brand-300 dark:border-brand-700 bg-brand-50/70 dark:bg-brand-950/40 px-5 py-3 text-sm font-bold text-brand-700 dark:text-brand-300 hover:bg-brand-100 dark:hover:bg-brand-900/60 transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-xs"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span>Save as Draft</span>
+              </button>
+
               <button
                 type="submit"
-                className="w-full sm:w-auto rounded-xl bg-brand-600 hover:bg-brand-700 px-8 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full sm:w-auto rounded-xl bg-brand-600 hover:bg-brand-700 px-7 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <span>Submit 5W Report</span>
-                <span>→</span>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Submit</span>
               </button>
             </div>
           </div>
