@@ -99,15 +99,65 @@ const SAMPLE_LGA_GAPS: LgaGap[] = [
 
 export default function CoordinatorDashboard() {
   const { stats, exportCsv } = useWashData();
-  const { currentUser } = useAuth();
+  const { currentUser, addUser } = useAuth();
 
   const [stateFilter, setStateFilter] = useState<string>("All");
   const [selectedLgaForReview, setSelectedLgaForReview] = useState<LgaGap | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Register Partner Modal State
+  const [isRegisterPartnerOpen, setIsRegisterPartnerOpen] = useState(false);
+  const [partnerOrgName, setPartnerOrgName] = useState("");
+  const [partnerOrgType, setPartnerOrgType] = useState("International NGO");
+  const [partnerFocalPoint, setPartnerFocalPoint] = useState("");
+  const [partnerEmail, setPartnerEmail] = useState("");
+  const [partnerLga, setPartnerLga] = useState("Maiduguri");
+
+  const sanitizeState = (st?: string): "Borno" | "Adamawa" | "Yobe" => {
+    if (!st) return "Borno";
+    if (st.includes("Adamawa")) return "Adamawa";
+    if (st.includes("Yobe")) return "Yobe";
+    return "Borno";
+  };
+
+  const coordState = sanitizeState(currentUser?.state);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleRegisterPartnerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!partnerOrgName || !partnerFocalPoint || !partnerEmail) {
+      showToast("Please complete all required fields.");
+      return;
+    }
+
+    addUser({
+      name: partnerFocalPoint.trim(),
+      email: partnerEmail.trim(),
+      role: "partner",
+      roleTitle: `${partnerOrgType} Focal Point`,
+      organization: partnerOrgName.trim(),
+      organizationType: partnerOrgType,
+      state: coordState,
+      lga: partnerLga,
+      status: "Active",
+      permissions: {
+        canApproveReports: false,
+        canExportMasterData: false,
+        canConfigureSettings: false,
+        canManageUsers: false,
+        canSubmit5W: true,
+      },
+    });
+
+    showToast(`Partner organization ${partnerOrgName} accredited for ${coordState} State!`);
+    setIsRegisterPartnerOpen(false);
+    setPartnerOrgName("");
+    setPartnerFocalPoint("");
+    setPartnerEmail("");
   };
 
   const filteredGaps = SAMPLE_LGA_GAPS.filter((g) => {
@@ -134,11 +184,21 @@ export default function CoordinatorDashboard() {
           <span>View Coverage Matrix</span>
         </Link>
         <Link
-          to="/admin/users"
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all"
+          to="/partners"
+          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all"
         >
-          <span>+ Register Partner</span>
+          <span>Manage {coordState} Partners</span>
         </Link>
+        <button
+          type="button"
+          onClick={() => setIsRegisterPartnerOpen(true)}
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all cursor-pointer"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>+ Register Partner</span>
+        </button>
         <button
           onClick={() => exportCsv()}
           className="inline-flex items-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all"
@@ -462,6 +522,139 @@ export default function CoordinatorDashboard() {
                 Dispatch Cluster Notice
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Register Partner Modal for Coordinator */}
+      {isRegisterPartnerOpen && (
+        <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                  Accredit & Register New Partner ({coordState} State)
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Register implementing partner focal point for {coordState} State 5W reporting.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRegisterPartnerOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterPartnerSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Partner Organization Name *
+                </label>
+                <input
+                  type="text"
+                  value={partnerOrgName}
+                  onChange={(e) => setPartnerOrgName(e.target.value)}
+                  placeholder="e.g. International Rescue Committee"
+                  required
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Organization Type *
+                  </label>
+                  <select
+                    value={partnerOrgType}
+                    onChange={(e) => setPartnerOrgType(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="International NGO">International NGO</option>
+                    <option value="National NGO">National NGO</option>
+                    <option value="UN Agency">UN Agency</option>
+                    <option value="Government / State Actor">Government / State Actor</option>
+                    <option value="Red Cross / Red Crescent">Red Cross / Red Crescent</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    State Jurisdiction
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={`${coordState} State (Coordinator Scope)`}
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/60 px-3.5 py-2.5 text-xs text-gray-500 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Focal Point Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={partnerFocalPoint}
+                    onChange={(e) => setPartnerFocalPoint(e.target.value)}
+                    placeholder="e.g. Ibrahim Lawan"
+                    required
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Focal Point Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={partnerEmail}
+                    onChange={(e) => setPartnerEmail(e.target.value)}
+                    placeholder="e.g. focal@partner.org"
+                    required
+                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Primary Field Base LGA
+                </label>
+                <input
+                  type="text"
+                  value={partnerLga}
+                  onChange={(e) => setPartnerLga(e.target.value)}
+                  placeholder="e.g. Maiduguri"
+                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRegisterPartnerOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all"
+                >
+                  Accredit & Register Partner
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

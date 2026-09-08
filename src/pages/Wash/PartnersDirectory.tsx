@@ -91,15 +91,30 @@ export default function PartnersDirectory() {
     return Array.from(map.values()).sort((a, b) => b.totalBeneficiaries - a.totalBeneficiaries);
   }, [reports, users]);
 
+  const isCoordinator = currentUser.role === "coordinator";
+  const userStateScope = sanitizeState(currentUser?.state);
+
+  const [stateTab, setStateTab] = useState<string>(() =>
+    isCoordinator ? userStateScope : "All"
+  );
+
   const filteredPartners = useMemo(() => {
-    if (!searchTerm) return partners;
-    const q = searchTerm.toLowerCase();
-    return partners.filter((p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.type.toLowerCase().includes(q) ||
-      p.focalPoint.toLowerCase().includes(q)
-    );
-  }, [partners, searchTerm]);
+    let result = partners;
+
+    if (stateTab !== "All") {
+      result = result.filter((p) => p.states.has(stateTab));
+    }
+
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q) ||
+        p.focalPoint.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [partners, searchTerm, stateTab]);
 
   const handleRegisterPartner = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,10 +174,12 @@ export default function PartnersDirectory() {
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 mb-1">
               <span>Humanitarian Coordination</span>
               <span>·</span>
-              <span className="text-clay-600 dark:text-clay-400">Sector Partners</span>
+              <span className="text-clay-600 dark:text-clay-400">
+                {isCoordinator ? `${userStateScope} State Partners Desk` : "Sector Partners"}
+              </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-              WASH Reporting Partners Directory ({partners.length})
+              WASH Reporting Partners Directory ({filteredPartners.length})
             </h1>
           </div>
 
@@ -181,7 +198,7 @@ export default function PartnersDirectory() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md transition-all shrink-0"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md transition-all shrink-0 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -190,6 +207,38 @@ export default function PartnersDirectory() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* State Desk Filter Tabs */}
+        <div className="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-2xl w-fit">
+          {isCoordinator && (
+            <button
+              onClick={() => setStateTab(userStateScope)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                stateTab === userStateScope
+                  ? "bg-brand-600 text-white shadow-xs"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              My State ({userStateScope})
+            </button>
+          )}
+          {["All", "Borno", "Adamawa", "Yobe"].map((st) => {
+            if (isCoordinator && st === userStateScope) return null; // Avoid duplicate tab
+            return (
+              <button
+                key={st}
+                onClick={() => setStateTab(st)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  stateTab === st
+                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-xs"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                {st === "All" ? "All BAY States" : `${st} State`}
+              </button>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
