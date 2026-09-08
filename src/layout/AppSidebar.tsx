@@ -86,7 +86,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         },
         {
           icon: <GroupIcon />,
-          name: "Partners Directory",
+          name: "Partners",
           path: "/partners",
         },
       ];
@@ -112,11 +112,6 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
           icon: <PieChartIcon />,
           name: "Analytics",
           path: "/coverage-dashboard",
-        },
-        {
-          icon: <GroupIcon />,
-          name: "Partners",
-          path: "/partners",
         },
       ];
   }

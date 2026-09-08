@@ -52,7 +52,14 @@ export default function App() {
               <Route path="submit-report" element={<SubmitReport />} />
               <Route path="coverage-dashboard" element={<CoverageDashboard />} />
               <Route path="reports-list" element={<ReportsList />} />
-              <Route path="partners" element={<PartnersDirectory />} />
+              <Route
+                path="partners"
+                element={
+                  <AdminOrCoordinatorRoute>
+                    <PartnersDirectory />
+                  </AdminOrCoordinatorRoute>
+                }
+              />
               <Route
                 path="admin/settings"
                 element={
@@ -81,7 +88,14 @@ export default function App() {
               <Route path="submit-report" element={<SubmitReport />} />
               <Route path="coverage-dashboard" element={<CoverageDashboard />} />
               <Route path="reports-list" element={<ReportsList />} />
-              <Route path="partners" element={<PartnersDirectory />} />
+              <Route
+                path="partners"
+                element={
+                  <AdminOrCoordinatorRoute>
+                    <PartnersDirectory />
+                  </AdminOrCoordinatorRoute>
+                }
+              />
               <Route
                 path="admin/settings"
                 element={
