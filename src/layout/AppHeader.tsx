@@ -61,22 +61,6 @@ const AppHeader: React.FC = () => {
             <WashLogo size="sm" showText={false} />
           </div>
 
-          {/* States Tag Pill (matching template states-tag) */}
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 border border-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800 px-3 py-1 rounded-md tracking-wider">
-              BORNO · ADAMAWA · YOBE
-            </span>
-          </div>
-
-          <button
-            onClick={toggleApplicationMenu}
-            className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </button>
-
           {/* Search bar */}
           <div className="hidden lg:block ml-3">
             <div className="relative">
@@ -104,11 +88,6 @@ const AppHeader: React.FC = () => {
             isApplicationMenuOpen ? "flex" : "hidden"
           } items-center justify-between w-full gap-3 px-5 py-3 lg:flex lg:justify-end lg:px-0`}
         >
-          {/* Quick 1-Click Role Switcher */}
-          <div className="flex items-center">
-            <RoleSwitcher />
-          </div>
-
           <div className="flex items-center gap-2">
             <ThemeToggleButton />
             <NotificationDropdown />
