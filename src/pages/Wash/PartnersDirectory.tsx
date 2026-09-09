@@ -379,7 +379,7 @@ export default function PartnersDirectory() {
                     type="text"
                     value={focalPoint}
                     onChange={(e) => setFocalPoint(e.target.value)}
-                    placeholder="e.g. Ibrahim Lawan"
+                    placeholder="e.g. WASH Partner Focal Point"
                     required
                     className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-brand-500 focus:outline-none"
                   />

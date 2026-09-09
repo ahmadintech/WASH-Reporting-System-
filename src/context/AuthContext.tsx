@@ -33,7 +33,7 @@ interface AuthContextType {
 export const PRESET_USERS: Record<UserRole, UserProfile> = {
   admin: {
     id: "usr_admin",
-    name: "Engr. Ahmed Lawan",
+    name: "WASH Admin",
     email: "admin@washsector-ne.org",
     role: "admin",
     roleTitle: "Sector Administrator",
@@ -41,11 +41,11 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organizationType: "Government / UN Co-Lead",
     state: "Borno",
     lga: "Maiduguri",
-    avatar: "/images/user/owner.jpg"
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Admin"
   },
   coordinator: {
     id: "usr_coordinator",
-    name: "Fatima Bello",
+    name: "WASH State Coordinator",
     email: "coordinator@washsector-ne.org",
     role: "coordinator",
     roleTitle: "State Coordinator",
@@ -53,11 +53,11 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organizationType: "UN / Coordination Desk",
     state: "Borno",
     lga: "Maiduguri",
-    avatar: "/images/user/owner.jpg"
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Coordinator"
   },
   partner: {
     id: "usr_partner",
-    name: "Ibrahim Mustapha",
+    name: "WASH Partner",
     email: "partner@solidarites.org",
     role: "partner",
     roleTitle: "Implementing Partner",
@@ -65,7 +65,7 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organizationType: "International NGO",
     state: "Borno",
     lga: "Maiduguri",
-    avatar: "/images/user/owner.jpg"
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Partner"
   }
 };
 
@@ -108,7 +108,7 @@ export const INITIAL_MANAGED_USERS: ManagedUser[] = [
   },
   {
     id: "usr_unicef",
-    name: "Grace Adebayo",
+    name: "UNICEF Partner",
     email: "gadebayo@unicef.org",
     role: "partner",
     roleTitle: "WASH Emergency Specialist",
@@ -128,7 +128,7 @@ export const INITIAL_MANAGED_USERS: ManagedUser[] = [
   },
   {
     id: "usr_acf",
-    name: "Tariq Mansoor",
+    name: "ACF Partner",
     email: "tmansoor@actionagainsthunger.org",
     role: "partner",
     roleTitle: "Field Coordinator",
@@ -169,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem("wash-auth-token") !== "false";
+    return localStorage.getItem("wash-auth-token") === "true";
   });
 
   useEffect(() => {

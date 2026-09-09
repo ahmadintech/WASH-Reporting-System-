@@ -531,7 +531,7 @@ export default function AdminDashboard() {
             <div className="space-y-3.5">
               {[
                 {
-                  actor: "Engr. Ahmed Lawan",
+                  actor: "WASH Admin",
                   role: "Sector Administrator",
                   action: "Verified & approved 4 5W entries in Maiduguri",
                   time: "10m ago",

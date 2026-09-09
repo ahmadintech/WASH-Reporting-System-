@@ -129,7 +129,7 @@ export default function NotificationDropdown() {
               </div>
               <div className="block flex-1 min-w-0">
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  <span className="font-bold text-gray-900 dark:text-white">Fatima Bello</span> flagged an AWD/Cholera priority watch alert in{" "}
+                  <span className="font-bold text-gray-900 dark:text-white">WASH State Coordinator</span> flagged an AWD/Cholera priority watch alert in{" "}
                   <span className="font-semibold text-gray-800 dark:text-gray-200">Bolori II Ward</span>.
                 </p>
                 <div className="mt-1 flex items-center gap-2 text-[11px] text-gray-400">
