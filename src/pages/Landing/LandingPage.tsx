@@ -467,8 +467,8 @@ export default function LandingPage() {
         zIndex: 100,
         background: navScrolled ? "rgba(255, 255, 255, 0.98)" : T.white,
         backdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${navScrolled ? T.line : "transparent"}`,
-        boxShadow: navScrolled ? "0 4px 24px rgba(11, 60, 70, 0.08)" : "none",
+        borderBottom: `1px solid ${navScrolled ? T.line : "#E5ECE9"}`,
+        boxShadow: navScrolled ? "0 4px 20px rgba(11, 60, 70, 0.07)" : "0 1px 2px rgba(0,0,0,0.02)",
         transition: "all .2s ease-in-out",
         width: "100%",
       }}>
@@ -476,33 +476,36 @@ export default function LandingPage() {
           maxWidth: 1380,
           margin: "0 auto",
           padding: "0 24px",
-          height: 78,
+          height: 74,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 20,
         }}>
-          {/* Brand Logo & Context with Official Dashboard Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <DashboardLogo size={50} />
-            <div style={{ borderLeft: `2px solid ${T.line}`, paddingLeft: 16 }}>
+          {/* Brand Logo & Professional Context Header */}
+          <div
+            onClick={() => navigate("/")}
+            style={{ display: "flex", alignItems: "center", gap: 14, cursor: "pointer", textDecoration: "none" }}
+          >
+            <DashboardLogo size={46} />
+            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 14 }}>
               <div style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: 20,
-                fontWeight: 700,
+                fontSize: 18.5,
+                fontWeight: 800,
                 color: T.tealDeep,
-                letterSpacing: "-0.3px",
-                lineHeight: 1.15,
+                letterSpacing: "-0.25px",
+                lineHeight: 1.2,
               }}>
                 WASH Sector North East Nigeria
               </div>
               <div style={{
                 fontFamily: FONT_MONO,
-                fontSize: 12,
-                color: T.inkMuted,
+                fontSize: 11,
+                color: "#546E74",
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                marginTop: 3,
+                marginTop: 2,
                 fontWeight: 600,
               }}>
                 5W Activity Reporting &amp; Response Coverage Platform
@@ -511,97 +514,94 @@ export default function LandingPage() {
           </div>
 
           {/* Navigation Menu (Desktop) */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 10 }} className="hidden md:flex">
-            <a href="#overview" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
-              Overview
-            </a>
-            <a href="#5w-framework" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
-              5W Architecture
-            </a>
-            <a href="#coverage" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
-              BAY Coverage
-            </a>
-            <a href="#pillars" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
-              Core Pillars
-            </a>
-            <a href="#resources" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
-              Resources &amp; Hubs
-            </a>
+          <nav style={{ display: "flex", alignItems: "center", gap: 4 }} className="hidden lg:flex">
+            {[
+              { label: "Overview", href: "#overview" },
+              { label: "5W Architecture", href: "#5w-framework" },
+              { label: "BAY Coverage", href: "#coverage" },
+              { label: "Core Pillars", href: "#pillars" },
+              { label: "Resources & Hubs", href: "#resources" },
+            ].map(item => (
+              <a
+                key={item.label}
+                href={item.href}
+                style={{
+                  textDecoration: "none",
+                  color: "#3F565C",
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  padding: "8px 13px",
+                  borderRadius: 8,
+                  transition: "all .15s ease",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = T.tealDeep;
+                  e.currentTarget.style.background = "rgba(18, 112, 126, 0.07)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "#3F565C";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
           {/* Right Action Group */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {/* Operational States Badge */}
             <div style={{
               display: "flex",
               alignItems: "center",
               gap: 7,
-              background: T.tealSoft,
-              border: "1.5px solid #C4E3DF",
-              borderRadius: 8,
-              padding: "6px 14px",
+              background: "#F0F7F6",
+              border: "1.5px solid #CFE5E2",
+              borderRadius: 20,
+              padding: "5px 12px",
               fontFamily: FONT_MONO,
-              fontSize: 12,
+              fontSize: 11.5,
               fontWeight: 700,
               color: T.tealDeep,
               letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
             }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.green }} />
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
               BORNO · ADAMAWA · YOBE
             </div>
 
-            {/* Main CTA: Go to Dashboard or Sign In */}
-            {isAuthenticated ? (
-              <button
-                id="navbar-dashboard-btn"
-                onClick={() => navigate("/dashboard")}
-                style={{
-                  background: T.tealDeep,
-                  color: T.white,
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "11px 24px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontFamily: FONT_PRIMARY,
-                  boxShadow: "0 2px 10px rgba(11, 60, 70, 0.18)",
-                  transition: "background .15s, transform .1s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = T.teal)}
-                onMouseLeave={e => (e.currentTarget.style.background = T.tealDeep)}
-              >
-                Go to Dashboard <IcoArrowRight size={16} />
-              </button>
-            ) : (
-              <button
-                id="navbar-signin-btn"
-                onClick={() => navigate("/signin")}
-                style={{
-                  background: T.clay,
-                  color: T.white,
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "11px 24px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontFamily: FONT_PRIMARY,
-                  boxShadow: "0 2px 10px rgba(193, 114, 47, 0.25)",
-                  transition: "background .15s, transform .1s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
-                onMouseLeave={e => (e.currentTarget.style.background = T.clay)}
-              >
-                Partner Sign In <IcoArrowRight size={16} />
-              </button>
-            )}
+            {/* Main CTA: Go to Dashboard */}
+            <button
+              id="navbar-dashboard-btn"
+              onClick={() => handleAction("/dashboard")}
+              style={{
+                background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
+                color: T.white,
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 20px",
+                fontSize: 14.5,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: FONT_PRIMARY,
+                boxShadow: "0 2px 8px rgba(11, 60, 70, 0.18)",
+                transition: "all .15s ease",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "linear-gradient(135deg, #12707E 0%, #1D8A99 100%)";
+                e.currentTarget.style.boxShadow = "0 4px 14px rgba(11, 60, 70, 0.28)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 60, 70, 0.18)";
+              }}
+            >
+              Go to Dashboard <IcoArrowRight size={15} />
+            </button>
           </div>
         </div>
       </header>
@@ -759,58 +759,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          4. EMERGENCY SURVEILLANCE & FIELD FOCUS BANNER (Full Width)
-      ══════════════════════════════════════════════════════════════════ */}
-      <section style={{
-        background: T.claySoft,
-        borderTop: `1.5px solid #F5DECB`,
-        borderBottom: `1.5px solid #F5DECB`,
-        padding: "24px 24px",
-        width: "100%",
-      }}>
-        <div style={{
-          maxWidth: 1360,
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 18,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ background: T.clay, color: T.white, padding: "9px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 13, fontFamily: FONT_MONO }}>
-              <IcoAlert /> AWD/CHOLERA SURVEILLANCE
-            </div>
-            <p style={{ margin: 0, fontSize: 15, color: "#6A3810", lineHeight: 1.5, fontWeight: 500 }}>
-              <strong>Active Cholera Prevention Protocol:</strong> Partner reporting is prioritized for high-risk displacement camps and flood-prone host communities in Maiduguri, Jere, and Damaturu.
-            </p>
-          </div>
-
-          <button
-            onClick={() => handleAction("/coverage-dashboard")}
-            style={{
-              background: T.clay,
-              color: T.white,
-              border: "none",
-              borderRadius: 7,
-              padding: "9px 18px",
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              fontFamily: FONT_PRIMARY,
-              whiteSpace: "nowrap",
-            }}
-          >
-            View Hotspot LGAs <IcoArrowRight size={15} />
-          </button>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          5. THE 5W METHODOLOGY SECTION (Outfit Font Everywhere)
+          4. THE 5W METHODOLOGY SECTION (Outfit Font Everywhere)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="5w-framework" style={{
         padding: "80px 24px 96px",
@@ -1561,110 +1510,28 @@ export default function LandingPage() {
       <footer style={{
         background: "#081F24",
         color: "#9BB3B8",
-        padding: "64px 24px 32px",
+        padding: "68px 24px 32px",
         width: "100%",
         borderTop: "3px solid #C1722F",
         fontFamily: FONT_PRIMARY,
       }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
 
-          {/* Institutional Co-Lead Bar */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 16,
-            paddingBottom: 28,
-            marginBottom: 44,
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13.5 }}>
-              <span style={{
-                fontFamily: FONT_MONO,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                color: "#4EAAB6",
-                background: "rgba(78, 170, 182, 0.12)",
-                padding: "3px 8px",
-                borderRadius: 4,
-                fontSize: 11.5,
-              }}>
-                Co-led by:
-              </span>
-              <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
-              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
-              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
-            </div>
-
-            {/* Social Media Links */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 12, color: "#6F8E94", fontFamily: FONT_MONO, textTransform: "uppercase", letterSpacing: "0.06em" }}>Connect:</span>
-              {[
-                { label: "Twitter / X", icon: <IcoXTwitter />, href: "https://twitter.com/UNICEFNigeria" },
-                { label: "LinkedIn",   icon: <IcoLinkedIn />, href: "https://www.linkedin.com/company/unicef-nigeria" },
-                { label: "YouTube",    icon: <IcoYouTube />,  href: "https://www.youtube.com/user/unicefnigeria" },
-                { label: "ReliefWeb",  icon: <IcoGlobe />,    href: "https://reliefweb.int/country/nga" },
-              ].map(social => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#C2E8E4",
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = T.clay;
-                    e.currentTarget.style.borderColor = T.clay;
-                    e.currentTarget.style.color = T.white;
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-                    e.currentTarget.style.color = "#C2E8E4";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Main 4-Column Footer Grid */}
+          {/* Main 4-Column Footer Grid (Top of footer) */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: 40,
-            paddingBottom: 48,
+            paddingBottom: 44,
           }}>
 
             {/* Column 1: Brand & Sector Mandate */}
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <DashboardLogo size={46} darkBg={true} />
                 <div>
-                  <div style={{ fontFamily: FONT_PRIMARY, fontSize: 18, fontWeight: 800, color: T.white, lineHeight: 1.2 }}>
+                  <div style={{ fontFamily: FONT_PRIMARY, fontSize: 18.5, fontWeight: 800, color: T.white, lineHeight: 1.2 }}>
                     WASH Sector North East Nigeria
-                  </div>
-                  <div style={{ fontSize: 11.5, color: "#8EACB2", fontFamily: FONT_MONO, marginTop: 3 }}>
-                    5W Activity Reporting &amp; Humanitarian Response Coverage
                   </div>
                 </div>
               </div>
@@ -1672,7 +1539,7 @@ export default function LandingPage() {
               <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#C2E8E4", marginBottom: 6, fontFamily: FONT_MONO }}>
                 Sector Mandate
               </div>
-              <p style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8EACB2", margin: "0 0 14px" }}>
+              <p style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8EACB2", margin: "0 0 16px" }}>
                 The WASH Sector coordinates humanitarian water, sanitation, and hygiene assistance across the conflict-affected states of Borno, Adamawa, and Yobe in North East Nigeria.
               </p>
 
@@ -1680,13 +1547,14 @@ export default function LandingPage() {
                 fontSize: 12,
                 color: "#9EBABF",
                 background: "rgba(255,255,255,0.04)",
-                padding: "8px 12px",
-                borderRadius: 6,
+                padding: "10px 14px",
+                borderRadius: 8,
                 border: "1px solid rgba(255,255,255,0.08)",
                 fontFamily: FONT_MONO,
                 lineHeight: 1.5,
               }}>
-                📍 <strong>Active Operational Nodes:</strong> Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
+                <i className="fa-solid fa-location-dot" style={{ color: "#C1722F", marginRight: 8, fontSize: 13 }}></i>
+                <strong>Active Operational Nodes:</strong> Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
               </div>
             </div>
 
@@ -1864,7 +1732,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ color: "#E09A52", marginTop: 2, flexShrink: 0 }}><IcoPhone size={15} /></span>
                   <div>
                     <div style={{ fontSize: 11, fontFamily: FONT_MONO, textTransform: "uppercase", color: "#7B9C9F", fontWeight: 700 }}>Emergency Hotline</div>
@@ -1873,28 +1741,88 @@ export default function LandingPage() {
                     </a>
                   </div>
                 </div>
-
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10 }}>
-                  <span style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "4px 8px",
-                    borderRadius: 4,
-                    background: "rgba(46, 125, 71, 0.25)",
-                    border: "1px solid rgba(87, 206, 127, 0.4)",
-                    color: "#57CE7F",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: FONT_MONO,
-                    letterSpacing: "0.04em",
-                  }}>
-                    ● SYSTEM STATUS: ONLINE &amp; OPERATIONAL
-                  </span>
-                </div>
               </div>
             </div>
 
+          </div>
+
+          {/* Institutional Co-Lead & Socials Bar (Moved below 4 columns, above copyright) */}
+          <div style={{
+            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+            paddingTop: 26,
+            paddingBottom: 26,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 16,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13.5 }}>
+              <span style={{
+                fontFamily: FONT_MONO,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "#4EAAB6",
+                background: "rgba(78, 170, 182, 0.12)",
+                padding: "3px 8px",
+                borderRadius: 4,
+                fontSize: 11.5,
+              }}>
+                Co-led by:
+              </span>
+              <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
+              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
+              <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
+              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
+              <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
+            </div>
+
+            {/* Social Media Links */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 12, color: "#6F8E94", fontFamily: FONT_MONO, textTransform: "uppercase", letterSpacing: "0.06em" }}>Connect:</span>
+              {[
+                { label: "Twitter / X", icon: <IcoXTwitter />, href: "https://twitter.com/UNICEFNigeria" },
+                { label: "LinkedIn",   icon: <IcoLinkedIn />, href: "https://www.linkedin.com/company/unicef-nigeria" },
+                { label: "YouTube",    icon: <IcoYouTube />,  href: "https://www.youtube.com/user/unicefnigeria" },
+                { label: "ReliefWeb",  icon: <IcoGlobe />,    href: "https://reliefweb.int/country/nga" },
+              ].map(social => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#C2E8E4",
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = T.clay;
+                    e.currentTarget.style.borderColor = T.clay;
+                    e.currentTarget.style.color = T.white;
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+                    e.currentTarget.style.color = "#C2E8E4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Bottom Bar: Copyright & Humanitarian Principles */}
