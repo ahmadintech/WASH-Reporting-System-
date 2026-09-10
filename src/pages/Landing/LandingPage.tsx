@@ -870,29 +870,7 @@ export default function LandingPage() {
 
         <div style={{ maxWidth: 1360, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <div style={{ maxWidth: 960 }}>
-            {/* Context Badge (Smaller, refined light styling, Material Icon) */}
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              backdropFilter: "blur(8px)",
-              borderRadius: 30,
-              padding: "4px 12px",
-              fontSize: 10.5,
-              fontWeight: 600,
-              color: "#E2F6F3",
-              marginBottom: 20,
-              fontFamily: FONT_MONO,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-            }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 13, color: "#B5F0E8" }}>account_balance</span>
-              <span style={{ color: "#EAF9F7" }}>UNICEF · Federal Ministry of Water Resources</span>
-              <span style={{ opacity: 0.35, margin: "0 2px" }}>|</span>
-              <span style={{ color: "#C6F2ED" }}>Inter-Agency Coordination</span>
-            </div>
+
 
             {/* Main Headline (Clean Outfit Font) */}
             <h1 style={{
@@ -1672,26 +1650,7 @@ export default function LandingPage() {
         position: "relative",
       }}>
         <div style={{ maxWidth: 880, margin: "0 auto" }}>
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.20)",
-            backdropFilter: "blur(6px)",
-            borderRadius: 30,
-            padding: "4px 14px",
-            fontSize: 11,
-            fontFamily: FONT_MONO,
-            fontWeight: 600,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            marginBottom: 20,
-            color: "#E2F6F3",
-          }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 13, color: "#B5F0E8" }}>verified</span>
-            <span>Humanitarian Accountability</span>
-          </div>
+
 
           <h2 style={{
             fontFamily: FONT_PRIMARY,
