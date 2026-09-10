@@ -139,6 +139,19 @@ const IcoGlobe = () => (
   </svg>
 );
 
+const IcoMail = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
+const IcoPhone = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+);
+
 /* ─── Official Dashboard Logo Component ─────────────────────────── */
 function DashboardLogo({ size = 48, darkBg = false }: { size?: number; darkBg?: boolean }) {
   return (
@@ -164,6 +177,153 @@ function DashboardLogo({ size = 48, darkBg = false }: { size?: number; darkBg?: 
           (e.target as HTMLImageElement).src = "./images/logo/wash-logo.png";
         }}
       />
+    </div>
+  );
+}
+
+/* ─── Static Stat Metric Card ───────────────────────────────────── */
+function StatCard({
+  label,
+  value,
+  icon,
+  accent,
+  accentSoft,
+  gradient,
+  tag,
+  subtext,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  accent: string;
+  accentSoft: string;
+  gradient: string;
+  tag: string;
+  subtext: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: T.white,
+        border: `1.5px solid ${hovered ? accent : T.line}`,
+        borderRadius: 16,
+        padding: "24px 22px 20px",
+        position: "relative",
+        overflow: "hidden",
+        boxShadow: hovered
+          ? "0 10px 24px -4px rgba(11, 60, 70, 0.10)"
+          : "0 2px 10px rgba(11, 60, 70, 0.04)",
+        transform: hovered ? "translateY(-3px)" : "translateY(0)",
+        transition: "all 0.2s ease",
+        cursor: "default",
+      }}
+    >
+      {/* Top accent line */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3.5,
+          background: gradient,
+        }}
+      />
+
+      {/* Top Row: Icon + Badge */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: accentSoft,
+            color: accent,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {icon}
+        </div>
+        <span
+          style={{
+            fontFamily: FONT_MONO,
+            fontSize: 11,
+            fontWeight: 700,
+            color: accent,
+            background: accentSoft,
+            padding: "3px 9px",
+            borderRadius: 14,
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            border: `1px solid ${accent}25`,
+          }}
+        >
+          {tag}
+        </span>
+      </div>
+
+      {/* Label */}
+      <div
+        style={{
+          fontSize: 12.5,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: T.inkMuted,
+          fontWeight: 700,
+          fontFamily: FONT_PRIMARY,
+          marginTop: 16,
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </div>
+
+      {/* Big Static Value */}
+      <div
+        style={{
+          fontFamily: FONT_PRIMARY,
+          fontSize: "clamp(32px, 3vw, 40px)",
+          fontWeight: 800,
+          color: hovered ? accent : T.tealDeep,
+          lineHeight: 1.15,
+          letterSpacing: "-0.5px",
+          transition: "color 0.15s ease",
+        }}
+      >
+        {value}
+      </div>
+
+      {/* Subtext info */}
+      <div
+        style={{
+          fontSize: 12,
+          color: T.inkLight,
+          marginTop: 6,
+          lineHeight: 1.4,
+          fontFamily: FONT_PRIMARY,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <span
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: accent,
+            display: "inline-block",
+            flexShrink: 0,
+          }}
+        />
+        <span>{subtext}</span>
+      </div>
     </div>
   );
 }
@@ -595,75 +755,6 @@ export default function LandingPage() {
               </button>
             </div>
           </div>
-
-          {/* ── LIVE STATS STRIP ── */}
-          <div style={{
-            marginTop: 64,
-            background: "rgba(255, 255, 255, 0.09)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            borderRadius: 16,
-            padding: "28px 36px",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-            gap: 28,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
-                <IcoDocument />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
-                  Reports On Record
-                </div>
-                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
-                  {fmtNum(stats.totalReports)}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
-                <IcoHeart />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
-                  Beneficiaries Reached
-                </div>
-                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
-                  {fmtNum(stats.totalBeneficiaries)}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
-                <IcoUsers />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
-                  Reporting Partners
-                </div>
-                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
-                  {fmtNum(stats.totalPartners)}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
-                <IcoMapPin />
-              </div>
-              <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
-                  LGAs Actively Covered
-                </div>
-                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
-                  {fmtNum(stats.totalLgas)}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -722,12 +813,62 @@ export default function LandingPage() {
           5. THE 5W METHODOLOGY SECTION (Outfit Font Everywhere)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="5w-framework" style={{
-        padding: "96px 24px",
+        padding: "80px 24px 96px",
         background: T.bgSubtle,
         borderBottom: `1px solid ${T.line}`,
         width: "100%",
       }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+
+          {/* ── 4 STATS CARDS DIRECTLY ABOVE 5W TITLE ── */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 20,
+            marginBottom: 56,
+          }}>
+            <StatCard
+              label="Reports On Record"
+              value={fmtNum(stats.totalReports)}
+              icon={<IcoDocument />}
+              accent={T.teal}
+              accentSoft={T.tealSoft}
+              gradient="linear-gradient(135deg, #12707E 0%, #1D8A99 100%)"
+              tag="Verified 5W"
+              subtext="Validated monthly submissions"
+            />
+            <StatCard
+              label="Beneficiaries Reached"
+              value={fmtNum(stats.totalBeneficiaries)}
+              icon={<IcoHeart />}
+              accent={T.clay}
+              accentSoft={T.claySoft}
+              gradient="linear-gradient(135deg, #C1722F 0%, #D8823E 100%)"
+              tag="Individuals Served"
+              subtext="Host & IDP community individuals"
+            />
+            <StatCard
+              label="Reporting Partners"
+              value={fmtNum(stats.totalPartners)}
+              icon={<IcoUsers />}
+              accent={T.tealMedium}
+              accentSoft="#E0F2F1"
+              gradient="linear-gradient(135deg, #1D8A99 0%, #4EAAB6 100%)"
+              tag="Accredited Leads"
+              subtext="Active UN, INGO & NGO agencies"
+            />
+            <StatCard
+              label="LGAs Actively Covered"
+              value={fmtNum(stats.totalLgas)}
+              icon={<IcoMapPin />}
+              accent={T.green}
+              accentSoft={T.greenSoft}
+              gradient="linear-gradient(135deg, #2E7D47 0%, #3F9A5F 100%)"
+              tag="Priority LGAs"
+              subtext="Targeted local government areas"
+            />
+          </div>
+
           <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto 60px" }}>
             <div style={{
               fontFamily: FONT_MONO,
@@ -1415,43 +1556,53 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          10. REDESIGNED STANDARD MULTI-COLUMN WEBSITE FOOTER
+          10. STANDARD MULTI-COLUMN WEBSITE FOOTER
       ══════════════════════════════════════════════════════════════════ */}
       <footer style={{
-        background: T.tealDarkest,
-        color: "#C2D4D8",
-        padding: "76px 24px 36px",
+        background: "#081F24",
+        color: "#9BB3B8",
+        padding: "64px 24px 32px",
         width: "100%",
-        borderTop: "4px solid #C1722F",
+        borderTop: "3px solid #C1722F",
         fontFamily: FONT_PRIMARY,
       }}>
-        <div style={{ maxWidth: 1380, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
 
           {/* Institutional Co-Lead Bar */}
           <div style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            borderRadius: 12,
-            padding: "16px 24px",
-            marginBottom: 48,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 16,
+            paddingBottom: 28,
+            marginBottom: 44,
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, color: "#8EACB2" }}>
-              <span style={{ fontFamily: FONT_MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#C2E8E4" }}>Co-led by:</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13.5 }}>
+              <span style={{
+                fontFamily: FONT_MONO,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "#4EAAB6",
+                background: "rgba(78, 170, 182, 0.12)",
+                padding: "3px 8px",
+                borderRadius: 4,
+                fontSize: 11.5,
+              }}>
+                Co-led by:
+              </span>
               <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
-              <span style={{ opacity: 0.4 }}>·</span>
+              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
               <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
-              <span style={{ opacity: 0.4 }}>·</span>
+              <span style={{ color: "#4EAAB6", opacity: 0.5 }}>·</span>
               <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
             </div>
 
-            {/* Social Media Icons Group */}
+            {/* Social Media Links */}
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 12, color: "#7B9C9F", marginRight: 4, fontFamily: FONT_MONO, textTransform: "uppercase" }}>Connect:</span>
+              <span style={{ fontSize: 12, color: "#6F8E94", fontFamily: FONT_MONO, textTransform: "uppercase", letterSpacing: "0.06em" }}>Connect:</span>
               {[
                 { label: "Twitter / X", icon: <IcoXTwitter />, href: "https://twitter.com/UNICEFNigeria" },
                 { label: "LinkedIn",   icon: <IcoLinkedIn />, href: "https://www.linkedin.com/company/unicef-nigeria" },
@@ -1465,17 +1616,17 @@ export default function LandingPage() {
                   rel="noopener noreferrer"
                   aria-label={social.label}
                   style={{
-                    width: 34,
-                    height: 34,
+                    width: 36,
+                    height: 36,
                     borderRadius: 8,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: "#C2E8E4",
                     textDecoration: "none",
-                    transition: "all .15s",
+                    transition: "all 0.2s ease",
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.background = T.clay;
@@ -1484,8 +1635,8 @@ export default function LandingPage() {
                     e.currentTarget.style.transform = "translateY(-2px)";
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
                     e.currentTarget.style.color = "#C2E8E4";
                     e.currentTarget.style.transform = "translateY(0)";
                   }}
@@ -1505,11 +1656,11 @@ export default function LandingPage() {
           }}>
 
             {/* Column 1: Brand & Sector Mandate */}
-            <div style={{ maxWidth: 360 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-                <DashboardLogo size={52} darkBg={true} />
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <DashboardLogo size={46} darkBg={true} />
                 <div>
-                  <div style={{ fontFamily: FONT_PRIMARY, fontSize: 19, fontWeight: 700, color: T.white, lineHeight: 1.2 }}>
+                  <div style={{ fontFamily: FONT_PRIMARY, fontSize: 18, fontWeight: 800, color: T.white, lineHeight: 1.2 }}>
                     WASH Sector North East Nigeria
                   </div>
                   <div style={{ fontSize: 11.5, color: "#8EACB2", fontFamily: FONT_MONO, marginTop: 3 }}>
@@ -1518,21 +1669,22 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#C2E8E4", marginBottom: 8 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#C2E8E4", marginBottom: 6, fontFamily: FONT_MONO }}>
                 Sector Mandate
               </div>
-              <p style={{ fontSize: 13.5, lineHeight: 1.65, color: "#8EACB2", margin: "0 0 16px" }}>
+              <p style={{ fontSize: 13.5, lineHeight: 1.6, color: "#8EACB2", margin: "0 0 14px" }}>
                 The WASH Sector coordinates humanitarian water, sanitation, and hygiene assistance across the conflict-affected states of Borno, Adamawa, and Yobe in North East Nigeria.
               </p>
 
               <div style={{
                 fontSize: 12,
-                color: "#7E9DA3",
+                color: "#9EBABF",
                 background: "rgba(255,255,255,0.04)",
                 padding: "8px 12px",
                 borderRadius: 6,
                 border: "1px solid rgba(255,255,255,0.08)",
                 fontFamily: FONT_MONO,
+                lineHeight: 1.5,
               }}>
                 📍 <strong>Active Operational Nodes:</strong> Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
               </div>
@@ -1542,49 +1694,77 @@ export default function LandingPage() {
             <div>
               <h4 style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: 16.5,
+                fontSize: 15,
                 fontWeight: 700,
                 color: T.white,
                 margin: "0 0 18px",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.06em",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
               }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.teal }} />
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.teal }} />
                 Platform Navigation
               </h4>
 
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.2 }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.1 }}>
                 <li>
-                  <a href="#overview" style={{ color: "#A2C1C6", textDecoration: "none", transition: "color .15s", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <a
+                    href="#overview"
+                    style={{ color: "#9BB3B8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, transition: "color 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = T.white)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9BB3B8")}
+                  >
                     <span style={{ opacity: 0.5 }}>›</span> Portal Overview
                   </a>
                 </li>
                 <li>
-                  <button onClick={() => handleAction("/submit-report")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={() => handleAction("/submit-report")}
+                    style={{ background: "none", border: "none", padding: 0, color: "#9BB3B8", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6, transition: "color 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = T.white)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9BB3B8")}
+                  >
                     <span style={{ opacity: 0.5 }}>›</span> Submit 5W Monthly Report
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={() => handleAction("/coverage-dashboard")}
+                    style={{ background: "none", border: "none", padding: 0, color: "#9BB3B8", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6, transition: "color 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = T.white)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9BB3B8")}
+                  >
                     <span style={{ opacity: 0.5 }}>›</span> Response Coverage Dashboard
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleAction("/reports-list")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={() => handleAction("/reports-list")}
+                    style={{ background: "none", border: "none", padding: 0, color: "#9BB3B8", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6, transition: "color 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = T.white)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9BB3B8")}
+                  >
                     <span style={{ opacity: 0.5 }}>›</span> All Submitted Reports
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleAction("/partners")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={() => handleAction("/partners")}
+                    style={{ background: "none", border: "none", padding: 0, color: "#9BB3B8", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6, transition: "color 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = T.white)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#9BB3B8")}
+                  >
                     <span style={{ opacity: 0.5 }}>›</span> Humanitarian Partner Roster
                   </button>
                 </li>
                 {isAuthenticated && (
                   <li>
-                    <button onClick={() => navigate("/admin/settings")} style={{ background: "none", border: "none", padding: 0, color: "#C1722F", cursor: "pointer", fontSize: 14, fontWeight: 600, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <button
+                      onClick={() => navigate("/admin/settings")}
+                      style={{ background: "none", border: "none", padding: 0, color: "#C1722F", cursor: "pointer", fontSize: 14, fontWeight: 600, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}
+                    >
                       <span style={{ opacity: 0.5 }}>›</span> Sector Admin Console
                     </button>
                   </li>
@@ -1596,101 +1776,115 @@ export default function LandingPage() {
             <div>
               <h4 style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: 16.5,
+                fontSize: 15,
                 fontWeight: 700,
                 color: T.white,
                 margin: "0 0 18px",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.06em",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
               }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.clay }} />
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.clay }} />
                 Key Resources &amp; TWGs
               </h4>
 
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.2 }}>
-                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ opacity: 0.5 }}>•</span> Water Quality Technical Working Group
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13.5, lineHeight: 2.1 }}>
+                <li style={{ color: "#9BB3B8", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: T.teal, opacity: 0.7 }}>•</span> Water Quality Technical Working Group
                 </li>
-                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ opacity: 0.5 }}>•</span> Sanitation &amp; Sludge Management Protocol
+                <li style={{ color: "#9BB3B8", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: T.teal, opacity: 0.7 }}>•</span> Sanitation &amp; Sludge Management Protocol
                 </li>
-                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ opacity: 0.5 }}>•</span> Hygiene Promotion in Cholera Outbreaks
+                <li style={{ color: "#9BB3B8", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: T.teal, opacity: 0.7 }}>•</span> Hygiene Promotion in Cholera Outbreaks
                 </li>
-                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ opacity: 0.5 }}>•</span> WASH in Primary Health Facilities (PHC)
+                <li style={{ color: "#9BB3B8", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: T.teal, opacity: 0.7 }}>•</span> WASH in Primary Health Facilities (PHC)
                 </li>
-                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ opacity: 0.5 }}>•</span> Humanitarian Response Plan (HRP) Matrix
+                <li style={{ color: "#9BB3B8", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: T.teal, opacity: 0.7 }}>•</span> Humanitarian Response Plan (HRP) Matrix
                 </li>
               </ul>
             </div>
 
-            {/* Column 4: Sector Helpdesk & Contact Info */}
+            {/* Column 4: Sector Helpdesk (Designed Contact Info) */}
             <div>
               <h4 style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: 16.5,
+                fontSize: 15,
                 fontWeight: 700,
                 color: T.white,
                 margin: "0 0 18px",
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
+                letterSpacing: "0.06em",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
               }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.green }} />
                 Sector Helpdesk
               </h4>
 
               <div style={{
-                fontSize: 14,
-                color: "#8EACB2",
-                lineHeight: 1.85,
                 background: "rgba(255, 255, 255, 0.03)",
                 border: "1px solid rgba(255, 255, 255, 0.08)",
                 borderRadius: 10,
                 padding: "16px 18px",
+                fontSize: 13.5,
               }}>
-                <div style={{ marginBottom: 8 }}>
-                  <strong style={{ color: T.white }}>Email:</strong>{" "}
-                  <a href="mailto:washcluster.nigeria@unicef.org" style={{ color: "#50D2E1", textDecoration: "none", fontWeight: 600 }}>
-                    washcluster.nigeria@unicef.org
-                  </a>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+                  <span style={{ color: "#4EAAB6", marginTop: 2, flexShrink: 0 }}><IcoMail size={15} /></span>
+                  <div>
+                    <div style={{ fontSize: 11, fontFamily: FONT_MONO, textTransform: "uppercase", color: "#7B9C9F", fontWeight: 700 }}>Email</div>
+                    <a href="mailto:washcluster.nigeria@unicef.org" style={{ color: "#50D2E1", textDecoration: "none", fontWeight: 600, wordBreak: "break-all" }}>
+                      washcluster.nigeria@unicef.org
+                    </a>
+                  </div>
                 </div>
 
-                <div style={{ marginBottom: 8 }}>
-                  <strong style={{ color: T.white }}>Lead Coordinator:</strong>{" "}
-                  <span style={{ color: "#C2E8E4" }}>coordinator@washsector-ne.org</span>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+                  <span style={{ color: "#C1722F", marginTop: 2, flexShrink: 0 }}><IcoUsers /></span>
+                  <div>
+                    <div style={{ fontSize: 11, fontFamily: FONT_MONO, textTransform: "uppercase", color: "#7B9C9F", fontWeight: 700 }}>Lead Coordinator</div>
+                    <a href="mailto:coordinator@washsector-ne.org" style={{ color: "#C2E8E4", textDecoration: "none" }}>
+                      coordinator@washsector-ne.org
+                    </a>
+                  </div>
                 </div>
 
-                <div style={{ marginBottom: 8 }}>
-                  <strong style={{ color: T.white }}>Information Management:</strong>{" "}
-                  <span style={{ color: "#C2E8E4" }}>im@washsector-ne.org</span>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+                  <span style={{ color: "#1D8A99", marginTop: 2, flexShrink: 0 }}><IcoBarChart /></span>
+                  <div>
+                    <div style={{ fontSize: 11, fontFamily: FONT_MONO, textTransform: "uppercase", color: "#7B9C9F", fontWeight: 700 }}>Information Management</div>
+                    <a href="mailto:im@washsector-ne.org" style={{ color: "#C2E8E4", textDecoration: "none" }}>
+                      im@washsector-ne.org
+                    </a>
+                  </div>
                 </div>
 
-                <div style={{ marginBottom: 14 }}>
-                  <strong style={{ color: T.white }}>Emergency Hotline:</strong>{" "}
-                  <span style={{ color: "#F3DFC9", fontFamily: FONT_MONO, fontWeight: 700 }}>
-                    +234 (0) 800-WASH-HELP
-                  </span>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
+                  <span style={{ color: "#E09A52", marginTop: 2, flexShrink: 0 }}><IcoPhone size={15} /></span>
+                  <div>
+                    <div style={{ fontSize: 11, fontFamily: FONT_MONO, textTransform: "uppercase", color: "#7B9C9F", fontWeight: 700 }}>Emergency Hotline</div>
+                    <a href="tel:+23480092744357" style={{ color: "#F3DFC9", fontFamily: FONT_MONO, fontWeight: 700, textDecoration: "none" }}>
+                      +234 (0) 800-WASH-HELP
+                    </a>
+                  </div>
                 </div>
 
-                <div>
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10 }}>
                   <span style={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 6,
-                    padding: "4px 10px",
-                    borderRadius: 6,
+                    padding: "4px 8px",
+                    borderRadius: 4,
                     background: "rgba(46, 125, 71, 0.25)",
                     border: "1px solid rgba(87, 206, 127, 0.4)",
                     color: "#57CE7F",
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: 700,
                     fontFamily: FONT_MONO,
                     letterSpacing: "0.04em",
@@ -1705,8 +1899,8 @@ export default function LandingPage() {
 
           {/* Bottom Bar: Copyright & Humanitarian Principles */}
           <div style={{
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            paddingTop: 28,
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            paddingTop: 24,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -1719,7 +1913,7 @@ export default function LandingPage() {
               © 2026 WASH Sector North East Nigeria. All rights reserved. Managed under the humanitarian cluster approach.
             </div>
 
-            <div style={{ display: "flex", gap: 18, fontFamily: FONT_PRIMARY, fontWeight: 500 }}>
+            <div style={{ display: "flex", gap: 16, fontFamily: FONT_PRIMARY, fontWeight: 500, fontSize: 12.5 }}>
               <span>Humanity</span>
               <span style={{ opacity: 0.3 }}>·</span>
               <span>Neutrality</span>

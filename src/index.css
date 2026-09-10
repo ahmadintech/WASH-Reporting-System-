@@ -17,6 +17,25 @@
   --danger-soft: #F7E5E2;
 }
 
+@keyframes logoScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.partner-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: logoScroll 32s linear infinite;
+}
+
+.partner-marquee-track:hover {
+  animation-play-state: paused;
+}
+
 @layer base {
   body {
     @apply relative text-base font-normal z-1 bg-gray-50 dark:bg-gray-900 font-outfit;
