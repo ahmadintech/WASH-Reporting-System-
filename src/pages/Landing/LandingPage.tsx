@@ -390,6 +390,9 @@ export default function LandingPage() {
   const [bannerVisible, setBannerVisible] = useState(true);
   const [navScrolled, setNavScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsVisible, setStatsVisible] = useState(false);
 
@@ -399,6 +402,18 @@ export default function LandingPage() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setWindowWidth(w);
+      if (w >= 1024) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -534,7 +549,7 @@ export default function LandingPage() {
           2. STICKY TOP NAVBAR (Responsive, Professional & Expanded)
       ══════════════════════════════════════════════════════════════════ */}
       {/* ══════════════════════════════════════════════════════════════════
-          2. STICKY TOP NAVBAR (Zero Horizontal Scroll & Responsive)
+          2. STICKY TOP NAVBAR (Strict Responsive Rendering & Compact Brand)
       ══════════════════════════════════════════════════════════════════ */}
       <header style={{
         position: "sticky",
@@ -554,13 +569,13 @@ export default function LandingPage() {
           maxWidth: "100%",
           boxSizing: "border-box",
           padding: "0 clamp(12px, 2.5vw, 32px)",
-          height: 72,
+          height: 68,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
         }}>
-          {/* Brand Logo & Context (Far Left) */}
+          {/* Brand Logo & Context (Far Left: Compact & Professional) */}
           <div
             onClick={() => navigate("/")}
             style={{
@@ -574,13 +589,13 @@ export default function LandingPage() {
             }}
           >
             <div style={{ flexShrink: 0 }}>
-              <DashboardLogo size={42} />
+              <DashboardLogo size={38} />
             </div>
             <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 10, minWidth: 0 }}>
               <div style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: "clamp(13.5px, 1.8vw, 18px)",
-                fontWeight: 800,
+                fontSize: "clamp(14px, 1.4vw, 16.5px)",
+                fontWeight: 700,
                 color: T.tealDeep,
                 letterSpacing: "-0.2px",
                 lineHeight: 1.2,
@@ -590,12 +605,11 @@ export default function LandingPage() {
               }}>
                 WASH Sector North East Nigeria
               </div>
-              <div
-                className="hidden md:block"
-                style={{
+              {windowWidth >= 480 && (
+                <div style={{
                   fontFamily: FONT_MONO,
-                  fontSize: 10.5,
-                  color: "#546E74",
+                  fontSize: 9.5,
+                  color: "#5B767C",
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
                   marginTop: 2,
@@ -603,135 +617,139 @@ export default function LandingPage() {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                }}
-              >
-                5W Activity Reporting &amp; Response Coverage Platform
-              </div>
+                }}>
+                  5W Activity Reporting &amp; Response Coverage Platform
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Desktop Navigation Menu (Visible on XL screens >= 1280px) */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }} className="hidden xl:flex">
-            {[
-              { label: "Overview", href: "#overview" },
-              { label: "5W Architecture", href: "#5w-framework" },
-              { label: "BAY Coverage", href: "#coverage" },
-              { label: "Core Pillars", href: "#pillars" },
-              { label: "Resources & Hubs", href: "#resources" },
-            ].map(item => (
-              <a
-                key={item.label}
-                href={item.href}
-                style={{
-                  textDecoration: "none",
-                  color: "#3F565C",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  padding: "7px 11px",
-                  borderRadius: 7,
-                  transition: "all .15s ease",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = T.tealDeep;
-                  e.currentTarget.style.background = "rgba(18, 112, 126, 0.07)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = "#3F565C";
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          {/* Desktop Navigation Menu (Rendered ONLY on Desktop >= 1024px) */}
+          {windowWidth >= 1024 && (
+            <nav style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
+              {[
+                { label: "Overview", href: "#overview" },
+                { label: "5W Architecture", href: "#5w-framework" },
+                { label: "BAY Coverage", href: "#coverage" },
+                { label: "Core Pillars", href: "#pillars" },
+                { label: "Resources & Hubs", href: "#resources" },
+              ].map(item => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  style={{
+                    textDecoration: "none",
+                    color: "#3F565C",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    padding: "7px 11px",
+                    borderRadius: 7,
+                    transition: "all .15s ease",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = T.tealDeep;
+                    e.currentTarget.style.background = "rgba(18, 112, 126, 0.07)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = "#3F565C";
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          )}
 
           {/* Right Action Group */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            {/* Operational States Badge (Visible on large screens >= 1400px) */}
-            <div
-              className="hidden 2xl:flex"
-              style={{
+            {/* Operational States Badge (Rendered ONLY on Large Desktop >= 1340px) */}
+            {windowWidth >= 1340 && (
+              <div style={{
+                display: "flex",
                 alignItems: "center",
                 gap: 7,
                 background: "#F0F7F6",
                 border: "1.5px solid #CFE5E2",
                 borderRadius: 20,
-                padding: "5px 12px",
+                padding: "4px 11px",
                 fontFamily: FONT_MONO,
                 fontSize: 11,
                 fontWeight: 700,
                 color: T.tealDeep,
                 letterSpacing: "0.05em",
                 whiteSpace: "nowrap",
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
-              BORNO · ADAMAWA · YOBE
-            </div>
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
+                BORNO · ADAMAWA · YOBE
+              </div>
+            )}
 
-            {/* Main CTA: Go to Dashboard (Tablets & Desktops >= 640px) */}
-            <button
-              id="navbar-dashboard-btn"
-              onClick={() => handleAction("/dashboard")}
-              className="hidden sm:inline-flex"
-              style={{
-                background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
-                color: T.white,
-                border: "none",
-                borderRadius: 8,
-                padding: "8px 16px",
-                fontSize: 13.5,
-                fontWeight: 700,
-                cursor: "pointer",
-                alignItems: "center",
-                gap: 6,
-                fontFamily: FONT_PRIMARY,
-                boxShadow: "0 2px 8px rgba(11, 60, 70, 0.18)",
-                transition: "all .15s ease",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #12707E 0%, #1D8A99 100%)";
-                e.currentTarget.style.boxShadow = "0 4px 14px rgba(11, 60, 70, 0.28)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)";
-                e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 60, 70, 0.18)";
-              }}
-            >
-              Go to Dashboard <IcoArrowRight size={14} />
-            </button>
+            {/* Main CTA: Go to Dashboard (Rendered on Desktop & Tablets >= 640px) */}
+            {(windowWidth >= 640) && (
+              <button
+                id="navbar-dashboard-btn"
+                onClick={() => handleAction("/dashboard")}
+                style={{
+                  background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
+                  color: T.white,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "8px 16px",
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontFamily: FONT_PRIMARY,
+                  boxShadow: "0 2px 8px rgba(11, 60, 70, 0.18)",
+                  transition: "all .15s ease",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, #12707E 0%, #1D8A99 100%)";
+                  e.currentTarget.style.boxShadow = "0 4px 14px rgba(11, 60, 70, 0.28)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 60, 70, 0.18)";
+                }}
+              >
+                Go to Dashboard <IcoArrowRight size={14} />
+              </button>
+            )}
 
-            {/* Mobile/Tablet Hamburger Toggle (< 1280px) */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex xl:hidden"
-              aria-label="Toggle navigation menu"
-              style={{
-                background: mobileMenuOpen ? "rgba(18, 112, 126, 0.08)" : "#F0F7F6",
-                border: "1.5px solid #CFE5E2",
-                borderRadius: 8,
-                width: 40,
-                height: 40,
-                color: T.tealDeep,
-                fontSize: 17,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.15s ease",
-              }}
-            >
-              <i className={mobileMenuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
-            </button>
+            {/* Mobile/Tablet Hamburger Toggle (Rendered ONLY on Viewports < 1024px) */}
+            {windowWidth < 1024 && (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle navigation menu"
+                style={{
+                  background: mobileMenuOpen ? "rgba(18, 112, 126, 0.08)" : "#F0F7F6",
+                  border: "1.5px solid #CFE5E2",
+                  borderRadius: 8,
+                  width: 40,
+                  height: 40,
+                  color: T.tealDeep,
+                  fontSize: 17,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <i className={mobileMenuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Mobile Dropdown Navigation Drawer */}
-        {mobileMenuOpen && (
+        {/* Mobile Dropdown Navigation Drawer (Rendered ONLY on Viewports < 1024px when opened) */}
+        {windowWidth < 1024 && mobileMenuOpen && (
           <div
-            className="block xl:hidden"
             style={{
               background: "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(16px)",
