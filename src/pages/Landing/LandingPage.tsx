@@ -870,28 +870,28 @@ export default function LandingPage() {
 
         <div style={{ maxWidth: 1360, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <div style={{ maxWidth: 960 }}>
-            {/* Context Badge (Smaller, clean typography, Material Icon) */}
+            {/* Context Badge (Smaller, refined light styling, Material Icon) */}
             <div style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              background: "rgba(255,255,255,0.10)",
-              border: "1px solid rgba(255,255,255,0.20)",
-              backdropFilter: "blur(6px)",
+              gap: 6,
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              backdropFilter: "blur(8px)",
               borderRadius: 30,
-              padding: "5px 14px",
-              fontSize: 11.5,
+              padding: "4px 12px",
+              fontSize: 10.5,
               fontWeight: 600,
-              color: "#C2E8E4",
-              marginBottom: 22,
+              color: "#E2F6F3",
+              marginBottom: 20,
               fontFamily: FONT_MONO,
-              letterSpacing: "0.05em",
+              letterSpacing: "0.04em",
               textTransform: "uppercase",
             }}>
-              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#8AE0D5" }}>account_balance</span>
-              <span>UNICEF · Federal Ministry of Water Resources</span>
-              <span style={{ opacity: 0.4 }}>|</span>
-              <span>Inter-Agency Coordination</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 13, color: "#B5F0E8" }}>account_balance</span>
+              <span style={{ color: "#EAF9F7" }}>UNICEF · Federal Ministry of Water Resources</span>
+              <span style={{ opacity: 0.35, margin: "0 2px" }}>|</span>
+              <span style={{ color: "#C6F2ED" }}>Inter-Agency Coordination</span>
             </div>
 
             {/* Main Headline (Clean Outfit Font) */}
@@ -1673,20 +1673,24 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: 880, margin: "0 auto" }}>
           <div style={{
-            display: "inline-block",
-            background: "rgba(255,255,255,0.18)",
-            border: "1px solid rgba(255,255,255,0.32)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.20)",
+            backdropFilter: "blur(6px)",
             borderRadius: 30,
-            padding: "6px 18px",
-            fontSize: 13,
+            padding: "4px 14px",
+            fontSize: 11,
             fontFamily: FONT_MONO,
-            fontWeight: 700,
-            letterSpacing: "0.06em",
+            fontWeight: 600,
+            letterSpacing: "0.05em",
             textTransform: "uppercase",
             marginBottom: 20,
-            color: "#C2E8E4",
+            color: "#E2F6F3",
           }}>
-            Humanitarian Accountability
+            <span className="material-symbols-outlined" style={{ fontSize: 13, color: "#B5F0E8" }}>verified</span>
+            <span>Humanitarian Accountability</span>
           </div>
 
           <h2 style={{
