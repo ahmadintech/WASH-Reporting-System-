@@ -489,13 +489,15 @@ export default function LandingPage() {
               {reportingConfig.isFreezeActive ? "SYSTEM FREEZE" : "ACTIVE CYCLE"}
             </span>
 
-            {reportingConfig.isFreezeActive ? (
-              <span style={{ fontSize: 14 }}>The current reporting window is paused for sector data reconciliation. Contact IM team for emergency updates.</span>
-            ) : (
-              <span style={{ fontSize: 14 }}>
-                <strong>{reportingConfig.activeCycle || "2026 Cycle"}</strong> reporting is active. Next submission deadline: <strong>{deadline}</strong>
-                {daysLeft !== null && ` (${daysLeft === 0 ? "Today is the last day" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining`})`}.
-              </span>
+            {windowWidth >= 768 && (
+              reportingConfig.isFreezeActive ? (
+                <span style={{ fontSize: 14 }}>The current reporting window is paused for sector data reconciliation. Contact IM team for emergency updates.</span>
+              ) : (
+                <span style={{ fontSize: 14 }}>
+                  <strong>{reportingConfig.activeCycle || "2026 Cycle"}</strong> reporting is active. Next submission deadline: <strong>{deadline}</strong>
+                  {daysLeft !== null && ` (${daysLeft === 0 ? "Today is the last day" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining`})`}.
+                </span>
+              )
             )}
 
             {!reportingConfig.isFreezeActive && (
@@ -591,21 +593,21 @@ export default function LandingPage() {
             <div style={{ flexShrink: 0 }}>
               <DashboardLogo size={38} />
             </div>
-            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 10, minWidth: 0 }}>
-              <div style={{
-                fontFamily: FONT_PRIMARY,
-                fontSize: "clamp(14px, 1.4vw, 16.5px)",
-                fontWeight: 700,
-                color: T.tealDeep,
-                letterSpacing: "-0.2px",
-                lineHeight: 1.2,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}>
-                WASH Sector North East Nigeria
-              </div>
-              {windowWidth >= 480 && (
+            {windowWidth >= 640 && (
+              <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 10, minWidth: 0 }}>
+                <div style={{
+                  fontFamily: FONT_PRIMARY,
+                  fontSize: "clamp(14px, 1.4vw, 16.5px)",
+                  fontWeight: 700,
+                  color: T.tealDeep,
+                  letterSpacing: "-0.2px",
+                  lineHeight: 1.2,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}>
+                  WASH Sector North East Nigeria
+                </div>
                 <div style={{
                   fontFamily: FONT_MONO,
                   fontSize: 9.5,
@@ -620,8 +622,8 @@ export default function LandingPage() {
                 }}>
                   5W Activity Reporting &amp; Response Coverage Platform
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation Menu (Rendered ONLY on Desktop >= 1024px) */}
@@ -856,7 +858,7 @@ export default function LandingPage() {
       ══════════════════════════════════════════════════════════════════ */}
       <section id="overview" style={{
         position: "relative",
-        background: "linear-gradient(135deg, #061B20 0%, #0B3C46 50%, #12707E 100%)",
+        background: "linear-gradient(135deg, rgba(4, 20, 24, 0.90) 0%, rgba(8, 45, 53, 0.86) 50%, rgba(4, 20, 24, 0.92) 100%), url('/images/wash_hero_bg.jpg') center/cover no-repeat",
         color: T.white,
         padding: "88px 24px 96px",
         overflow: "hidden",
@@ -868,25 +870,27 @@ export default function LandingPage() {
 
         <div style={{ maxWidth: 1360, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <div style={{ maxWidth: 960 }}>
-            {/* Context Badge */}
+            {/* Context Badge (Smaller, clean typography, Material Icon) */}
             <div style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 10,
-              background: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.25)",
+              gap: 8,
+              background: "rgba(255,255,255,0.10)",
+              border: "1px solid rgba(255,255,255,0.20)",
+              backdropFilter: "blur(6px)",
               borderRadius: 30,
-              padding: "7px 18px",
-              fontSize: 13.5,
+              padding: "5px 14px",
+              fontSize: 11.5,
               fontWeight: 600,
               color: "#C2E8E4",
-              marginBottom: 24,
+              marginBottom: 22,
               fontFamily: FONT_MONO,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
               textTransform: "uppercase",
             }}>
-              <span>🏛️ UNICEF · Federal Ministry of Water Resources</span>
-              <span style={{ opacity: 0.5 }}>|</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#8AE0D5" }}>account_balance</span>
+              <span>UNICEF · Federal Ministry of Water Resources</span>
+              <span style={{ opacity: 0.4 }}>|</span>
               <span>Inter-Agency Coordination</span>
             </div>
 
@@ -918,7 +922,7 @@ export default function LandingPage() {
               Eliminating coverage gaps and maximizing emergency response reach.
             </p>
 
-            {/* Primary Action Buttons */}
+            {/* Primary Action Buttons (Material Icons) */}
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
               <button
                 id="hero-submit-btn"
@@ -928,8 +932,8 @@ export default function LandingPage() {
                   color: T.white,
                   border: "none",
                   borderRadius: 10,
-                  padding: "16px 32px",
-                  fontSize: 16,
+                  padding: "16px 30px",
+                  fontSize: 15.5,
                   fontWeight: 700,
                   cursor: "pointer",
                   display: "inline-flex",
@@ -942,7 +946,9 @@ export default function LandingPage() {
                 onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
                 onMouseLeave={e => (e.currentTarget.style.background = T.clay)}
               >
-                <IcoDocument /> Submit Monthly 5W Report <IcoArrowRight size={18} />
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>description</span>
+                Submit Monthly 5W Report
+                <span className="material-symbols-outlined" style={{ fontSize: 19 }}>arrow_forward</span>
               </button>
 
               <button
@@ -953,27 +959,29 @@ export default function LandingPage() {
                   color: T.white,
                   border: "1.5px solid rgba(255, 255, 255, 0.35)",
                   borderRadius: 10,
-                  padding: "16px 28px",
-                  fontSize: 16,
+                  padding: "16px 26px",
+                  fontSize: 15.5,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 10,
                   fontFamily: FONT_PRIMARY,
+                  backdropFilter: "blur(4px)",
                   transition: "background .15s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.24)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.14)")}
               >
-                <IcoBarChart /> Explore Coverage Dashboard
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>analytics</span>
+                Explore Coverage Dashboard
               </button>
 
               <button
                 id="hero-partners-btn"
                 onClick={() => handleAction("/partners")}
                 style={{
-                  background: "transparent",
+                  background: "rgba(255, 255, 255, 0.05)",
                   color: "#C2E8E4",
                   border: "1.5px solid rgba(255, 255, 255, 0.2)",
                   borderRadius: 10,
@@ -985,6 +993,7 @@ export default function LandingPage() {
                   alignItems: "center",
                   gap: 8,
                   fontFamily: FONT_PRIMARY,
+                  backdropFilter: "blur(4px)",
                   transition: "color .15s, border-color .15s",
                 }}
                 onMouseEnter={e => {
@@ -996,7 +1005,8 @@ export default function LandingPage() {
                   e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
                 }}
               >
-                <IcoShield /> Partner Directory
+                <span className="material-symbols-outlined" style={{ fontSize: 19 }}>groups</span>
+                Partner Directory
               </button>
             </div>
           </div>
