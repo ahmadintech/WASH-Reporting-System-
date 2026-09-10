@@ -26,10 +26,32 @@
   }
 }
 
+/* Step-scroll: moves, stays briefly, then moves again smoothly */
+@keyframes logoStepScroll {
+  0%, 15% {
+    transform: translateX(0%);
+  }
+  20%, 35% {
+    transform: translateX(-10%);
+  }
+  40%, 55% {
+    transform: translateX(-20%);
+  }
+  60%, 75% {
+    transform: translateX(-30%);
+  }
+  80%, 95% {
+    transform: translateX(-40%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .partner-marquee-track {
   display: flex;
   width: max-content;
-  animation: logoScroll 32s linear infinite;
+  animation: logoStepScroll 28s ease-in-out infinite;
 }
 
 .partner-marquee-track:hover {

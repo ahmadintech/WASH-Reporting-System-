@@ -28,8 +28,8 @@ const T = {
 };
 
 /* ─── Standard Typography Token ──────────────────────────────────── */
-const FONT_PRIMARY = "'Outfit', 'Inter', system-ui, -apple-system, sans-serif";
-const FONT_MONO = "'IBM Plex Mono', monospace";
+const FONT_PRIMARY = "'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FONT_MONO = "'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, Arial, sans-serif";
 
 /* ─── Number Formatter ─────────────────────────────────────────── */
 function fmtNum(n: number): string {
@@ -635,6 +635,7 @@ export default function LandingPage() {
                 { label: "BAY Coverage", href: "#coverage" },
                 { label: "Core Pillars", href: "#pillars" },
                 { label: "Resources & Hubs", href: "#resources" },
+                { label: "Partners", href: "#partners" },
               ].map(item => (
                 <a
                   key={item.label}
@@ -666,27 +667,6 @@ export default function LandingPage() {
 
           {/* Right Action Group */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            {/* Operational States Badge (Rendered ONLY on Large Desktop >= 1340px) */}
-            {windowWidth >= 1340 && (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                background: "#F0F7F6",
-                border: "1.5px solid #CFE5E2",
-                borderRadius: 20,
-                padding: "4px 11px",
-                fontFamily: FONT_MONO,
-                fontSize: 11,
-                fontWeight: 700,
-                color: T.tealDeep,
-                letterSpacing: "0.05em",
-                whiteSpace: "nowrap",
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
-                BORNO · ADAMAWA · YOBE
-              </div>
-            )}
 
             {/* Main CTA: Go to Dashboard (Rendered on Desktop & Tablets >= 640px) */}
             {(windowWidth >= 640) && (
@@ -771,6 +751,7 @@ export default function LandingPage() {
                 { label: "BAY Coverage", href: "#coverage", icon: "fa-solid fa-map-location-dot" },
                 { label: "Core Pillars", href: "#pillars", icon: "fa-solid fa-layer-group" },
                 { label: "Resources & Hubs", href: "#resources", icon: "fa-regular fa-folder-open" },
+                { label: "Partners", href: "#partners", icon: "fa-solid fa-handshake" },
               ].map(item => (
                 <a
                   key={item.label}
@@ -1322,31 +1303,31 @@ export default function LandingPage() {
               >
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 26, fontWeight: 800, color: T.tealDeep, margin: 0 }}>
+                    <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 28, fontWeight: 800, color: T.tealDeep, margin: 0 }}>
                       {item.state}
                     </h3>
-                    <span style={{ fontSize: 13, fontWeight: 700, padding: "5px 14px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: FONT_MONO }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, padding: "5px 14px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: FONT_PRIMARY }}>
                       {item.tag}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: 15, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: FONT_MONO, display: "flex", alignItems: "center" }}>
-                    <i className="fa-solid fa-location-dot" style={{ color: "#C1722F", marginRight: 8, fontSize: 15 }}></i>
+                  <div style={{ fontSize: 17, color: T.teal, fontWeight: 700, marginBottom: 18, fontFamily: FONT_PRIMARY, display: "flex", alignItems: "center" }}>
+                    <i className="fa-solid fa-location-dot" style={{ color: "#C1722F", marginRight: 8, fontSize: 17 }}></i>
                     {item.hub}
                   </div>
 
-                  <p style={{ fontSize: 16, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px", fontFamily: FONT_PRIMARY }}>
+                  <p style={{ fontSize: 17.5, color: T.inkMuted, lineHeight: 1.7, margin: "0 0 24px", fontFamily: FONT_PRIMARY, fontWeight: 400 }}>
                     {item.desc}
                   </p>
 
                   <div style={{ borderTop: `1.5px solid #EEF2F1`, paddingTop: 20, marginBottom: 20 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: T.tealDeep, marginBottom: 12, fontFamily: FONT_PRIMARY }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: T.tealDeep, marginBottom: 14, fontFamily: FONT_PRIMARY }}>
                       Priority Interventions:
                     </div>
-                    <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 15.5, color: T.ink, lineHeight: 1.9, fontFamily: FONT_PRIMARY }}>
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 17, color: T.ink, lineHeight: 2.0, fontFamily: FONT_PRIMARY, fontWeight: 500 }}>
                       {item.priorityNeeds.map(need => (
-                        <li key={need} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <i className="fa-solid fa-circle-check" style={{ color: T.teal, fontSize: 14 }}></i>
+                        <li key={need} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: T.teal, fontSize: 16 }}></i>
                           {need}
                         </li>
                       ))}
@@ -1354,10 +1335,10 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: `1.5px solid #EEF2F1`, paddingTop: 18, fontSize: 14.5, color: T.inkMuted, fontFamily: FONT_PRIMARY, display: "flex", alignItems: "flex-start", gap: 6 }}>
-                  <i className="fa-solid fa-map-pin" style={{ color: "#C1722F", fontSize: 14, marginTop: 3 }}></i>
+                <div style={{ borderTop: `1.5px solid #EEF2F1`, paddingTop: 18, fontSize: 16, color: T.inkMuted, fontFamily: FONT_PRIMARY, display: "flex", alignItems: "flex-start", gap: 8, lineHeight: 1.55 }}>
+                  <i className="fa-solid fa-map-pin" style={{ color: "#C1722F", fontSize: 16, marginTop: 4 }}></i>
                   <div>
-                    <strong style={{ color: T.tealDeep }}>Key LGAs:</strong> {item.lgas}
+                    <strong style={{ color: T.tealDeep, fontWeight: 700 }}>Key LGAs:</strong> {item.lgas}
                   </div>
                 </div>
               </div>
@@ -1639,6 +1620,250 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
+          8b. OPERATIONAL & IMPLEMENTING PARTNERS (SCROLLABLE STEP-MARQUEE)
+      ══════════════════════════════════════════════════════════════════ */}
+      <section
+        id="partners"
+        style={{
+          background: "#FFFFFF",
+          borderTop: `1px solid ${T.line}`,
+          borderBottom: `1px solid ${T.line}`,
+          padding: "70px 0 65px",
+          width: "100%",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px 32px", textAlign: "center" }}>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "5px 14px",
+            borderRadius: 20,
+            background: "#E4F0EF",
+            border: "1px solid #CFE5E2",
+            color: T.tealDeep,
+            fontSize: 12.5,
+            fontWeight: 700,
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            fontFamily: FONT_PRIMARY,
+            marginBottom: 12,
+          }}>
+            <i className="fa-solid fa-handshake" style={{ color: T.teal }}></i>
+            Inter-Agency Consortium
+          </div>
+          <h2 style={{
+            fontFamily: FONT_PRIMARY,
+            fontSize: "clamp(26px, 3.2vw, 36px)",
+            fontWeight: 800,
+            color: T.tealDeep,
+            margin: "0 0 12px",
+            letterSpacing: "-0.5px",
+          }}>
+            Operational &amp; Implementing Partners
+          </h2>
+          <p style={{
+            fontFamily: FONT_PRIMARY,
+            fontSize: 16,
+            color: T.inkMuted,
+            maxWidth: 680,
+            margin: "0 auto",
+            lineHeight: 1.6,
+          }}>
+            Over 40 accredited United Nations agencies, international non-governmental organizations, and national civil society organizations working synchronously across Borno, Adamawa, and Yobe states.
+          </p>
+        </div>
+
+        {/* Continuous Step-Scrolling Logo Showcase */}
+        <div style={{
+          position: "relative",
+          width: "100%",
+          overflow: "hidden",
+          padding: "16px 0 24px",
+        }}>
+          {/* Subtle edge fades */}
+          <div style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: 120,
+            background: "linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0))",
+            zIndex: 3,
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 120,
+            background: "linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0))",
+            zIndex: 3,
+            pointerEvents: "none",
+          }} />
+
+          {/* Marquee Track with step-scroll animation */}
+          <div className="partner-marquee-track" style={{ gap: 20, paddingLeft: 20 }}>
+            {[
+              { name: "UNICEF", role: "Cluster Lead Agency", type: "UN Agency", img: "/images/brand/brand-01.svg" },
+              { name: "WHO", role: "Water Quality & Cholera", type: "UN Agency", img: "/images/brand/brand-02.svg" },
+              { name: "IOM", role: "Camp WASH & Displacement", type: "UN Agency", img: "/images/brand/brand-03.svg" },
+              { name: "Action Against Hunger", role: "Nutrition & Hygiene", type: "INGO", img: "/images/brand/brand-04.svg" },
+              { name: "IRC", role: "Emergency WASH Response", type: "INGO", img: "/images/brand/brand-05.svg" },
+              { name: "Save the Children", role: "Child-Friendly Sanitation", type: "INGO", img: "/images/brand/brand-06.svg" },
+              { name: "Oxfam", role: "Public Health Promotion", type: "INGO", img: "/images/brand/brand-07.svg" },
+              { name: "Solidarités International", role: "Water Trucking & Chlorination", type: "INGO", img: "/images/brand/brand-08.svg" },
+              { name: "Norwegian Refugee Council", role: "Sanitation & Shelter WASH", type: "INGO", img: "/images/brand/brand-09.svg" },
+              { name: "Danish Refugee Council", role: "Community Infrastructure", type: "INGO", img: "/images/brand/brand-10.svg" },
+              { name: "Intersos", role: "Frontline Health Center WASH", type: "INGO", img: "/images/brand/brand-11.svg" },
+              { name: "Premiere Urgence", role: "Borehole Rehabilitation", type: "INGO", img: "/images/brand/brand-12.svg" },
+              { name: "UNHCR", role: "Refugee & IDP Settlements", type: "UN Agency", img: "/images/brand/brand-13.svg" },
+              { name: "CISP", role: "Hygiene Promotion & Kits", type: "INGO", img: "/images/brand/brand-14.svg" },
+              { name: "Malteser International", role: "Emergency Water Treatment", type: "INGO", img: "/images/brand/brand-15.svg" },
+              // Duplicate set to create infinite seamless loop
+              { name: "UNICEF", role: "Cluster Lead Agency", type: "UN Agency", img: "/images/brand/brand-01.svg" },
+              { name: "WHO", role: "Water Quality & Cholera", type: "UN Agency", img: "/images/brand/brand-02.svg" },
+              { name: "IOM", role: "Camp WASH & Displacement", type: "UN Agency", img: "/images/brand/brand-03.svg" },
+              { name: "Action Against Hunger", role: "Nutrition & Hygiene", type: "INGO", img: "/images/brand/brand-04.svg" },
+              { name: "IRC", role: "Emergency WASH Response", type: "INGO", img: "/images/brand/brand-05.svg" },
+              { name: "Save the Children", role: "Child-Friendly Sanitation", type: "INGO", img: "/images/brand/brand-06.svg" },
+              { name: "Oxfam", role: "Public Health Promotion", type: "INGO", img: "/images/brand/brand-07.svg" },
+              { name: "Solidarités International", role: "Water Trucking & Chlorination", type: "INGO", img: "/images/brand/brand-08.svg" },
+              { name: "Norwegian Refugee Council", role: "Sanitation & Shelter WASH", type: "INGO", img: "/images/brand/brand-09.svg" },
+              { name: "Danish Refugee Council", role: "Community Infrastructure", type: "INGO", img: "/images/brand/brand-10.svg" },
+              { name: "Intersos", role: "Frontline Health Center WASH", type: "INGO", img: "/images/brand/brand-11.svg" },
+              { name: "Premiere Urgence", role: "Borehole Rehabilitation", type: "INGO", img: "/images/brand/brand-12.svg" },
+              { name: "UNHCR", role: "Refugee & IDP Settlements", type: "UN Agency", img: "/images/brand/brand-13.svg" },
+              { name: "CISP", role: "Hygiene Promotion & Kits", type: "INGO", img: "/images/brand/brand-14.svg" },
+              { name: "Malteser International", role: "Emergency Water Treatment", type: "INGO", img: "/images/brand/brand-15.svg" },
+            ].map((p, idx) => (
+              <div
+                key={`${p.name}-${idx}`}
+                style={{
+                  minWidth: 230,
+                  maxWidth: 250,
+                  background: "#FAFCFC",
+                  border: "1.5px solid #E2EAE7",
+                  borderRadius: 12,
+                  padding: "18px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  boxShadow: "0 2px 8px rgba(11, 60, 70, 0.04)",
+                  transition: "all 0.2s ease",
+                  flexShrink: 0,
+                  cursor: "default",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow = "0 8px 18px rgba(11, 60, 70, 0.12)";
+                  e.currentTarget.style.borderColor = "#12707E";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 60, 70, 0.04)";
+                  e.currentTarget.style.borderColor = "#E2EAE7";
+                }}
+              >
+                <div style={{
+                  height: 48,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 12,
+                }}>
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    style={{
+                      maxHeight: 38,
+                      maxWidth: 130,
+                      objectFit: "contain",
+                      filter: "grayscale(25%)",
+                      transition: "filter 0.2s ease",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.filter = "none";
+                    }}
+                  />
+                </div>
+                <div style={{
+                  fontFamily: FONT_PRIMARY,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: T.tealDeep,
+                  marginBottom: 3,
+                }}>
+                  {p.name}
+                </div>
+                <div style={{
+                  fontFamily: FONT_PRIMARY,
+                  fontSize: 11,
+                  color: T.inkMuted,
+                  lineHeight: 1.3,
+                  marginBottom: 8,
+                }}>
+                  {p.role}
+                </div>
+                <span style={{
+                  display: "inline-block",
+                  padding: "2px 8px",
+                  borderRadius: 12,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  background: p.type === "UN Agency" ? "#E4F0EF" : "#F5F3EF",
+                  color: p.type === "UN Agency" ? T.teal : "#7A5A35",
+                  border: `1px solid ${p.type === "UN Agency" ? "#CFE5E2" : "#E8DFC8"}`,
+                  fontFamily: FONT_PRIMARY,
+                }}>
+                  {p.type}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Directory CTA */}
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <button
+            onClick={() => handleAction("/partners")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: T.white,
+              border: `1.5px solid ${T.teal}`,
+              color: T.teal,
+              padding: "10px 22px",
+              borderRadius: 8,
+              fontSize: 13.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_PRIMARY,
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = T.teal;
+              e.currentTarget.style.color = T.white;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = T.white;
+              e.currentTarget.style.color = T.teal;
+            }}
+          >
+            <i className="fa-solid fa-users"></i>
+            Explore Full Partner Directory &amp; Contacts
+            <i className="fa-solid fa-arrow-right" style={{ fontSize: 11 }}></i>
+          </button>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════
           9. FULL-WIDTH CALL TO ACTION BANNER
       ══════════════════════════════════════════════════════════════════ */}
       <section style={{
@@ -1772,22 +1997,20 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <p style={{ fontSize: 15, lineHeight: 1.65, color: "#9BB7BC", margin: "0 0 20px" }}>
+              <p style={{ fontSize: 16.5, fontWeight: 500, lineHeight: 1.7, color: "#C0D7DC", margin: "0 0 20px" }}>
                 The WASH Sector coordinates humanitarian water, sanitation, and hygiene assistance across the conflict-affected states of Borno, Adamawa, and Yobe in North East Nigeria.
               </p>
 
               <div style={{
-                fontSize: 13.5,
-                color: "#C2E8E4",
-                background: "rgba(255,255,255,0.05)",
-                padding: "12px 16px",
-                borderRadius: 8,
-                border: "1px solid rgba(255,255,255,0.1)",
-                fontFamily: FONT_MONO,
-                lineHeight: 1.5,
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#E2F6F3",
+                padding: "4px 0",
+                fontFamily: FONT_PRIMARY,
+                lineHeight: 1.6,
               }}>
-                <i className="fa-solid fa-location-dot" style={{ color: "#E09A52", marginRight: 10, fontSize: 14 }}></i>
-                <strong>Active Nodes:</strong> Maiduguri Central, Yola, Damaturu Sub-Offices.
+                <i className="fa-solid fa-location-dot" style={{ color: "#E09A52", marginRight: 10, fontSize: 16 }}></i>
+                <strong style={{ color: T.white }}>Active Nodes:</strong> Maiduguri Central, Yola, Damaturu Sub-Offices.
               </div>
             </div>
 
