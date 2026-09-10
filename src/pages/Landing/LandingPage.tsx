@@ -438,7 +438,7 @@ export default function LandingPage() {
     : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.white, color: T.ink, fontFamily: FONT_PRIMARY }}>
+    <div style={{ minHeight: "100vh", background: T.white, color: T.ink, fontFamily: FONT_PRIMARY, width: "100%", maxWidth: "100%", overflowX: "hidden", boxSizing: "border-box" }}>
 
       {/* ══════════════════════════════════════════════════════════════════
           1. TOP ANNOUNCEMENT BANNER (Full Width)
@@ -533,6 +533,9 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════
           2. STICKY TOP NAVBAR (Responsive, Professional & Expanded)
       ══════════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════
+          2. STICKY TOP NAVBAR (Zero Horizontal Scroll & Responsive)
+      ══════════════════════════════════════════════════════════════════ */}
       <header style={{
         position: "sticky",
         top: 0,
@@ -543,36 +546,52 @@ export default function LandingPage() {
         boxShadow: navScrolled ? "0 4px 20px rgba(11, 60, 70, 0.07)" : "0 1px 2px rgba(0,0,0,0.02)",
         transition: "all .2s ease-in-out",
         width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}>
         <div style={{
           width: "100%",
-          padding: "0 clamp(16px, 3vw, 36px)",
-          height: 74,
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          padding: "0 clamp(12px, 2.5vw, 32px)",
+          height: 72,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 16,
+          gap: 12,
         }}>
-          {/* Brand Logo & Professional Context Header (Far Left) */}
+          {/* Brand Logo & Context (Far Left) */}
           <div
             onClick={() => navigate("/")}
-            style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer", textDecoration: "none", flexShrink: 0 }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              cursor: "pointer",
+              textDecoration: "none",
+              minWidth: 0,
+              flexShrink: 1,
+            }}
           >
-            <DashboardLogo size={44} />
-            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 12 }}>
+            <div style={{ flexShrink: 0 }}>
+              <DashboardLogo size={42} />
+            </div>
+            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 10, minWidth: 0 }}>
               <div style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: "clamp(15px, 1.6vw, 18.5px)",
+                fontSize: "clamp(13.5px, 1.8vw, 18px)",
                 fontWeight: 800,
                 color: T.tealDeep,
-                letterSpacing: "-0.25px",
+                letterSpacing: "-0.2px",
                 lineHeight: 1.2,
                 whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}>
                 WASH Sector North East Nigeria
               </div>
               <div
-                className="hidden sm:block"
+                className="hidden md:block"
                 style={{
                   fontFamily: FONT_MONO,
                   fontSize: 10.5,
@@ -581,6 +600,9 @@ export default function LandingPage() {
                   textTransform: "uppercase",
                   marginTop: 2,
                   fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 5W Activity Reporting &amp; Response Coverage Platform
@@ -588,8 +610,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Desktop Navigation Menu (Center) */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 4 }} className="hidden lg:flex">
+          {/* Desktop Navigation Menu (Visible on XL screens >= 1280px) */}
+          <nav style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }} className="hidden xl:flex">
             {[
               { label: "Overview", href: "#overview" },
               { label: "5W Architecture", href: "#5w-framework" },
@@ -603,10 +625,10 @@ export default function LandingPage() {
                 style={{
                   textDecoration: "none",
                   color: "#3F565C",
-                  fontSize: 14.5,
+                  fontSize: 14,
                   fontWeight: 600,
-                  padding: "8px 12px",
-                  borderRadius: 8,
+                  padding: "7px 11px",
+                  borderRadius: 7,
                   transition: "all .15s ease",
                   whiteSpace: "nowrap",
                 }}
@@ -624,11 +646,11 @@ export default function LandingPage() {
             ))}
           </nav>
 
-          {/* Right Action Group (Far Right) */}
+          {/* Right Action Group */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            {/* Operational States Badge (Desktop only) */}
+            {/* Operational States Badge (Visible on large screens >= 1400px) */}
             <div
-              className="hidden xl:flex"
+              className="hidden 2xl:flex"
               style={{
                 alignItems: "center",
                 gap: 7,
@@ -637,7 +659,7 @@ export default function LandingPage() {
                 borderRadius: 20,
                 padding: "5px 12px",
                 fontFamily: FONT_MONO,
-                fontSize: 11.5,
+                fontSize: 11,
                 fontWeight: 700,
                 color: T.tealDeep,
                 letterSpacing: "0.05em",
@@ -648,7 +670,7 @@ export default function LandingPage() {
               BORNO · ADAMAWA · YOBE
             </div>
 
-            {/* Main CTA: Go to Dashboard */}
+            {/* Main CTA: Go to Dashboard (Tablets & Desktops >= 640px) */}
             <button
               id="navbar-dashboard-btn"
               onClick={() => handleAction("/dashboard")}
@@ -658,12 +680,12 @@ export default function LandingPage() {
                 color: T.white,
                 border: "none",
                 borderRadius: 8,
-                padding: "9px 18px",
-                fontSize: 14,
+                padding: "8px 16px",
+                fontSize: 13.5,
                 fontWeight: 700,
                 cursor: "pointer",
                 alignItems: "center",
-                gap: 7,
+                gap: 6,
                 fontFamily: FONT_PRIMARY,
                 boxShadow: "0 2px 8px rgba(11, 60, 70, 0.18)",
                 transition: "all .15s ease",
@@ -681,19 +703,19 @@ export default function LandingPage() {
               Go to Dashboard <IcoArrowRight size={14} />
             </button>
 
-            {/* Mobile Hamburger Menu Toggle Button */}
+            {/* Mobile/Tablet Hamburger Toggle (< 1280px) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex lg:hidden"
+              className="flex xl:hidden"
               aria-label="Toggle navigation menu"
               style={{
                 background: mobileMenuOpen ? "rgba(18, 112, 126, 0.08)" : "#F0F7F6",
                 border: "1.5px solid #CFE5E2",
                 borderRadius: 8,
-                width: 42,
-                height: 42,
+                width: 40,
+                height: 40,
                 color: T.tealDeep,
-                fontSize: 18,
+                fontSize: 17,
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -701,7 +723,7 @@ export default function LandingPage() {
                 transition: "all 0.15s ease",
               }}
             >
-              <i className={mobileMenuOpen ? "fa-solid fa-xmark text-lg" : "fa-solid fa-bars text-lg"}></i>
+              <i className={mobileMenuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
             </button>
           </div>
         </div>
@@ -709,17 +731,20 @@ export default function LandingPage() {
         {/* Mobile Dropdown Navigation Drawer */}
         {mobileMenuOpen && (
           <div
-            className="block lg:hidden"
+            className="block xl:hidden"
             style={{
               background: "rgba(255, 255, 255, 0.98)",
               backdropFilter: "blur(16px)",
               borderTop: "1px solid #E5ECE9",
               borderBottom: "2px solid #12707E",
               boxShadow: "0 16px 32px rgba(11, 60, 70, 0.14)",
-              padding: "20px 20px 24px",
+              padding: "18px 20px 22px",
+              boxSizing: "border-box",
+              width: "100%",
+              maxWidth: "100%",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 18 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 16 }}>
               {[
                 { label: "Overview", href: "#overview", icon: "fa-regular fa-compass" },
                 { label: "5W Architecture", href: "#5w-framework", icon: "fa-solid fa-cubes" },
@@ -734,7 +759,7 @@ export default function LandingPage() {
                   style={{
                     textDecoration: "none",
                     color: "#2C4044",
-                    fontSize: 15.5,
+                    fontSize: 15,
                     fontWeight: 600,
                     padding: "10px 14px",
                     borderRadius: 8,
@@ -759,7 +784,7 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Actions in Drawer */}
-            <div style={{ borderTop: "1px solid #E5ECE9", paddingTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ borderTop: "1px solid #E5ECE9", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -767,9 +792,9 @@ export default function LandingPage() {
                 background: "#F0F7F6",
                 border: "1px solid #CFE5E2",
                 borderRadius: 20,
-                padding: "6px 14px",
+                padding: "5px 12px",
                 fontFamily: FONT_MONO,
-                fontSize: 11.5,
+                fontSize: 11,
                 fontWeight: 700,
                 color: T.tealDeep,
                 alignSelf: "flex-start",
@@ -1240,7 +1265,7 @@ export default function LandingPage() {
           {/* 3 State Highlight Cards */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
             gap: 28,
           }}>
             {[
@@ -1374,7 +1399,7 @@ export default function LandingPage() {
 
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
             gap: 22,
           }}>
             {[
@@ -1464,7 +1489,7 @@ export default function LandingPage() {
         width: "100%",
       }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 36 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 36 }}>
 
             {/* Left Column: Reporting Calendar & Technical Guidelines */}
             <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 16, padding: "36px 32px" }}>
@@ -1742,7 +1767,7 @@ export default function LandingPage() {
           {/* Main 4-Column Footer Grid */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))",
             gap: 48,
             paddingBottom: 48,
           }}>
