@@ -473,9 +473,8 @@ export default function LandingPage() {
         width: "100%",
       }}>
         <div style={{
-          maxWidth: 1380,
-          margin: "0 auto",
-          padding: "0 24px",
+          width: "100%",
+          padding: "0 36px",
           height: 74,
           display: "flex",
           alignItems: "center",
@@ -1032,7 +1031,7 @@ export default function LandingPage() {
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-            gap: 26,
+            gap: 28,
           }}>
             {[
               {
@@ -1041,19 +1040,19 @@ export default function LandingPage() {
                 tag: "High Priority",
                 tagBg: "#FDE8E8",
                 tagColor: "#9B1C1C",
-                desc: "Epicenter of the humanitarian crisis. Heavy concentration of formal & informal IDP sites requiring sustained water trucking, daily borehole chlorination, and intensive camp sanitation.",
+                desc: "Epicenter of humanitarian response with sustained water trucking, daily borehole chlorination, and camp sanitation.",
                 priorityNeeds: ["Emergency Desludging", "Solar Borehole Rehabilitation", "Chlorination at Water Points"],
                 lgas: "Maiduguri, Jere, Gwoza, Bama, Monguno, Dikwa",
               },
               {
                 state: "Adamawa State",
                 hub: "Yola Sub-Cluster Desk",
-                tag: "Flood Response & Returnees",
+                tag: "Flood & Returnees",
                 tagBg: "#FEF08A",
                 tagColor: "#713F12",
-                desc: "Supporting vulnerable returnee communities and flood-impacted riverine settlements along the Benue basin with community water systems and cholera prevention kits.",
+                desc: "Assisting vulnerable returnees and riverine flood settlements along the Benue basin with clean water and hygiene kits.",
                 priorityNeeds: ["Flood Drainage Systems", "Family Hygiene Kit Distribution", "Household Water Treatment"],
-                lgas: "Yola North, Yola South, Mubi North, Michika, Fufore",
+                lgas: "Yola North, Yola South, Mubi, Michika, Fufore",
               },
               {
                 state: "Yobe State",
@@ -1061,7 +1060,7 @@ export default function LandingPage() {
                 tag: "Drought & Water Quality",
                 tagBg: T.tealSoft,
                 tagColor: T.tealDeep,
-                desc: "Arid zone interventions focused on deep aquifer motorized water schemes, water quality testing labs, and institutional WASH installations in primary health care clinics.",
+                desc: "Arid zone interventions prioritizing deep motorized aquifer schemes, water testing, and clinic WASH systems.",
                 priorityNeeds: ["Deep Motorized Boreholes", "Clinic WASH Infrastructure", "Community Hygiene Clubs"],
                 lgas: "Damaturu, Potiskum, Bade, Gujba, Geidam",
               },
@@ -1069,47 +1068,56 @@ export default function LandingPage() {
               <div
                 key={item.state}
                 style={{
-                  background: T.bgSubtle,
+                  background: T.white,
                   border: `1.5px solid ${T.line}`,
                   borderRadius: 16,
-                  padding: "32px 28px",
+                  padding: "34px 30px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
+                  boxShadow: "0 2px 8px rgba(11,60,70,0.04)",
+                  transition: "all 0.2s ease",
                 }}
               >
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 24, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                    <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 26, fontWeight: 800, color: T.tealDeep, margin: 0 }}>
                       {item.state}
                     </h3>
-                    <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: FONT_MONO }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, padding: "5px 14px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: FONT_MONO }}>
                       {item.tag}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: 13, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: FONT_MONO }}>
-                    📍 {item.hub}
+                  <div style={{ fontSize: 15, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: FONT_MONO, display: "flex", alignItems: "center" }}>
+                    <i className="fa-solid fa-location-dot" style={{ color: "#C1722F", marginRight: 8, fontSize: 15 }}></i>
+                    {item.hub}
                   </div>
 
-                  <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px", fontFamily: FONT_PRIMARY }}>
+                  <p style={{ fontSize: 16, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px", fontFamily: FONT_PRIMARY }}>
                     {item.desc}
                   </p>
 
-                  <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 18, marginBottom: 18 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 10, fontFamily: FONT_PRIMARY }}>
+                  <div style={{ borderTop: `1.5px solid #EEF2F1`, paddingTop: 20, marginBottom: 20 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.06em", color: T.tealDeep, marginBottom: 12, fontFamily: FONT_PRIMARY }}>
                       Priority Interventions:
                     </div>
-                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: T.ink, lineHeight: 1.7, fontFamily: FONT_PRIMARY }}>
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none", fontSize: 15.5, color: T.ink, lineHeight: 1.9, fontFamily: FONT_PRIMARY }}>
                       {item.priorityNeeds.map(need => (
-                        <li key={need}>{need}</li>
+                        <li key={need} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <i className="fa-solid fa-circle-check" style={{ color: T.teal, fontSize: 14 }}></i>
+                          {need}
+                        </li>
                       ))}
                     </ul>
                   </div>
                 </div>
 
-                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16, fontSize: 13, color: T.inkMuted, fontFamily: FONT_PRIMARY }}>
-                  <strong>Key LGAs:</strong> {item.lgas}
+                <div style={{ borderTop: `1.5px solid #EEF2F1`, paddingTop: 18, fontSize: 14.5, color: T.inkMuted, fontFamily: FONT_PRIMARY, display: "flex", alignItems: "flex-start", gap: 6 }}>
+                  <i className="fa-solid fa-map-pin" style={{ color: "#C1722F", fontSize: 14, marginTop: 3 }}></i>
+                  <div>
+                    <strong style={{ color: T.tealDeep }}>Key LGAs:</strong> {item.lgas}
+                  </div>
                 </div>
               </div>
             ))}
