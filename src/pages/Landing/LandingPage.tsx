@@ -35,107 +35,106 @@ function fmtNum(n: number): string {
 }
 
 /* ─── SVG Icons ─────────────────────────────────────────────────── */
-const IcoArrowRight = ({ size = 16 }: { size?: number }) => (
+const IcoArrowRight = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14M12 5l7 7-7 7" />
   </svg>
 );
 
 const IcoCheck = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
 const IcoAlert = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
 
 const IcoClose = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const IcoWaterDrop = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
   </svg>
 );
 
 const IcoShield = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 
 const IcoUsers = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
     <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
 
 const IcoMapPin = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z" /><circle cx="12" cy="10" r="3" />
   </svg>
 );
 
 const IcoCalendar = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 
 const IcoHeart = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
   </svg>
 );
 
 const IcoDocument = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
   </svg>
 );
 
 const IcoBarChart = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /><line x1="2" y1="20" x2="22" y2="20" />
   </svg>
 );
 
-const IcoMail = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
-  </svg>
-);
-
-const IcoPhone = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-  </svg>
-);
-
-const IcoDownload = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-);
-
-/* ─── WASH Logo Mark ─────────────────────────────────────────────── */
-function WashLogoMark({ size = 42 }: { size?: number }) {
+/* ─── Official Dashboard Logo Component ─────────────────────────── */
+function DashboardLogo({ size = 48, darkBg = false }: { size?: number; darkBg?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="44" height="44" rx="10" fill="#0B3C46" />
-      <path d="M22 8c0 0-10 7-10 14a10 10 0 0 0 20 0C32 15 22 8 22 8z" fill="#12707E" />
-      <path d="M22 14c0 0-6 4-6 8.5a6 6 0 0 0 12 0C28 18 22 14 22 14z" fill="#BFE3DD" />
-      <path d="M15 26h14M17 29.5h10" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
+    <div style={{
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: darkBg ? "rgba(255,255,255,0.95)" : "transparent",
+      padding: darkBg ? "6px 12px" : "0",
+      borderRadius: darkBg ? 10 : 0,
+      boxShadow: darkBg ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+    }}>
+      <img
+        src="/images/logo/wash-logo.png"
+        alt="WASH Sector North East Nigeria Logo"
+        style={{
+          height: size,
+          width: "auto",
+          objectFit: "contain",
+          display: "block",
+        }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "./images/logo/wash-logo.png";
+        }}
+      />
+    </div>
   );
 }
 
@@ -147,7 +146,6 @@ export default function LandingPage() {
 
   const [bannerVisible, setBannerVisible] = useState(true);
   const [navScrolled, setNavScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -189,35 +187,35 @@ export default function LandingPage() {
             ? "linear-gradient(90deg, #8C2B22 0%, #A8382E 100%)"
             : "linear-gradient(90deg, #0B3C46 0%, #12707E 50%, #C1722F 100%)",
           color: T.white,
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 500,
-          padding: "9px 20px",
+          padding: "10px 20px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: 12,
           position: "relative",
           zIndex: 101,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.12)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, maxWidth: 1320, width: "100%", margin: "0 auto", justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 1360, width: "100%", margin: "0 auto", justifyContent: "center", flexWrap: "wrap" }}>
             <span style={{
-              background: "rgba(255,255,255,0.2)",
-              padding: "2px 8px",
+              background: "rgba(255,255,255,0.22)",
+              padding: "3px 10px",
               borderRadius: 4,
-              fontSize: 11,
+              fontSize: 12,
               fontFamily: "'IBM Plex Mono', monospace",
               fontWeight: 700,
-              letterSpacing: "0.05em",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}>
               {reportingConfig.isFreezeActive ? "SYSTEM FREEZE" : "ACTIVE CYCLE"}
             </span>
 
             {reportingConfig.isFreezeActive ? (
-              <span>The current reporting window is paused for sector data reconciliation. Contact IM team for emergency updates.</span>
+              <span style={{ fontSize: 14 }}>The current reporting window is paused for sector data reconciliation. Contact IM team for emergency updates.</span>
             ) : (
-              <span>
+              <span style={{ fontSize: 14 }}>
                 <strong>{reportingConfig.activeCycle || "2026 Cycle"}</strong> reporting is active. Next submission deadline: <strong>{deadline}</strong>
                 {daysLeft !== null && ` (${daysLeft === 0 ? "Today is the last day" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} remaining`})`}.
               </span>
@@ -227,24 +225,24 @@ export default function LandingPage() {
               <button
                 onClick={() => handleAction("/submit-report")}
                 style={{
-                  background: "rgba(255,255,255,0.22)",
-                  border: "1px solid rgba(255,255,255,0.4)",
+                  background: "rgba(255,255,255,0.25)",
+                  border: "1px solid rgba(255,255,255,0.45)",
                   color: T.white,
                   borderRadius: 20,
-                  padding: "3px 12px",
-                  fontSize: 12,
+                  padding: "4px 14px",
+                  fontSize: 13,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 4,
-                  marginLeft: 6,
+                  gap: 5,
+                  marginLeft: 8,
                   transition: "background .15s",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.35)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.22)")}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.38)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.25)")}
               >
-                Submit Now <IcoArrowRight size={12} />
+                Submit Now <IcoArrowRight size={13} />
               </button>
             )}
 
@@ -254,11 +252,11 @@ export default function LandingPage() {
               style={{
                 background: "none",
                 border: "none",
-                color: "rgba(255,255,255,0.8)",
+                color: "rgba(255,255,255,0.85)",
                 cursor: "pointer",
                 padding: 4,
                 position: "absolute",
-                right: 16,
+                right: 18,
                 display: "flex",
                 alignItems: "center",
               }}
@@ -270,7 +268,7 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          2. STICKY TOP NAVBAR (Full Width)
+          2. STICKY TOP NAVBAR (Full Width with Dashboard Logo)
       ══════════════════════════════════════════════════════════════════ */}
       <header style={{
         position: "sticky",
@@ -279,62 +277,63 @@ export default function LandingPage() {
         background: navScrolled ? "rgba(255, 255, 255, 0.98)" : T.white,
         backdropFilter: "blur(12px)",
         borderBottom: `1px solid ${navScrolled ? T.line : "transparent"}`,
-        boxShadow: navScrolled ? "0 4px 20px rgba(11, 60, 70, 0.06)" : "none",
+        boxShadow: navScrolled ? "0 4px 24px rgba(11, 60, 70, 0.08)" : "none",
         transition: "all .2s ease-in-out",
         width: "100%",
       }}>
         <div style={{
-          maxWidth: 1360,
+          maxWidth: 1380,
           margin: "0 auto",
           padding: "0 24px",
-          height: 72,
+          height: 78,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 20,
         }}>
-          {/* Brand Logo & Context */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <WashLogoMark size={44} />
-            <div style={{ borderLeft: `1.5px solid ${T.line}`, paddingLeft: 14 }}>
+          {/* Brand Logo & Context with Official Dashboard Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <DashboardLogo size={50} />
+            <div style={{ borderLeft: `2px solid ${T.line}`, paddingLeft: 16 }}>
               <div style={{
                 fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                fontSize: 17,
+                fontSize: 19,
                 fontWeight: 700,
                 color: T.tealDeep,
-                letterSpacing: "-0.2px",
+                letterSpacing: "-0.3px",
                 lineHeight: 1.15,
               }}>
                 WASH Sector North East Nigeria
               </div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 11,
+                fontSize: 12,
                 color: T.inkMuted,
-                letterSpacing: "0.05em",
+                letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                marginTop: 2,
+                marginTop: 3,
+                fontWeight: 500,
               }}>
-                5W Activity Reporting &amp; Coverage Platform
+                5W Activity Reporting &amp; Response Coverage Platform
               </div>
             </div>
           </div>
 
           {/* Navigation Menu (Desktop) */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 8 }} className="hidden md:flex">
-            <a href="#overview" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 14, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+          <nav style={{ display: "flex", alignItems: "center", gap: 10 }} className="hidden md:flex">
+            <a href="#overview" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Overview
             </a>
-            <a href="#5w-framework" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 14, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#5w-framework" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               5W Architecture
             </a>
-            <a href="#coverage" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 14, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#coverage" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               BAY Coverage
             </a>
-            <a href="#pillars" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 14, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#pillars" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Core Pillars
             </a>
-            <a href="#resources" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 14, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#resources" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Resources &amp; Hubs
             </a>
           </nav>
@@ -345,18 +344,18 @@ export default function LandingPage() {
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 7,
               background: T.tealSoft,
-              border: "1px solid #C4E3DF",
-              borderRadius: 6,
-              padding: "5px 12px",
+              border: "1.5px solid #C4E3DF",
+              borderRadius: 8,
+              padding: "6px 14px",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 11,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               color: T.tealDeep,
-              letterSpacing: "0.04em",
+              letterSpacing: "0.05em",
             }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.green }} />
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: T.green }} />
               BORNO · ADAMAWA · YOBE
             </div>
 
@@ -370,20 +369,20 @@ export default function LandingPage() {
                   color: T.white,
                   border: "none",
                   borderRadius: 8,
-                  padding: "10px 22px",
-                  fontSize: 14,
+                  padding: "11px 24px",
+                  fontSize: 15,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  boxShadow: "0 2px 8px rgba(11, 60, 70, 0.15)",
+                  boxShadow: "0 2px 10px rgba(11, 60, 70, 0.18)",
                   transition: "background .15s, transform .1s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = T.teal)}
                 onMouseLeave={e => (e.currentTarget.style.background = T.tealDeep)}
               >
-                Go to Dashboard <IcoArrowRight size={15} />
+                Go to Dashboard <IcoArrowRight size={16} />
               </button>
             ) : (
               <button
@@ -394,20 +393,20 @@ export default function LandingPage() {
                   color: T.white,
                   border: "none",
                   borderRadius: 8,
-                  padding: "10px 22px",
-                  fontSize: 14,
+                  padding: "11px 24px",
+                  fontSize: 15,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  boxShadow: "0 2px 8px rgba(193, 114, 47, 0.2)",
+                  boxShadow: "0 2px 10px rgba(193, 114, 47, 0.25)",
                   transition: "background .15s, transform .1s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
                 onMouseLeave={e => (e.currentTarget.style.background = T.clay)}
               >
-                Partner Sign In <IcoArrowRight size={15} />
+                Partner Sign In <IcoArrowRight size={16} />
               </button>
             )}
           </div>
@@ -415,35 +414,35 @@ export default function LandingPage() {
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════
-          3. HERO SECTION (Full Width Edge-to-Edge with Deep Gradient)
+          3. HERO SECTION (Larger Fonts, Bolder Headings, Full Width)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="overview" style={{
         position: "relative",
         background: "linear-gradient(135deg, #061B20 0%, #0B3C46 50%, #12707E 100%)",
         color: T.white,
-        padding: "76px 24px 84px",
+        padding: "88px 24px 96px",
         overflow: "hidden",
         width: "100%",
       }}>
         {/* Subtle Decorative Geometric Circles */}
-        <div style={{ position: "absolute", top: -100, right: -100, width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -120, left: -60, width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,138,153,0.18) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -100, right: -100, width: 460, height: 460, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -120, left: -60, width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle, rgba(29,138,153,0.2) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-        <div style={{ maxWidth: 1320, margin: "0 auto", position: "relative", zIndex: 1 }}>
-          <div style={{ maxWidth: 840 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto", position: "relative", zIndex: 1 }}>
+          <div style={{ maxWidth: 960 }}>
             {/* Context Badge */}
             <div style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.22)",
+              gap: 10,
+              background: "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.25)",
               borderRadius: 30,
-              padding: "6px 16px",
-              fontSize: 12,
+              padding: "7px 18px",
+              fontSize: 13.5,
               fontWeight: 600,
               color: "#C2E8E4",
-              marginBottom: 20,
+              marginBottom: 24,
               fontFamily: "'IBM Plex Mono', monospace",
               letterSpacing: "0.06em",
               textTransform: "uppercase",
@@ -453,34 +452,35 @@ export default function LandingPage() {
               <span>Inter-Agency Coordination</span>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Headline (Larger & Bolder) */}
             <h1 style={{
               fontFamily: "'Space Grotesk', system-ui, sans-serif",
-              fontSize: "clamp(30px, 4.4vw, 52px)",
-              fontWeight: 700,
-              lineHeight: 1.15,
-              letterSpacing: "-0.6px",
-              margin: "0 0 20px",
+              fontSize: "clamp(36px, 5vw, 62px)",
+              fontWeight: 800,
+              lineHeight: 1.12,
+              letterSpacing: "-0.8px",
+              margin: "0 0 24px",
               color: T.white,
             }}>
               One Unified Platform for Humanitarian WASH Response in North East Nigeria.
             </h1>
 
-            {/* Description Subtitle */}
+            {/* Description Subtitle (Larger font) */}
             <p style={{
-              fontSize: "clamp(15px, 1.8vw, 18px)",
-              lineHeight: 1.6,
-              color: "#D2ECE9",
-              margin: "0 0 36px",
-              maxWidth: 720,
+              fontSize: "clamp(17px, 2.1vw, 21px)",
+              lineHeight: 1.65,
+              color: "#D6F0ED",
+              margin: "0 0 42px",
+              maxWidth: 820,
+              fontWeight: 400,
             }}>
               Empowering over 40 accredited humanitarian partners to record, visualize, and analyze
               life-saving Water, Sanitation, and Hygiene activities across Borno, Adamawa, and Yobe states.
               Eliminating coverage gaps and maximizing emergency response reach.
             </p>
 
-            {/* Primary Action Buttons */}
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
+            {/* Primary Action Buttons (Larger) */}
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
               <button
                 id="hero-submit-btn"
                 onClick={() => handleAction("/submit-report")}
@@ -488,33 +488,33 @@ export default function LandingPage() {
                   background: T.clay,
                   color: T.white,
                   border: "none",
-                  borderRadius: 9,
-                  padding: "15px 28px",
-                  fontSize: 15,
+                  borderRadius: 10,
+                  padding: "16px 32px",
+                  fontSize: 16,
                   fontWeight: 700,
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 10,
-                  boxShadow: "0 4px 16px rgba(193, 114, 47, 0.35)",
+                  boxShadow: "0 4px 18px rgba(193, 114, 47, 0.4)",
                   transition: "all .15s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
                 onMouseLeave={e => (e.currentTarget.style.background = T.clay)}
               >
-                <IcoDocument /> Submit Monthly 5W Report <IcoArrowRight />
+                <IcoDocument /> Submit Monthly 5W Report <IcoArrowRight size={18} />
               </button>
 
               <button
                 id="hero-coverage-btn"
                 onClick={() => handleAction("/coverage-dashboard")}
                 style={{
-                  background: "rgba(255, 255, 255, 0.12)",
+                  background: "rgba(255, 255, 255, 0.14)",
                   color: T.white,
-                  border: "1px solid rgba(255, 255, 255, 0.32)",
-                  borderRadius: 9,
-                  padding: "15px 26px",
-                  fontSize: 15,
+                  border: "1.5px solid rgba(255, 255, 255, 0.35)",
+                  borderRadius: 10,
+                  padding: "16px 28px",
+                  fontSize: 16,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
@@ -522,8 +522,8 @@ export default function LandingPage() {
                   gap: 10,
                   transition: "background .15s",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.22)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)")}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.24)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.14)")}
               >
                 <IcoBarChart /> Explore Coverage Dashboard
               </button>
@@ -534,10 +534,10 @@ export default function LandingPage() {
                 style={{
                   background: "transparent",
                   color: "#C2E8E4",
-                  border: "1px solid rgba(255, 255, 255, 0.18)",
-                  borderRadius: 9,
-                  padding: "15px 22px",
-                  fontSize: 14,
+                  border: "1.5px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: 10,
+                  padding: "16px 24px",
+                  fontSize: 15,
                   fontWeight: 600,
                   cursor: "pointer",
                   display: "inline-flex",
@@ -547,11 +547,11 @@ export default function LandingPage() {
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = T.white;
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.45)";
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.color = "#C2E8E4";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.18)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
                 }}
               >
                 <IcoShield /> Partner Directory
@@ -559,69 +559,69 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* ── LIVE STATS STRIP (Integrated Hero Bar) ── */}
+          {/* ── LIVE STATS STRIP (Larger metrics) ── */}
           <div style={{
-            marginTop: 56,
-            background: "rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255, 255, 255, 0.18)",
-            borderRadius: 14,
-            padding: "24px 32px",
+            marginTop: 64,
+            background: "rgba(255, 255, 255, 0.09)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            borderRadius: 16,
+            padding: "28px 36px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 24,
+            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+            gap: 28,
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
                 <IcoDocument />
               </div>
               <div>
-                <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#A8D8D3", fontWeight: 600 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
                   Reports On Record
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 28, fontWeight: 700, color: T.white }}>
+                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalReports)}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
                 <IcoHeart />
               </div>
               <div>
-                <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#A8D8D3", fontWeight: 600 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
                   Beneficiaries Reached
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 28, fontWeight: 700, color: T.white }}>
+                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalBeneficiaries)}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
                 <IcoUsers />
               </div>
               <div>
-                <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#A8D8D3", fontWeight: 600 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
                   Reporting Partners
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 28, fontWeight: 700, color: T.white }}>
+                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalPartners)}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 10, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, background: "rgba(255,255,255,0.14)", display: "flex", alignItems: "center", justifyContent: "center", color: "#BFE3DD" }}>
                 <IcoMapPin />
               </div>
               <div>
-                <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em", color: "#A8D8D3", fontWeight: 600 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
                   LGAs Actively Covered
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 28, fontWeight: 700, color: T.white }}>
+                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalLgas)}
                 </div>
               </div>
@@ -635,25 +635,25 @@ export default function LandingPage() {
       ══════════════════════════════════════════════════════════════════ */}
       <section style={{
         background: T.claySoft,
-        borderTop: `1px solid #F5DECB`,
-        borderBottom: `1px solid #F5DECB`,
-        padding: "20px 24px",
+        borderTop: `1.5px solid #F5DECB`,
+        borderBottom: `1.5px solid #F5DECB`,
+        padding: "24px 24px",
         width: "100%",
       }}>
         <div style={{
-          maxWidth: 1320,
+          maxWidth: 1360,
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: 16,
+          gap: 18,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ background: T.clay, color: T.white, padding: "8px 12px", borderRadius: 8, display: "flex", alignItems: "center", gap: 6, fontWeight: 700, fontSize: 12, fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ background: T.clay, color: T.white, padding: "9px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 13, fontFamily: "'IBM Plex Mono', monospace" }}>
               <IcoAlert /> AWD/CHOLERA SURVEILLANCE
             </div>
-            <p style={{ margin: 0, fontSize: 14, color: "#6A3810", lineHeight: 1.4 }}>
+            <p style={{ margin: 0, fontSize: 15, color: "#6A3810", lineHeight: 1.5, fontWeight: 500 }}>
               <strong>Active Cholera Prevention Protocol:</strong> Partner reporting is prioritized for high-risk displacement camps and flood-prone host communities in Maiduguri, Jere, and Damaturu.
             </p>
           </div>
@@ -664,9 +664,9 @@ export default function LandingPage() {
               background: T.clay,
               color: T.white,
               border: "none",
-              borderRadius: 6,
-              padding: "8px 16px",
-              fontSize: 13,
+              borderRadius: 7,
+              padding: "9px 18px",
+              fontSize: 14,
               fontWeight: 600,
               cursor: "pointer",
               display: "inline-flex",
@@ -675,43 +675,44 @@ export default function LandingPage() {
               whiteSpace: "nowrap",
             }}
           >
-            View Hotspot LGAs <IcoArrowRight size={14} />
+            View Hotspot LGAs <IcoArrowRight size={15} />
           </button>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          5. THE 5W METHODOLOGY SECTION (Full Width, Soft Background)
+          5. THE 5W METHODOLOGY SECTION (Larger Headings)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="5w-framework" style={{
-        padding: "80px 24px",
+        padding: "96px 24px",
         background: T.bgSubtle,
         borderBottom: `1px solid ${T.line}`,
         width: "100%",
       }}>
-        <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 52px" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto 60px" }}>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
               color: T.teal,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              marginBottom: 8,
+              marginBottom: 10,
             }}>
               Inter-Agency Information Management
             </div>
             <h2 style={{
               fontFamily: "'Space Grotesk', system-ui, sans-serif",
-              fontSize: 34,
-              fontWeight: 700,
+              fontSize: "clamp(32px, 4vw, 44px)",
+              fontWeight: 800,
               color: T.tealDeep,
-              margin: "0 0 14px",
+              margin: "0 0 16px",
+              lineHeight: 1.18,
             }}>
               How the 5W Framework Operates
             </h2>
-            <p style={{ fontSize: 15.5, color: T.inkMuted, lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0 }}>
               The 5W matrix is the globally recognized humanitarian cluster standard that ensures accountability,
               prevents overlap, and directs emergency resources to the most vulnerable individuals.
             </p>
@@ -720,8 +721,8 @@ export default function LandingPage() {
           {/* 5W Interactive Step Cards */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-            gap: 18,
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 20,
           }}>
             {[
               {
@@ -770,15 +771,15 @@ export default function LandingPage() {
                 style={{
                   background: T.white,
                   border: `1.5px solid ${T.line}`,
-                  borderRadius: 14,
-                  padding: "26px 22px",
+                  borderRadius: 16,
+                  padding: "30px 24px",
                   position: "relative",
                   overflow: "hidden",
                   transition: "transform .2s, box-shadow .2s, border-color .2s",
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 12px 28px rgba(11, 60, 70, 0.08)";
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.boxShadow = "0 14px 32px rgba(11, 60, 70, 0.1)";
                   e.currentTarget.style.borderColor = step.accent;
                 }}
                 onMouseLeave={e => {
@@ -792,7 +793,7 @@ export default function LandingPage() {
                   top: 14,
                   right: 18,
                   fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                  fontSize: 48,
+                  fontSize: 54,
                   fontWeight: 800,
                   color: "#EFF3F2",
                   userSelect: "none",
@@ -801,35 +802,35 @@ export default function LandingPage() {
                   {step.num}
                 </div>
 
-                <div style={{ color: step.accent, marginBottom: 16 }}>
+                <div style={{ color: step.accent, marginBottom: 18 }}>
                   {step.icon}
                 </div>
 
                 <div style={{
                   fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 700,
                   color: step.accent,
                   letterSpacing: "0.06em",
-                  marginBottom: 6,
+                  marginBottom: 8,
                 }}>
                   {step.num} · {step.code}
                 </div>
 
                 <h3 style={{
                   fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                  fontSize: 17,
+                  fontSize: 19,
                   fontWeight: 700,
                   color: T.tealDeep,
-                  margin: "0 0 10px",
+                  margin: "0 0 12px",
                 }}>
                   {step.title}
                 </h3>
 
                 <p style={{
-                  fontSize: 13.5,
+                  fontSize: 14.5,
                   color: T.inkMuted,
-                  lineHeight: 1.55,
+                  lineHeight: 1.6,
                   margin: 0,
                   position: "relative",
                   zIndex: 1,
@@ -846,31 +847,32 @@ export default function LandingPage() {
           6. STATE OPERATIONAL COVERAGE: BAY STATES (Full Width)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="coverage" style={{
-        padding: "80px 24px",
+        padding: "96px 24px",
         background: T.white,
         borderBottom: `1px solid ${T.line}`,
         width: "100%",
       }}>
-        <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 44 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 24, marginBottom: 52 }}>
             <div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: 700,
                 color: T.clay,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                marginBottom: 6,
+                marginBottom: 8,
               }}>
                 Geographic Operational Footprint
               </div>
               <h2 style={{
                 fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                fontSize: 32,
-                fontWeight: 700,
+                fontSize: "clamp(30px, 3.8vw, 42px)",
+                fontWeight: 800,
                 color: T.tealDeep,
                 margin: 0,
+                lineHeight: 1.2,
               }}>
                 Response Coverage Across Borno, Adamawa &amp; Yobe
               </h2>
@@ -881,26 +883,26 @@ export default function LandingPage() {
               style={{
                 background: T.tealSoft,
                 color: T.tealDeep,
-                border: "1px solid #C4E3DF",
+                border: "1.5px solid #C4E3DF",
                 borderRadius: 8,
-                padding: "10px 18px",
-                fontSize: 13.5,
+                padding: "12px 22px",
+                fontSize: 14.5,
                 fontWeight: 600,
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
               }}
             >
-              Open Interactive State Map <IcoArrowRight size={14} />
+              Open Interactive State Map <IcoArrowRight size={16} />
             </button>
           </div>
 
           {/* 3 State Highlight Cards */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: 24,
+            gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+            gap: 26,
           }}>
             {[
               {
@@ -939,36 +941,36 @@ export default function LandingPage() {
                 style={{
                   background: T.bgSubtle,
                   border: `1.5px solid ${T.line}`,
-                  borderRadius: 14,
-                  padding: "28px 24px",
+                  borderRadius: 16,
+                  padding: "32px 28px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
                 }}
               >
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 21, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 24, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                       {item.state}
                     </h3>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: "'IBM Plex Mono', monospace" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: "'IBM Plex Mono', monospace" }}>
                       {item.tag}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: 12, color: T.teal, fontWeight: 600, marginBottom: 14, fontFamily: "'IBM Plex Mono', monospace" }}>
+                  <div style={{ fontSize: 13, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: "'IBM Plex Mono', monospace" }}>
                     📍 {item.hub}
                   </div>
 
-                  <p style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.6, margin: "0 0 20px" }}>
+                  <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px" }}>
                     {item.desc}
                   </p>
 
-                  <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16, marginBottom: 16 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: T.inkMuted, marginBottom: 8 }}>
+                  <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 18, marginBottom: 18 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 10 }}>
                       Priority Interventions:
                     </div>
-                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: T.ink, lineHeight: 1.6 }}>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: T.ink, lineHeight: 1.7 }}>
                       {item.priorityNeeds.map(need => (
                         <li key={need}>{need}</li>
                       ))}
@@ -976,7 +978,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 14, fontSize: 12, color: T.inkMuted }}>
+                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16, fontSize: 13, color: T.inkMuted }}>
                   <strong>Key LGAs:</strong> {item.lgas}
                 </div>
               </div>
@@ -986,45 +988,46 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          7. CORE STRATEGIC PILLARS SECTION (Full Width, Soft Teal)
+          7. CORE STRATEGIC PILLARS SECTION (Larger Fonts, Soft Teal)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="pillars" style={{
-        padding: "80px 24px",
+        padding: "96px 24px",
         background: T.tealSubtle,
         borderBottom: `1px solid ${T.line}`,
         width: "100%",
       }}>
-        <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto 48px" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 56px" }}>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
               color: T.teal,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              marginBottom: 8,
+              marginBottom: 10,
             }}>
               Strategic Humanitarian Objectives
             </div>
             <h2 style={{
               fontFamily: "'Space Grotesk', system-ui, sans-serif",
-              fontSize: 32,
-              fontWeight: 700,
+              fontSize: "clamp(32px, 3.8vw, 42px)",
+              fontWeight: 800,
               color: T.tealDeep,
-              margin: "0 0 12px",
+              margin: "0 0 16px",
+              lineHeight: 1.2,
             }}>
               Four Core Pillars of Sector Delivery
             </h2>
-            <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0 }}>
               All 5W activity reports align with one of the four sector operational pillars defined under the Humanitarian Response Plan (HRP).
             </p>
           </div>
 
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 20,
+            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+            gap: 22,
           }}>
             {[
               {
@@ -1061,37 +1064,37 @@ export default function LandingPage() {
                 style={{
                   background: pillar.bg,
                   border: `1.5px solid ${T.line}`,
-                  borderRadius: 14,
-                  padding: "26px 22px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  borderRadius: 16,
+                  padding: "30px 24px",
+                  boxShadow: "0 3px 12px rgba(0,0,0,0.04)",
                 }}
               >
                 <div style={{
                   display: "inline-block",
-                  width: 10,
-                  height: 10,
+                  width: 12,
+                  height: 12,
                   borderRadius: "50%",
                   background: pillar.color,
-                  marginBottom: 12,
+                  marginBottom: 14,
                 }} />
 
                 <h3 style={{
                   fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: 700,
                   color: T.tealDeep,
-                  margin: "0 0 10px",
+                  margin: "0 0 12px",
                 }}>
                   {pillar.title}
                 </h3>
 
-                <p style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.6, margin: "0 0 16px" }}>
+                <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 20px" }}>
                   {pillar.desc}
                 </p>
 
-                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 14 }}>
+                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16 }}>
                   {pillar.points.map(pt => (
-                    <div key={pt} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: T.ink, marginBottom: 6 }}>
+                    <div key={pt} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: T.ink, marginBottom: 8 }}>
                       <span style={{ color: pillar.color }}><IcoCheck /></span>
                       <span>{pt}</span>
                     </div>
@@ -1107,28 +1110,28 @@ export default function LandingPage() {
           8. SECTOR GOVERNANCE & COORDINATION HUBS (Full Width)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="resources" style={{
-        padding: "80px 24px",
+        padding: "96px 24px",
         background: T.white,
         borderBottom: `1px solid ${T.line}`,
         width: "100%",
       }}>
-        <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 32 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 36 }}>
 
             {/* Left Column: Reporting Calendar & Technical Guidelines */}
-            <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 14, padding: "32px 28px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 16, padding: "36px 32px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <span style={{ color: T.teal }}><IcoDocument /></span>
-                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 20, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                   Reporting Cadence &amp; Rules
                 </h3>
               </div>
 
-              <p style={{ fontSize: 14, color: T.inkMuted, lineHeight: 1.6, marginBottom: 20 }}>
+              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24 }}>
                 Every accredited organization operating in Borno, Adamawa, or Yobe is required to submit monthly 5W returns in accordance with sector guidelines:
               </p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
                 {[
                   {
                     title: "Submission Timetable",
@@ -1147,52 +1150,52 @@ export default function LandingPage() {
                     text: "The Information Management team verifies coordinates against official administrative boundaries before data goes live.",
                   },
                 ].map(rule => (
-                  <div key={rule.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                    <span style={{ color: T.green, marginTop: 2 }}><IcoCheck /></span>
+                  <div key={rule.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                    <span style={{ color: T.green, marginTop: 3 }}><IcoCheck /></span>
                     <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: T.tealDeep }}>{rule.title}</div>
-                      <div style={{ fontSize: 13, color: T.inkMuted, lineHeight: 1.5 }}>{rule.text}</div>
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: T.tealDeep }}>{rule.title}</div>
+                      <div style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.55 }}>{rule.text}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 22, display: "flex", gap: 14, flexWrap: "wrap" }}>
                 <button
                   onClick={() => handleAction("/submit-report")}
                   style={{
                     background: T.clay,
                     color: T.white,
                     border: "none",
-                    borderRadius: 7,
-                    padding: "9px 18px",
-                    fontSize: 13,
+                    borderRadius: 8,
+                    padding: "11px 22px",
+                    fontSize: 14.5,
                     fontWeight: 600,
                     cursor: "pointer",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 6,
+                    gap: 8,
                   }}
                 >
-                  Open 5W Submission Form <IcoArrowRight size={14} />
+                  Open 5W Submission Form <IcoArrowRight size={15} />
                 </button>
               </div>
             </div>
 
             {/* Right Column: Coordination Focal Points & Meetings */}
-            <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 14, padding: "32px 28px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 16, padding: "36px 32px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <span style={{ color: T.teal }}><IcoUsers /></span>
-                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 20, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                   Coordination Hubs &amp; Contacts
                 </h3>
               </div>
 
-              <p style={{ fontSize: 14, color: T.inkMuted, lineHeight: 1.6, marginBottom: 20 }}>
+              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24 }}>
                 Reach out to sector focal points for technical assistance, coordination meeting agendas, or reporting helpdesk:
               </p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
                 {[
                   {
                     role: "National Sector Lead Agency",
@@ -1220,9 +1223,9 @@ export default function LandingPage() {
                     type: "cal",
                   },
                 ].map(c => (
-                  <div key={c.role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${T.line}`, paddingBottom: 10 }}>
-                    <span style={{ fontSize: 13, color: T.inkMuted }}>{c.role}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: T.tealDeep, fontFamily: c.type === "email" ? "'IBM Plex Mono', monospace" : "inherit" }}>
+                  <div key={c.role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${T.line}`, paddingBottom: 12 }}>
+                    <span style={{ fontSize: 14, color: T.inkMuted }}>{c.role}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: T.tealDeep, fontFamily: c.type === "email" ? "'IBM Plex Mono', monospace" : "inherit" }}>
                       {c.type === "email" ? (
                         <a href={`mailto:${c.contact}`} style={{ color: T.teal, textDecoration: "none" }}>{c.contact}</a>
                       ) : (
@@ -1233,18 +1236,18 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 10 }}>
+              <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 12 }}>
                   Quick Navigation Links:
                 </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button onClick={() => handleAction("/reports-list")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button onClick={() => handleAction("/reports-list")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
                     Reports Archive
                   </button>
-                  <button onClick={() => handleAction("/partners")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                  <button onClick={() => handleAction("/partners")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
                     Partner Roster
                   </button>
-                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
                     Coverage Metrics
                   </button>
                 </div>
@@ -1256,29 +1259,29 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          9. FULL-WIDTH CALL TO ACTION BANNER (Full Width)
+          9. FULL-WIDTH CALL TO ACTION BANNER (Larger Fonts)
       ══════════════════════════════════════════════════════════════════ */}
       <section style={{
         background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
         color: T.white,
-        padding: "68px 24px",
+        padding: "80px 24px",
         textAlign: "center",
         width: "100%",
         position: "relative",
       }}>
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <div style={{ maxWidth: 880, margin: "0 auto" }}>
           <div style={{
             display: "inline-block",
-            background: "rgba(255,255,255,0.15)",
-            border: "1px solid rgba(255,255,255,0.3)",
+            background: "rgba(255,255,255,0.18)",
+            border: "1px solid rgba(255,255,255,0.32)",
             borderRadius: 30,
-            padding: "4px 14px",
-            fontSize: 12,
+            padding: "6px 18px",
+            fontSize: 13,
             fontFamily: "'IBM Plex Mono', monospace",
             fontWeight: 700,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
-            marginBottom: 16,
+            marginBottom: 20,
             color: "#C2E8E4",
           }}>
             Humanitarian Accountability
@@ -1286,26 +1289,26 @@ export default function LandingPage() {
 
           <h2 style={{
             fontFamily: "'Space Grotesk', system-ui, sans-serif",
-            fontSize: "clamp(26px, 3.5vw, 40px)",
-            fontWeight: 700,
-            margin: "0 0 16px",
+            fontSize: "clamp(30px, 4vw, 46px)",
+            fontWeight: 800,
+            margin: "0 0 20px",
             lineHeight: 1.2,
           }}>
             Are You Delivering Life-Saving WASH Activities in the North East?
           </h2>
 
           <p style={{
-            fontSize: 16,
-            color: "#D2ECE9",
-            lineHeight: 1.6,
-            margin: "0 auto 32px",
-            maxWidth: 680,
+            fontSize: 18,
+            color: "#D6F0ED",
+            lineHeight: 1.65,
+            margin: "0 auto 38px",
+            maxWidth: 740,
           }}>
             Make sure your interventions are reflected in inter-agency coverage maps, sector bulletins,
             and donor humanitarian funding overviews.
           </p>
 
-          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <button
               id="cta-submit-btn"
               onClick={() => handleAction("/submit-report")}
@@ -1313,32 +1316,32 @@ export default function LandingPage() {
                 background: T.clay,
                 color: T.white,
                 border: "none",
-                borderRadius: 9,
-                padding: "14px 30px",
-                fontSize: 15,
+                borderRadius: 10,
+                padding: "16px 34px",
+                fontSize: 16,
                 fontWeight: 700,
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 8,
-                boxShadow: "0 4px 18px rgba(0,0,0,0.2)",
+                gap: 10,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
               }}
               onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
               onMouseLeave={e => (e.currentTarget.style.background = T.clay)}
             >
-              Submit Your 5W Data Now <IcoArrowRight />
+              Submit Your 5W Data Now <IcoArrowRight size={17} />
             </button>
 
             {isAuthenticated ? (
               <button
                 onClick={() => navigate("/dashboard")}
                 style={{
-                  background: "rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.18)",
                   color: T.white,
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  borderRadius: 9,
-                  padding: "14px 26px",
-                  fontSize: 15,
+                  border: "1.5px solid rgba(255,255,255,0.4)",
+                  borderRadius: 10,
+                  padding: "16px 30px",
+                  fontSize: 16,
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -1349,12 +1352,12 @@ export default function LandingPage() {
               <button
                 onClick={() => navigate("/signin")}
                 style={{
-                  background: "rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.18)",
                   color: T.white,
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  borderRadius: 9,
-                  padding: "14px 26px",
-                  fontSize: 15,
+                  border: "1.5px solid rgba(255,255,255,0.4)",
+                  borderRadius: 10,
+                  padding: "16px 30px",
+                  fontSize: 16,
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -1367,39 +1370,39 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          10. STANDARD MULTI-COLUMN WEBSITE FOOTER (Full Width)
+          10. STANDARD MULTI-COLUMN WEBSITE FOOTER (With Dashboard Logo)
       ══════════════════════════════════════════════════════════════════ */}
       <footer style={{
         background: T.tealDarkest,
         color: "#C2D4D8",
-        padding: "64px 24px 32px",
+        padding: "72px 24px 36px",
         width: "100%",
-        borderTop: "3px solid #C1722F",
+        borderTop: "4px solid #C1722F",
       }}>
-        <div style={{ maxWidth: 1320, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           {/* Top Footer Row: Branding & Endorsements */}
           <div style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexWrap: "wrap",
             gap: 24,
-            paddingBottom: 40,
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            paddingBottom: 44,
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <WashLogoMark size={46} />
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <DashboardLogo size={52} darkBg={true} />
               <div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 18, fontWeight: 700, color: T.white }}>
+                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 20, fontWeight: 700, color: T.white }}>
                   WASH Sector North East Nigeria
                 </div>
-                <div style={{ fontSize: 12, color: "#8EACB2", fontFamily: "'IBM Plex Mono', monospace" }}>
+                <div style={{ fontSize: 13, color: "#8EACB2", fontFamily: "'IBM Plex Mono', monospace", marginTop: 2 }}>
                   5W Activity Reporting &amp; Humanitarian Response Coverage
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 12, color: "#9CB8BD", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: "#9CB8BD", flexWrap: "wrap" }}>
               <span>Co-led by:</span>
               <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
               <span>·</span>
@@ -1412,43 +1415,43 @@ export default function LandingPage() {
           {/* Middle Footer: 4 Multi-Columns */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 36,
-            padding: "44px 0 40px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+            gap: 40,
+            padding: "48px 0 44px",
           }}>
             {/* Column 1: Mandate */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 15, fontWeight: 700, color: T.white, margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Sector Mandate
               </h4>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "#8EACB2", margin: "0 0 14px" }}>
+              <p style={{ fontSize: 14, lineHeight: 1.65, color: "#8EACB2", margin: "0 0 16px" }}>
                 The WASH Sector coordinates humanitarian water, sanitation, and hygiene assistance across the conflict-affected states of Borno, Adamawa, and Yobe in North East Nigeria.
               </p>
-              <div style={{ fontSize: 12, color: "#5F7F85" }}>
+              <div style={{ fontSize: 13, color: "#5F7F85" }}>
                 Active Operational Nodes: Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
               </div>
             </div>
 
             {/* Column 2: Platform Links */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 15, fontWeight: 700, color: T.white, margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Platform Navigation
               </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, lineHeight: 2.2 }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.3 }}>
                 <li><a href="#overview" style={{ color: "#A2C1C6", textDecoration: "none" }}>Portal Overview</a></li>
-                <li><button onClick={() => handleAction("/submit-report")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 13 }}>Submit 5W Monthly Report</button></li>
-                <li><button onClick={() => handleAction("/coverage-dashboard")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 13 }}>Response Coverage Dashboard</button></li>
-                <li><button onClick={() => handleAction("/reports-list")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 13 }}>All Submitted Reports</button></li>
-                <li><button onClick={() => handleAction("/partners")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 13 }}>Humanitarian Partner Roster</button></li>
+                <li><button onClick={() => handleAction("/submit-report")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Submit 5W Monthly Report</button></li>
+                <li><button onClick={() => handleAction("/coverage-dashboard")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Response Coverage Dashboard</button></li>
+                <li><button onClick={() => handleAction("/reports-list")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>All Submitted Reports</button></li>
+                <li><button onClick={() => handleAction("/partners")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Humanitarian Partner Roster</button></li>
               </ul>
             </div>
 
             {/* Column 3: Response Pillars & Resources */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 15, fontWeight: 700, color: T.white, margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Key Resources &amp; TWGs
               </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, lineHeight: 2.2 }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.3 }}>
                 <li><span style={{ color: "#A2C1C6" }}>Water Quality Technical Working Group</span></li>
                 <li><span style={{ color: "#A2C1C6" }}>Sanitation &amp; Sludge Management Protocol</span></li>
                 <li><span style={{ color: "#A2C1C6" }}>Hygiene Promotion in Cholera Outbreaks</span></li>
@@ -1459,22 +1462,22 @@ export default function LandingPage() {
 
             {/* Column 4: Helpdesk & Coordination */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 15, fontWeight: 700, color: T.white, margin: "0 0 14px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Sector Helpdesk
               </h4>
-              <div style={{ fontSize: 13, color: "#8EACB2", lineHeight: 1.8 }}>
+              <div style={{ fontSize: 14, color: "#8EACB2", lineHeight: 1.9 }}>
                 <div><strong>Email:</strong> <a href={`mailto:${systemConfig.replyToEmail}`} style={{ color: "#61CCD8", textDecoration: "none" }}>{systemConfig.replyToEmail}</a></div>
                 <div><strong>Lead Coordinator:</strong> coordinator@washsector-ne.org</div>
                 <div><strong>Information Management:</strong> im@washsector-ne.org</div>
                 <div><strong>Emergency Hotline:</strong> {systemConfig.emergencyContact}</div>
-                <div style={{ marginTop: 12 }}>
+                <div style={{ marginTop: 14 }}>
                   <span style={{
                     display: "inline-block",
-                    padding: "3px 8px",
+                    padding: "4px 10px",
                     borderRadius: 4,
                     background: "rgba(46, 125, 71, 0.2)",
                     color: "#57CE7F",
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 600,
                     fontFamily: "'IBM Plex Mono', monospace",
                   }}>
@@ -1488,20 +1491,20 @@ export default function LandingPage() {
           {/* Bottom Bar: Copyright & Humanitarian Principles */}
           <div style={{
             borderTop: "1px solid rgba(255,255,255,0.08)",
-            paddingTop: 24,
+            paddingTop: 26,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 14,
-            fontSize: 12,
+            gap: 16,
+            fontSize: 13,
             color: "#6D8D93",
           }}>
             <div>
               © 2026 WASH Sector North East Nigeria. All rights reserved. Managed under the humanitarian cluster approach.
             </div>
 
-            <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ display: "flex", gap: 18 }}>
               <span>Humanity</span>
               <span>·</span>
               <span>Neutrality</span>
