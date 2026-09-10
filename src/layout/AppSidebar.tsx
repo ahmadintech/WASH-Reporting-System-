@@ -33,7 +33,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         {
           icon: <GridIcon />,
           name: "Dashboard",
-          path: "/",
+          path: "/dashboard",
         },
         {
           icon: <TableIcon />,
@@ -70,7 +70,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         {
           icon: <GridIcon />,
           name: "Dashboard",
-          path: "/",
+          path: "/dashboard",
         },
         {
           icon: <PieChartIcon />,
@@ -96,7 +96,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         {
           icon: <GridIcon />,
           name: "Dashboard",
-          path: "/",
+          path: "/dashboard",
         },
         {
           icon: <PlusIcon />,
@@ -122,6 +122,11 @@ const othersItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    icon: <PlugInIcon />,
+    name: "Public Portal",
+    path: "/home",
   },
 ];
 
@@ -331,7 +336,7 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start px-2"
         }`}
       >
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/dashboard" className="flex items-center gap-3">
           <img
             src="/images/logo/wash-logo.png"
             alt="WASH Sector Nigeria"

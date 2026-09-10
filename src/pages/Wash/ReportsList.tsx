@@ -250,6 +250,9 @@ export default function ReportsList() {
                       <td className="py-3.5 px-4 font-mono font-bold text-right text-gray-900 dark:text-white">
                         {Number(r.total).toLocaleString()}
                       </td>
+                      <td className="py-3.5 px-4 text-right text-gray-500">
+                        -
+                      </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button

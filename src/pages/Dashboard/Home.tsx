@@ -38,7 +38,6 @@ export default function Home() {
   return (
     <>
       <PageMeta title={meta.title} description={meta.desc} />
-
       {role === "admin" ? (
         <AdminDashboard />
       ) : role === "partner" ? (
