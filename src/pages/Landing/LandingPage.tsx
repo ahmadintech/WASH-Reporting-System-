@@ -2028,30 +2028,19 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Bottom Bar: Copyright & Humanitarian Principles */}
+          {/* Bottom Bar: Copyright Notice */}
           <div style={{
             borderTop: "1px solid rgba(255,255,255,0.08)",
             paddingTop: 26,
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "center",
             alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
+            textAlign: "center",
             fontSize: 14,
             color: "#83A2A8",
           }}>
             <div>
               © 2026 WASH Sector North East Nigeria. All rights reserved. Managed under the humanitarian cluster approach.
-            </div>
-
-            <div style={{ display: "flex", gap: 16, fontFamily: FONT_PRIMARY, fontWeight: 500, fontSize: 13.5, color: "#A2BFC4" }}>
-              <span>Humanity</span>
-              <span style={{ opacity: 0.35 }}>·</span>
-              <span>Neutrality</span>
-              <span style={{ opacity: 0.35 }}>·</span>
-              <span>Impartiality</span>
-              <span style={{ opacity: 0.35 }}>·</span>
-              <span>Operational Independence</span>
             </div>
           </div>
 

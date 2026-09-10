@@ -10,7 +10,7 @@ const Footer = () => {
           Borno · Adamawa · Yobe
         </span>
         <span className="hidden sm:inline">·</span>
-        <span>5W Activity Reporting Platform</span>
+        <span>© 2026 WASH Sector North East Nigeria. All rights reserved. Managed under the humanitarian cluster approach.</span>
       </div>
     </footer>
   );
