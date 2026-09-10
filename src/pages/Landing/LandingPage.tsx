@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useWashData } from "../../context/WashDataContext";
 import { useAuth } from "../../context/AuthContext";
@@ -181,27 +181,62 @@ function DashboardLogo({ size = 48, darkBg = false }: { size?: number; darkBg?: 
   );
 }
 
-/* ─── Static Stat Metric Card ───────────────────────────────────── */
+/* ─── Animated Counter Hook (Cubic Ease-Out) ─────────────────────── */
+function useAnimatedCounter(target: number, isVisible: boolean, duration = 1800) {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let startTimestamp: number | null = null;
+    let rafId: number;
+
+    const step = (now: number) => {
+      if (!startTimestamp) startTimestamp = now;
+      const elapsed = now - startTimestamp;
+      const progress = Math.min(elapsed / duration, 1);
+      // Cubic ease-out curve: swift rise followed by smooth glide into target
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setCurrent(Math.round(easeOut * target));
+
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        setCurrent(target);
+      }
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [target, isVisible, duration]);
+
+  return current;
+}
+
+/* ─── Animated Stat Metric Card ───────────────────────────────────── */
 function StatCard({
   label,
-  value,
+  targetValue,
   icon,
   accent,
   accentSoft,
   gradient,
   tag,
   subtext,
+  isVisible,
 }: {
   label: string;
-  value: string;
+  targetValue: number;
   icon: React.ReactNode;
   accent: string;
   accentSoft: string;
   gradient: string;
   tag: string;
   subtext: string;
+  isVisible: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  const animatedValue = useAnimatedCounter(targetValue, isVisible, 1800);
+  const displayValue = fmtNum(animatedValue);
 
   return (
     <div
@@ -211,14 +246,14 @@ function StatCard({
         background: T.white,
         border: `1.5px solid ${hovered ? accent : T.line}`,
         borderRadius: 16,
-        padding: "24px 22px 20px",
+        padding: "26px 22px 22px",
         position: "relative",
         overflow: "hidden",
         boxShadow: hovered
-          ? "0 10px 24px -4px rgba(11, 60, 70, 0.10)"
+          ? `0 12px 28px -4px ${accent}25, 0 4px 12px rgba(11, 60, 70, 0.06)`
           : "0 2px 10px rgba(11, 60, 70, 0.04)",
-        transform: hovered ? "translateY(-3px)" : "translateY(0)",
-        transition: "all 0.2s ease",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
+        transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
         cursor: "default",
       }}
     >
@@ -238,14 +273,16 @@ function StatCard({
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div
           style={{
-            width: 44,
-            height: 44,
+            width: 46,
+            height: 46,
             borderRadius: 12,
             background: accentSoft,
             color: accent,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            transition: "transform 0.2s ease",
+            transform: hovered ? "scale(1.08)" : "scale(1)",
           }}
         >
           {icon}
@@ -253,11 +290,11 @@ function StatCard({
         <span
           style={{
             fontFamily: FONT_MONO,
-            fontSize: 11,
+            fontSize: 11.5,
             fontWeight: 700,
             color: accent,
             background: accentSoft,
-            padding: "3px 9px",
+            padding: "4px 10px",
             borderRadius: 14,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
@@ -271,51 +308,67 @@ function StatCard({
       {/* Label */}
       <div
         style={{
-          fontSize: 12.5,
+          fontSize: 13,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
           color: T.inkMuted,
           fontWeight: 700,
           fontFamily: FONT_PRIMARY,
-          marginTop: 16,
-          marginBottom: 4,
+          marginTop: 18,
+          marginBottom: 6,
         }}
       >
         {label}
       </div>
 
-      {/* Big Static Value */}
+      {/* Big Animated Wow Value */}
       <div
         style={{
           fontFamily: FONT_PRIMARY,
-          fontSize: "clamp(32px, 3vw, 40px)",
+          fontSize: "clamp(34px, 3.2vw, 42px)",
           fontWeight: 800,
           color: hovered ? accent : T.tealDeep,
           lineHeight: 1.15,
           letterSpacing: "-0.5px",
-          transition: "color 0.15s ease",
+          transition: "color 0.2s ease",
+          display: "flex",
+          alignItems: "baseline",
+          gap: 4,
         }}
       >
-        {value}
+        <span>{displayValue}</span>
+        {isVisible && (
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              background: accent,
+              display: "inline-block",
+              marginLeft: 2,
+              opacity: 0.85,
+            }}
+          />
+        )}
       </div>
 
       {/* Subtext info */}
       <div
         style={{
-          fontSize: 12,
+          fontSize: 13,
           color: T.inkLight,
-          marginTop: 6,
-          lineHeight: 1.4,
+          marginTop: 8,
+          lineHeight: 1.45,
           fontFamily: FONT_PRIMARY,
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 7,
         }}
       >
         <span
           style={{
-            width: 5,
-            height: 5,
+            width: 6,
+            height: 6,
             borderRadius: "50%",
             background: accent,
             display: "inline-block",
@@ -336,6 +389,9 @@ export default function LandingPage() {
 
   const [bannerVisible, setBannerVisible] = useState(true);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -343,6 +399,22 @@ export default function LandingPage() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsVisible(true);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+    return () => observer.disconnect();
   }, []);
 
   const handleAction = (path: string) => {
@@ -459,7 +531,7 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          2. STICKY TOP NAVBAR (Outfit Typography & Official Logo)
+          2. STICKY TOP NAVBAR (Responsive, Professional & Expanded)
       ══════════════════════════════════════════════════════════════════ */}
       <header style={{
         position: "sticky",
@@ -474,45 +546,49 @@ export default function LandingPage() {
       }}>
         <div style={{
           width: "100%",
-          padding: "0 36px",
+          padding: "0 clamp(16px, 3vw, 36px)",
           height: 74,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 20,
+          gap: 16,
         }}>
-          {/* Brand Logo & Professional Context Header */}
+          {/* Brand Logo & Professional Context Header (Far Left) */}
           <div
             onClick={() => navigate("/")}
-            style={{ display: "flex", alignItems: "center", gap: 14, cursor: "pointer", textDecoration: "none" }}
+            style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer", textDecoration: "none", flexShrink: 0 }}
           >
-            <DashboardLogo size={46} />
-            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 14 }}>
+            <DashboardLogo size={44} />
+            <div style={{ borderLeft: `1.5px solid #D5DFDC`, paddingLeft: 12 }}>
               <div style={{
                 fontFamily: FONT_PRIMARY,
-                fontSize: 18.5,
+                fontSize: "clamp(15px, 1.6vw, 18.5px)",
                 fontWeight: 800,
                 color: T.tealDeep,
                 letterSpacing: "-0.25px",
                 lineHeight: 1.2,
+                whiteSpace: "nowrap",
               }}>
                 WASH Sector North East Nigeria
               </div>
-              <div style={{
-                fontFamily: FONT_MONO,
-                fontSize: 11,
-                color: "#546E74",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                marginTop: 2,
-                fontWeight: 600,
-              }}>
+              <div
+                className="hidden sm:block"
+                style={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 10.5,
+                  color: "#546E74",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  marginTop: 2,
+                  fontWeight: 600,
+                }}
+              >
                 5W Activity Reporting &amp; Response Coverage Platform
               </div>
             </div>
           </div>
 
-          {/* Navigation Menu (Desktop) */}
+          {/* Desktop Navigation Menu (Center) */}
           <nav style={{ display: "flex", alignItems: "center", gap: 4 }} className="hidden lg:flex">
             {[
               { label: "Overview", href: "#overview" },
@@ -529,9 +605,10 @@ export default function LandingPage() {
                   color: "#3F565C",
                   fontSize: 14.5,
                   fontWeight: 600,
-                  padding: "8px 13px",
+                  padding: "8px 12px",
                   borderRadius: 8,
                   transition: "all .15s ease",
+                  whiteSpace: "nowrap",
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = T.tealDeep;
@@ -547,24 +624,26 @@ export default function LandingPage() {
             ))}
           </nav>
 
-          {/* Right Action Group */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Operational States Badge */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              background: "#F0F7F6",
-              border: "1.5px solid #CFE5E2",
-              borderRadius: 20,
-              padding: "5px 12px",
-              fontFamily: FONT_MONO,
-              fontSize: 11.5,
-              fontWeight: 700,
-              color: T.tealDeep,
-              letterSpacing: "0.05em",
-              whiteSpace: "nowrap",
-            }}>
+          {/* Right Action Group (Far Right) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            {/* Operational States Badge (Desktop only) */}
+            <div
+              className="hidden xl:flex"
+              style={{
+                alignItems: "center",
+                gap: 7,
+                background: "#F0F7F6",
+                border: "1.5px solid #CFE5E2",
+                borderRadius: 20,
+                padding: "5px 12px",
+                fontFamily: FONT_MONO,
+                fontSize: 11.5,
+                fontWeight: 700,
+                color: T.tealDeep,
+                letterSpacing: "0.05em",
+                whiteSpace: "nowrap",
+              }}
+            >
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
               BORNO · ADAMAWA · YOBE
             </div>
@@ -573,18 +652,18 @@ export default function LandingPage() {
             <button
               id="navbar-dashboard-btn"
               onClick={() => handleAction("/dashboard")}
+              className="hidden sm:inline-flex"
               style={{
                 background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
                 color: T.white,
                 border: "none",
                 borderRadius: 8,
-                padding: "10px 20px",
-                fontSize: 14.5,
+                padding: "9px 18px",
+                fontSize: 14,
                 fontWeight: 700,
                 cursor: "pointer",
-                display: "inline-flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 7,
                 fontFamily: FONT_PRIMARY,
                 boxShadow: "0 2px 8px rgba(11, 60, 70, 0.18)",
                 transition: "all .15s ease",
@@ -599,10 +678,134 @@ export default function LandingPage() {
                 e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 60, 70, 0.18)";
               }}
             >
-              Go to Dashboard <IcoArrowRight size={15} />
+              Go to Dashboard <IcoArrowRight size={14} />
+            </button>
+
+            {/* Mobile Hamburger Menu Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="flex lg:hidden"
+              aria-label="Toggle navigation menu"
+              style={{
+                background: mobileMenuOpen ? "rgba(18, 112, 126, 0.08)" : "#F0F7F6",
+                border: "1.5px solid #CFE5E2",
+                borderRadius: 8,
+                width: 42,
+                height: 42,
+                color: T.tealDeep,
+                fontSize: 18,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <i className={mobileMenuOpen ? "fa-solid fa-xmark text-lg" : "fa-solid fa-bars text-lg"}></i>
             </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div
+            className="block lg:hidden"
+            style={{
+              background: "rgba(255, 255, 255, 0.98)",
+              backdropFilter: "blur(16px)",
+              borderTop: "1px solid #E5ECE9",
+              borderBottom: "2px solid #12707E",
+              boxShadow: "0 16px 32px rgba(11, 60, 70, 0.14)",
+              padding: "20px 20px 24px",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 18 }}>
+              {[
+                { label: "Overview", href: "#overview", icon: "fa-regular fa-compass" },
+                { label: "5W Architecture", href: "#5w-framework", icon: "fa-solid fa-cubes" },
+                { label: "BAY Coverage", href: "#coverage", icon: "fa-solid fa-map-location-dot" },
+                { label: "Core Pillars", href: "#pillars", icon: "fa-solid fa-layer-group" },
+                { label: "Resources & Hubs", href: "#resources", icon: "fa-regular fa-folder-open" },
+              ].map(item => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    textDecoration: "none",
+                    color: "#2C4044",
+                    fontSize: 15.5,
+                    fontWeight: 600,
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = T.tealDeep;
+                    e.currentTarget.style.background = "rgba(18, 112, 126, 0.08)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = "#2C4044";
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <i className={item.icon} style={{ color: T.teal, width: 20, textAlign: "center" }}></i>
+                  {item.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Mobile Actions in Drawer */}
+            <div style={{ borderTop: "1px solid #E5ECE9", paddingTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "#F0F7F6",
+                border: "1px solid #CFE5E2",
+                borderRadius: 20,
+                padding: "6px 14px",
+                fontFamily: FONT_MONO,
+                fontSize: 11.5,
+                fontWeight: 700,
+                color: T.tealDeep,
+                alignSelf: "flex-start",
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2E7D47" }} />
+                BORNO · ADAMAWA · YOBE
+              </div>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleAction("/dashboard");
+                }}
+                style={{
+                  background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
+                  color: T.white,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px 20px",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  width: "100%",
+                  boxShadow: "0 2px 8px rgba(11, 60, 70, 0.2)",
+                  fontFamily: FONT_PRIMARY,
+                }}
+              >
+                Go to Dashboard <IcoArrowRight size={15} />
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════
@@ -768,16 +971,20 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
 
-          {/* ── 4 STATS CARDS DIRECTLY ABOVE 5W TITLE ── */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 20,
-            marginBottom: 56,
-          }}>
+          {/* ── 4 STATS CARDS DIRECTLY ABOVE 5W TITLE (Animated Count on Scroll) ── */}
+          <div
+            ref={statsRef}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: 22,
+              marginBottom: 56,
+            }}
+          >
             <StatCard
               label="Reports On Record"
-              value={fmtNum(stats.totalReports)}
+              targetValue={stats.totalReports}
+              isVisible={statsVisible}
               icon={<IcoDocument />}
               accent={T.teal}
               accentSoft={T.tealSoft}
@@ -787,7 +994,8 @@ export default function LandingPage() {
             />
             <StatCard
               label="Beneficiaries Reached"
-              value={fmtNum(stats.totalBeneficiaries)}
+              targetValue={stats.totalBeneficiaries}
+              isVisible={statsVisible}
               icon={<IcoHeart />}
               accent={T.clay}
               accentSoft={T.claySoft}
@@ -797,7 +1005,8 @@ export default function LandingPage() {
             />
             <StatCard
               label="Reporting Partners"
-              value={fmtNum(stats.totalPartners)}
+              targetValue={stats.totalPartners}
+              isVisible={statsVisible}
               icon={<IcoUsers />}
               accent={T.tealMedium}
               accentSoft="#E0F2F1"
@@ -807,7 +1016,8 @@ export default function LandingPage() {
             />
             <StatCard
               label="LGAs Actively Covered"
-              value={fmtNum(stats.totalLgas)}
+              targetValue={stats.totalLgas}
+              isVisible={statsVisible}
               icon={<IcoMapPin />}
               accent={T.green}
               accentSoft={T.greenSoft}
@@ -1522,12 +1732,12 @@ export default function LandingPage() {
       <footer style={{
         background: "#071B20",
         color: "#A2BFC4",
-        padding: "72px 24px 36px",
+        padding: "72px clamp(20px, 3.5vw, 48px) 36px",
         width: "100%",
         borderTop: "3px solid #C1722F",
         fontFamily: FONT_PRIMARY,
       }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
+        <div style={{ width: "100%" }}>
 
           {/* Main 4-Column Footer Grid */}
           <div style={{
