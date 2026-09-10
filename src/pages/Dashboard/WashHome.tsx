@@ -151,7 +151,7 @@ function ActionCard({ id, tag, tagColor, tagBg, title, desc, cta, icon, accent, 
         <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,color:tagColor,background:tagBg,padding:"3px 10px",borderRadius:5,letterSpacing:"0.05em",fontWeight:600}}>{tag}</span>
         <span style={{color:tagColor,opacity:0.7}}>{icon}</span>
       </div>
-      <h3 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:17,margin:"0 0 8px",color:T.tealDeep,fontWeight:700}}>{title}</h3>
+      <h3 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:17,margin:"0 0 8px",color:T.tealDeep,fontWeight:700}}>{title}</h3>
       <p style={{fontSize:13.5,color:T.inkSoft,margin:"0 0 18px",lineHeight:1.55}}>{desc}</p>
       <span style={{fontSize:13,fontWeight:700,color:accent,display:"flex",alignItems:"center",gap:6}}>{cta} <IcoArrow /></span>
     </button>
@@ -178,7 +178,7 @@ function Pill({ label, color, onClick }: { label:string; color:string; onClick:(
 /* ─── Section title ───────────────────────────────────────────────── */
 function STitle({ text }: { text: string }) {
   return (
-    <h2 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:15,color:T.tealDeep,margin:"0 0 16px",display:"flex",alignItems:"center",gap:12,fontWeight:700}}>
+    <h2 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:15,color:T.tealDeep,margin:"0 0 16px",display:"flex",alignItems:"center",gap:12,fontWeight:700}}>
       {text}
       <span style={{flex:1,height:1,background:T.line,display:"block"}} />
     </h2>
@@ -227,7 +227,7 @@ export default function WashHome() {
   ];
 
   return (
-    <div style={{fontFamily:"'IBM Plex Sans',system-ui,sans-serif",lineHeight:1.5,color:T.ink}}>
+    <div style={{fontFamily:"'Outfit',system-ui,sans-serif",lineHeight:1.5,color:T.ink}}>
 
       {/* deadline banner */}
       {showDeadline && (
@@ -258,7 +258,7 @@ export default function WashHome() {
         <p style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:11.5,letterSpacing:"0.1em",textTransform:"uppercase",color:"#BFE3DD",margin:"0 0 10px"}}>
           Sector coordination · Borno · Adamawa · Yobe
         </p>
-        <h1 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:"clamp(22px,3.5vw,32px)",fontWeight:700,margin:"0 0 14px",maxWidth:620,lineHeight:1.2}}>
+        <h1 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:"clamp(22px,3.5vw,32px)",fontWeight:700,margin:"0 0 14px",maxWidth:620,lineHeight:1.2}}>
           One home for every WASH partner's 5W reporting and coverage data.
         </h1>
         <p style={{maxWidth:560,color:"#DCEEEC",fontSize:14.5,margin:"0 0 28px",lineHeight:1.55}}>
@@ -283,7 +283,7 @@ export default function WashHome() {
               <span style={{color:T.teal,opacity:.7}}>{s.icon}</span>
               <span style={{fontSize:11,textTransform:"uppercase",letterSpacing:"0.06em",color:T.inkSoft}}>{s.label}</span>
             </div>
-            <div style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:28,color:T.tealDeep,fontWeight:700,letterSpacing:"-0.5px"}}>{s.value}</div>
+            <div style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:28,color:T.tealDeep,fontWeight:700,letterSpacing:"-0.5px"}}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -299,12 +299,12 @@ export default function WashHome() {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(165px,1fr))",gap:12}}>
           {STEPS.map((s,i)=>(
             <div key={s.code} style={{background:T.surf,border:`1px solid ${T.line}`,borderRadius:12,padding:"16px 16px 18px",position:"relative",overflow:"hidden"}}>
-              <div style={{position:"absolute",right:-6,bottom:-14,fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:70,fontWeight:700,color:T.subtle,lineHeight:1,pointerEvents:"none",userSelect:"none"}}>
+              <div style={{position:"absolute",right:-6,bottom:-14,fontFamily:"'Outfit',system-ui,sans-serif",fontSize:70,fontWeight:700,color:T.subtle,lineHeight:1,pointerEvents:"none",userSelect:"none"}}>
                 {String(i+1).padStart(2,"0")}
               </div>
               <div style={{marginBottom:10,color:T.teal}}>{s.icon}</div>
               <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:11,color:T.clay,letterSpacing:"0.05em",marginBottom:6}}>{s.code}</div>
-              <h4 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:13.5,margin:"0 0 5px",color:T.tealDeep,fontWeight:700}}>{s.label}</h4>
+              <h4 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:13.5,margin:"0 0 5px",color:T.tealDeep,fontWeight:700}}>{s.label}</h4>
               <p style={{fontSize:12,color:T.inkSoft,margin:0,lineHeight:1.5,position:"relative"}}>{s.desc}</p>
             </div>
           ))}
@@ -316,7 +316,7 @@ export default function WashHome() {
 
         {/* resources */}
         <div style={{background:T.surf,border:`1px solid ${T.line}`,borderRadius:12,padding:"22px 24px"}}>
-          <h3 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:15,margin:"0 0 16px",color:T.tealDeep,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+          <h3 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:15,margin:"0 0 16px",color:T.tealDeep,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
             <span style={{color:T.teal}}><IcoInfo /></span> Sector resources &amp; reporting rules
           </h3>
           <ul style={{margin:0,padding:0,listStyle:"none"}}>
@@ -349,7 +349,7 @@ export default function WashHome() {
 
         {/* contacts */}
         <div style={{background:T.surf,border:`1px solid ${T.line}`,borderRadius:12,padding:"22px 24px"}}>
-          <h3 style={{fontFamily:"'Space Grotesk',system-ui,sans-serif",fontSize:15,margin:"0 0 16px",color:T.tealDeep,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+          <h3 style={{fontFamily:"'Outfit',system-ui,sans-serif",fontSize:15,margin:"0 0 16px",color:T.tealDeep,fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
             <span style={{color:T.teal}}><IcoUsers /></span> Sector contacts
           </h3>
           {contacts.map((c,i)=>(

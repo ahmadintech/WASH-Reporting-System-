@@ -27,6 +27,10 @@ const T = {
   bgSubtle:    "#F8FAFA",
 };
 
+/* ─── Standard Typography Token ──────────────────────────────────── */
+const FONT_PRIMARY = "'Outfit', 'Inter', system-ui, -apple-system, sans-serif";
+const FONT_MONO = "'IBM Plex Mono', monospace";
+
 /* ─── Number Formatter ─────────────────────────────────────────── */
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
@@ -109,6 +113,32 @@ const IcoBarChart = () => (
   </svg>
 );
 
+/* ─── Social Media Icons ─────────────────────────────────────────── */
+const IcoXTwitter = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const IcoLinkedIn = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+  </svg>
+);
+
+const IcoYouTube = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
+const IcoGlobe = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
 /* ─── Official Dashboard Logo Component ─────────────────────────── */
 function DashboardLogo({ size = 48, darkBg = false }: { size?: number; darkBg?: boolean }) {
   return (
@@ -176,7 +206,7 @@ export default function LandingPage() {
     : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.white, color: T.ink, fontFamily: "'IBM Plex Sans', system-ui, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: T.white, color: T.ink, fontFamily: FONT_PRIMARY }}>
 
       {/* ══════════════════════════════════════════════════════════════════
           1. TOP ANNOUNCEMENT BANNER (Full Width)
@@ -204,7 +234,7 @@ export default function LandingPage() {
               padding: "3px 10px",
               borderRadius: 4,
               fontSize: 12,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: FONT_MONO,
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
@@ -237,6 +267,7 @@ export default function LandingPage() {
                   alignItems: "center",
                   gap: 5,
                   marginLeft: 8,
+                  fontFamily: FONT_PRIMARY,
                   transition: "background .15s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.38)")}
@@ -268,7 +299,7 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════
-          2. STICKY TOP NAVBAR (Full Width with Dashboard Logo)
+          2. STICKY TOP NAVBAR (Outfit Typography & Official Logo)
       ══════════════════════════════════════════════════════════════════ */}
       <header style={{
         position: "sticky",
@@ -296,8 +327,8 @@ export default function LandingPage() {
             <DashboardLogo size={50} />
             <div style={{ borderLeft: `2px solid ${T.line}`, paddingLeft: 16 }}>
               <div style={{
-                fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                fontSize: 19,
+                fontFamily: FONT_PRIMARY,
+                fontSize: 20,
                 fontWeight: 700,
                 color: T.tealDeep,
                 letterSpacing: "-0.3px",
@@ -306,13 +337,13 @@ export default function LandingPage() {
                 WASH Sector North East Nigeria
               </div>
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: FONT_MONO,
                 fontSize: 12,
                 color: T.inkMuted,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
                 marginTop: 3,
-                fontWeight: 500,
+                fontWeight: 600,
               }}>
                 5W Activity Reporting &amp; Response Coverage Platform
               </div>
@@ -321,19 +352,19 @@ export default function LandingPage() {
 
           {/* Navigation Menu (Desktop) */}
           <nav style={{ display: "flex", alignItems: "center", gap: 10 }} className="hidden md:flex">
-            <a href="#overview" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#overview" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Overview
             </a>
-            <a href="#5w-framework" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#5w-framework" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               5W Architecture
             </a>
-            <a href="#coverage" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#coverage" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               BAY Coverage
             </a>
-            <a href="#pillars" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#pillars" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Core Pillars
             </a>
-            <a href="#resources" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 500, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
+            <a href="#resources" style={{ textDecoration: "none", color: T.inkMuted, fontSize: 15, fontWeight: 600, padding: "8px 12px", borderRadius: 6, transition: "color .15s" }}>
               Resources &amp; Hubs
             </a>
           </nav>
@@ -349,7 +380,7 @@ export default function LandingPage() {
               border: "1.5px solid #C4E3DF",
               borderRadius: 8,
               padding: "6px 14px",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: FONT_MONO,
               fontSize: 12,
               fontWeight: 700,
               color: T.tealDeep,
@@ -376,6 +407,7 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
+                  fontFamily: FONT_PRIMARY,
                   boxShadow: "0 2px 10px rgba(11, 60, 70, 0.18)",
                   transition: "background .15s, transform .1s",
                 }}
@@ -400,6 +432,7 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
+                  fontFamily: FONT_PRIMARY,
                   boxShadow: "0 2px 10px rgba(193, 114, 47, 0.25)",
                   transition: "background .15s, transform .1s",
                 }}
@@ -414,7 +447,7 @@ export default function LandingPage() {
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════
-          3. HERO SECTION (Larger Fonts, Bolder Headings, Full Width)
+          3. HERO SECTION (Outfit Font Everywhere)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="overview" style={{
         position: "relative",
@@ -443,7 +476,7 @@ export default function LandingPage() {
               fontWeight: 600,
               color: "#C2E8E4",
               marginBottom: 24,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: FONT_MONO,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}>
@@ -452,21 +485,22 @@ export default function LandingPage() {
               <span>Inter-Agency Coordination</span>
             </div>
 
-            {/* Main Headline (Larger & Bolder) */}
+            {/* Main Headline (Clean Outfit Font) */}
             <h1 style={{
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
-              fontSize: "clamp(36px, 5vw, 62px)",
+              fontFamily: FONT_PRIMARY,
+              fontSize: "clamp(36px, 5.2vw, 62px)",
               fontWeight: 800,
-              lineHeight: 1.12,
-              letterSpacing: "-0.8px",
+              lineHeight: 1.15,
+              letterSpacing: "-0.5px",
               margin: "0 0 24px",
               color: T.white,
             }}>
               One Unified Platform for Humanitarian WASH Response in North East Nigeria.
             </h1>
 
-            {/* Description Subtitle (Larger font) */}
+            {/* Description Subtitle */}
             <p style={{
+              fontFamily: FONT_PRIMARY,
               fontSize: "clamp(17px, 2.1vw, 21px)",
               lineHeight: 1.65,
               color: "#D6F0ED",
@@ -479,7 +513,7 @@ export default function LandingPage() {
               Eliminating coverage gaps and maximizing emergency response reach.
             </p>
 
-            {/* Primary Action Buttons (Larger) */}
+            {/* Primary Action Buttons */}
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
               <button
                 id="hero-submit-btn"
@@ -496,6 +530,7 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 10,
+                  fontFamily: FONT_PRIMARY,
                   boxShadow: "0 4px 18px rgba(193, 114, 47, 0.4)",
                   transition: "all .15s",
                 }}
@@ -520,6 +555,7 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 10,
+                  fontFamily: FONT_PRIMARY,
                   transition: "background .15s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.24)")}
@@ -543,6 +579,7 @@ export default function LandingPage() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
+                  fontFamily: FONT_PRIMARY,
                   transition: "color .15s, border-color .15s",
                 }}
                 onMouseEnter={e => {
@@ -559,7 +596,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* ── LIVE STATS STRIP (Larger metrics) ── */}
+          {/* ── LIVE STATS STRIP ── */}
           <div style={{
             marginTop: 64,
             background: "rgba(255, 255, 255, 0.09)",
@@ -576,10 +613,10 @@ export default function LandingPage() {
                 <IcoDocument />
               </div>
               <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
                   Reports On Record
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
+                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalReports)}
                 </div>
               </div>
@@ -590,10 +627,10 @@ export default function LandingPage() {
                 <IcoHeart />
               </div>
               <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
                   Beneficiaries Reached
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
+                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalBeneficiaries)}
                 </div>
               </div>
@@ -604,10 +641,10 @@ export default function LandingPage() {
                 <IcoUsers />
               </div>
               <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
                   Reporting Partners
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
+                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalPartners)}
                 </div>
               </div>
@@ -618,10 +655,10 @@ export default function LandingPage() {
                 <IcoMapPin />
               </div>
               <div>
-                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700 }}>
+                <div style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.07em", color: "#A8D8D3", fontWeight: 700, fontFamily: FONT_PRIMARY }}>
                   LGAs Actively Covered
                 </div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 34, fontWeight: 700, color: T.white, lineHeight: 1.15 }}>
+                <div style={{ fontFamily: FONT_PRIMARY, fontSize: 36, fontWeight: 800, color: T.white, lineHeight: 1.15 }}>
                   {fmtNum(stats.totalLgas)}
                 </div>
               </div>
@@ -650,7 +687,7 @@ export default function LandingPage() {
           gap: 18,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ background: T.clay, color: T.white, padding: "9px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 13, fontFamily: "'IBM Plex Mono', monospace" }}>
+            <div style={{ background: T.clay, color: T.white, padding: "9px 14px", borderRadius: 8, display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 13, fontFamily: FONT_MONO }}>
               <IcoAlert /> AWD/CHOLERA SURVEILLANCE
             </div>
             <p style={{ margin: 0, fontSize: 15, color: "#6A3810", lineHeight: 1.5, fontWeight: 500 }}>
@@ -672,6 +709,7 @@ export default function LandingPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
+              fontFamily: FONT_PRIMARY,
               whiteSpace: "nowrap",
             }}
           >
@@ -681,7 +719,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          5. THE 5W METHODOLOGY SECTION (Larger Headings)
+          5. THE 5W METHODOLOGY SECTION (Outfit Font Everywhere)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="5w-framework" style={{
         padding: "96px 24px",
@@ -692,7 +730,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto 60px" }}>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: FONT_MONO,
               fontSize: 13,
               fontWeight: 700,
               color: T.teal,
@@ -703,7 +741,7 @@ export default function LandingPage() {
               Inter-Agency Information Management
             </div>
             <h2 style={{
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontFamily: FONT_PRIMARY,
               fontSize: "clamp(32px, 4vw, 44px)",
               fontWeight: 800,
               color: T.tealDeep,
@@ -712,7 +750,7 @@ export default function LandingPage() {
             }}>
               How the 5W Framework Operates
             </h2>
-            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0 }}>
+            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0, fontFamily: FONT_PRIMARY }}>
               The 5W matrix is the globally recognized humanitarian cluster standard that ensures accountability,
               prevents overlap, and directs emergency resources to the most vulnerable individuals.
             </p>
@@ -792,7 +830,7 @@ export default function LandingPage() {
                   position: "absolute",
                   top: 14,
                   right: 18,
-                  fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                  fontFamily: FONT_PRIMARY,
                   fontSize: 54,
                   fontWeight: 800,
                   color: "#EFF3F2",
@@ -807,7 +845,7 @@ export default function LandingPage() {
                 </div>
 
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: FONT_MONO,
                   fontSize: 13,
                   fontWeight: 700,
                   color: step.accent,
@@ -818,8 +856,8 @@ export default function LandingPage() {
                 </div>
 
                 <h3 style={{
-                  fontFamily: "'Space Grotesk', system-ui, sans-serif",
-                  fontSize: 19,
+                  fontFamily: FONT_PRIMARY,
+                  fontSize: 20,
                   fontWeight: 700,
                   color: T.tealDeep,
                   margin: "0 0 12px",
@@ -834,6 +872,7 @@ export default function LandingPage() {
                   margin: 0,
                   position: "relative",
                   zIndex: 1,
+                  fontFamily: FONT_PRIMARY,
                 }}>
                   {step.desc}
                 </p>
@@ -856,7 +895,7 @@ export default function LandingPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 24, marginBottom: 52 }}>
             <div>
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: FONT_MONO,
                 fontSize: 13,
                 fontWeight: 700,
                 color: T.clay,
@@ -867,7 +906,7 @@ export default function LandingPage() {
                 Geographic Operational Footprint
               </div>
               <h2 style={{
-                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                fontFamily: FONT_PRIMARY,
                 fontSize: "clamp(30px, 3.8vw, 42px)",
                 fontWeight: 800,
                 color: T.tealDeep,
@@ -892,6 +931,7 @@ export default function LandingPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
+                fontFamily: FONT_PRIMARY,
               }}
             >
               Open Interactive State Map <IcoArrowRight size={16} />
@@ -950,27 +990,27 @@ export default function LandingPage() {
               >
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 24, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                    <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 24, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                       {item.state}
                     </h3>
-                    <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: "'IBM Plex Mono', monospace" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: item.tagBg, color: item.tagColor, fontFamily: FONT_MONO }}>
                       {item.tag}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: 13, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: "'IBM Plex Mono', monospace" }}>
+                  <div style={{ fontSize: 13, color: T.teal, fontWeight: 600, marginBottom: 16, fontFamily: FONT_MONO }}>
                     📍 {item.hub}
                   </div>
 
-                  <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px" }}>
+                  <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 24px", fontFamily: FONT_PRIMARY }}>
                     {item.desc}
                   </p>
 
                   <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 18, marginBottom: 18 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 10, fontFamily: FONT_PRIMARY }}>
                       Priority Interventions:
                     </div>
-                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: T.ink, lineHeight: 1.7 }}>
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: T.ink, lineHeight: 1.7, fontFamily: FONT_PRIMARY }}>
                       {item.priorityNeeds.map(need => (
                         <li key={need}>{need}</li>
                       ))}
@@ -978,7 +1018,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16, fontSize: 13, color: T.inkMuted }}>
+                <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16, fontSize: 13, color: T.inkMuted, fontFamily: FONT_PRIMARY }}>
                   <strong>Key LGAs:</strong> {item.lgas}
                 </div>
               </div>
@@ -988,7 +1028,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          7. CORE STRATEGIC PILLARS SECTION (Larger Fonts, Soft Teal)
+          7. CORE STRATEGIC PILLARS SECTION (Outfit Font)
       ══════════════════════════════════════════════════════════════════ */}
       <section id="pillars" style={{
         padding: "96px 24px",
@@ -999,7 +1039,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1360, margin: "0 auto" }}>
           <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 56px" }}>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: FONT_MONO,
               fontSize: 13,
               fontWeight: 700,
               color: T.teal,
@@ -1010,7 +1050,7 @@ export default function LandingPage() {
               Strategic Humanitarian Objectives
             </div>
             <h2 style={{
-              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontFamily: FONT_PRIMARY,
               fontSize: "clamp(32px, 3.8vw, 42px)",
               fontWeight: 800,
               color: T.tealDeep,
@@ -1019,7 +1059,7 @@ export default function LandingPage() {
             }}>
               Four Core Pillars of Sector Delivery
             </h2>
-            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0 }}>
+            <p style={{ fontSize: 17, color: T.inkMuted, lineHeight: 1.65, margin: 0, fontFamily: FONT_PRIMARY }}>
               All 5W activity reports align with one of the four sector operational pillars defined under the Humanitarian Response Plan (HRP).
             </p>
           </div>
@@ -1079,7 +1119,7 @@ export default function LandingPage() {
                 }} />
 
                 <h3 style={{
-                  fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                  fontFamily: FONT_PRIMARY,
                   fontSize: 20,
                   fontWeight: 700,
                   color: T.tealDeep,
@@ -1088,13 +1128,13 @@ export default function LandingPage() {
                   {pillar.title}
                 </h3>
 
-                <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 20px" }}>
+                <p style={{ fontSize: 14.5, color: T.inkMuted, lineHeight: 1.65, margin: "0 0 20px", fontFamily: FONT_PRIMARY }}>
                   {pillar.desc}
                 </p>
 
                 <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 16 }}>
                   {pillar.points.map(pt => (
-                    <div key={pt} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: T.ink, marginBottom: 8 }}>
+                    <div key={pt} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: T.ink, marginBottom: 8, fontFamily: FONT_PRIMARY }}>
                       <span style={{ color: pillar.color }}><IcoCheck /></span>
                       <span>{pt}</span>
                     </div>
@@ -1122,12 +1162,12 @@ export default function LandingPage() {
             <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 16, padding: "36px 32px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <span style={{ color: T.teal }}><IcoDocument /></span>
-                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                   Reporting Cadence &amp; Rules
                 </h3>
               </div>
 
-              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24 }}>
+              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24, fontFamily: FONT_PRIMARY }}>
                 Every accredited organization operating in Borno, Adamawa, or Yobe is required to submit monthly 5W returns in accordance with sector guidelines:
               </p>
 
@@ -1153,8 +1193,8 @@ export default function LandingPage() {
                   <div key={rule.title} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                     <span style={{ color: T.green, marginTop: 3 }}><IcoCheck /></span>
                     <div>
-                      <div style={{ fontSize: 14.5, fontWeight: 700, color: T.tealDeep }}>{rule.title}</div>
-                      <div style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.55 }}>{rule.text}</div>
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: T.tealDeep, fontFamily: FONT_PRIMARY }}>{rule.title}</div>
+                      <div style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.55, fontFamily: FONT_PRIMARY }}>{rule.text}</div>
                     </div>
                   </div>
                 ))}
@@ -1175,6 +1215,7 @@ export default function LandingPage() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 8,
+                    fontFamily: FONT_PRIMARY,
                   }}
                 >
                   Open 5W Submission Form <IcoArrowRight size={15} />
@@ -1186,12 +1227,12 @@ export default function LandingPage() {
             <div style={{ background: T.bgSubtle, border: `1.5px solid ${T.line}`, borderRadius: 16, padding: "36px 32px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
                 <span style={{ color: T.teal }}><IcoUsers /></span>
-                <h3 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
+                <h3 style={{ fontFamily: FONT_PRIMARY, fontSize: 22, fontWeight: 700, color: T.tealDeep, margin: 0 }}>
                   Coordination Hubs &amp; Contacts
                 </h3>
               </div>
 
-              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24 }}>
+              <p style={{ fontSize: 15, color: T.inkMuted, lineHeight: 1.65, marginBottom: 24, fontFamily: FONT_PRIMARY }}>
                 Reach out to sector focal points for technical assistance, coordination meeting agendas, or reporting helpdesk:
               </p>
 
@@ -1224,8 +1265,8 @@ export default function LandingPage() {
                   },
                 ].map(c => (
                   <div key={c.role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${T.line}`, paddingBottom: 12 }}>
-                    <span style={{ fontSize: 14, color: T.inkMuted }}>{c.role}</span>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: T.tealDeep, fontFamily: c.type === "email" ? "'IBM Plex Mono', monospace" : "inherit" }}>
+                    <span style={{ fontSize: 14, color: T.inkMuted, fontFamily: FONT_PRIMARY }}>{c.role}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: T.tealDeep, fontFamily: c.type === "email" ? FONT_MONO : FONT_PRIMARY }}>
                       {c.type === "email" ? (
                         <a href={`mailto:${c.contact}`} style={{ color: T.teal, textDecoration: "none" }}>{c.contact}</a>
                       ) : (
@@ -1237,17 +1278,17 @@ export default function LandingPage() {
               </div>
 
               <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 12 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: T.inkMuted, marginBottom: 12, fontFamily: FONT_PRIMARY }}>
                   Quick Navigation Links:
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <button onClick={() => handleAction("/reports-list")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                  <button onClick={() => handleAction("/reports-list")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
                     Reports Archive
                   </button>
-                  <button onClick={() => handleAction("/partners")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                  <button onClick={() => handleAction("/partners")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
                     Partner Roster
                   </button>
-                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer" }}>
+                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
                     Coverage Metrics
                   </button>
                 </div>
@@ -1259,7 +1300,7 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          9. FULL-WIDTH CALL TO ACTION BANNER (Larger Fonts)
+          9. FULL-WIDTH CALL TO ACTION BANNER
       ══════════════════════════════════════════════════════════════════ */}
       <section style={{
         background: "linear-gradient(135deg, #0B3C46 0%, #12707E 100%)",
@@ -1277,7 +1318,7 @@ export default function LandingPage() {
             borderRadius: 30,
             padding: "6px 18px",
             fontSize: 13,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: FONT_MONO,
             fontWeight: 700,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
@@ -1288,7 +1329,7 @@ export default function LandingPage() {
           </div>
 
           <h2 style={{
-            fontFamily: "'Space Grotesk', system-ui, sans-serif",
+            fontFamily: FONT_PRIMARY,
             fontSize: "clamp(30px, 4vw, 46px)",
             fontWeight: 800,
             margin: "0 0 20px",
@@ -1303,6 +1344,7 @@ export default function LandingPage() {
             lineHeight: 1.65,
             margin: "0 auto 38px",
             maxWidth: 740,
+            fontFamily: FONT_PRIMARY,
           }}>
             Make sure your interventions are reflected in inter-agency coverage maps, sector bulletins,
             and donor humanitarian funding overviews.
@@ -1324,6 +1366,7 @@ export default function LandingPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 10,
+                fontFamily: FONT_PRIMARY,
                 boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
               }}
               onMouseEnter={e => (e.currentTarget.style.background = T.clayHover)}
@@ -1344,6 +1387,7 @@ export default function LandingPage() {
                   fontSize: 16,
                   fontWeight: 600,
                   cursor: "pointer",
+                  fontFamily: FONT_PRIMARY,
                 }}
               >
                 Access Coordinator Dashboard
@@ -1360,6 +1404,7 @@ export default function LandingPage() {
                   fontSize: 16,
                   fontWeight: 600,
                   cursor: "pointer",
+                  fontFamily: FONT_PRIMARY,
                 }}
               >
                 Partner Login Portal
@@ -1370,128 +1415,298 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════
-          10. STANDARD MULTI-COLUMN WEBSITE FOOTER (With Dashboard Logo)
+          10. REDESIGNED STANDARD MULTI-COLUMN WEBSITE FOOTER
       ══════════════════════════════════════════════════════════════════ */}
       <footer style={{
         background: T.tealDarkest,
         color: "#C2D4D8",
-        padding: "72px 24px 36px",
+        padding: "76px 24px 36px",
         width: "100%",
         borderTop: "4px solid #C1722F",
+        fontFamily: FONT_PRIMARY,
       }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto" }}>
-          {/* Top Footer Row: Branding & Endorsements */}
+        <div style={{ maxWidth: 1380, margin: "0 auto" }}>
+
+          {/* Institutional Co-Lead Bar */}
           <div style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 12,
+            padding: "16px 24px",
+            marginBottom: 48,
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
+            justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 24,
-            paddingBottom: 44,
-            borderBottom: "1px solid rgba(255,255,255,0.12)",
+            gap: 16,
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <DashboardLogo size={52} darkBg={true} />
-              <div>
-                <div style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 20, fontWeight: 700, color: T.white }}>
-                  WASH Sector North East Nigeria
-                </div>
-                <div style={{ fontSize: 13, color: "#8EACB2", fontFamily: "'IBM Plex Mono', monospace", marginTop: 2 }}>
-                  5W Activity Reporting &amp; Humanitarian Response Coverage
-                </div>
-              </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13.5, color: "#8EACB2" }}>
+              <span style={{ fontFamily: FONT_MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#C2E8E4" }}>Co-led by:</span>
+              <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
+              <span style={{ opacity: 0.4 }}>·</span>
+              <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
+              <span style={{ opacity: 0.4 }}>·</span>
+              <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 13, color: "#9CB8BD", flexWrap: "wrap" }}>
-              <span>Co-led by:</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
-              <span>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
-              <span>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
+            {/* Social Media Icons Group */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 12, color: "#7B9C9F", marginRight: 4, fontFamily: FONT_MONO, textTransform: "uppercase" }}>Connect:</span>
+              {[
+                { label: "Twitter / X", icon: <IcoXTwitter />, href: "https://twitter.com/UNICEFNigeria" },
+                { label: "LinkedIn",   icon: <IcoLinkedIn />, href: "https://www.linkedin.com/company/unicef-nigeria" },
+                { label: "YouTube",    icon: <IcoYouTube />,  href: "https://www.youtube.com/user/unicefnigeria" },
+                { label: "ReliefWeb",  icon: <IcoGlobe />,    href: "https://reliefweb.int/country/nga" },
+              ].map(social => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#C2E8E4",
+                    textDecoration: "none",
+                    transition: "all .15s",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = T.clay;
+                    e.currentTarget.style.borderColor = T.clay;
+                    e.currentTarget.style.color = T.white;
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                    e.currentTarget.style.color = "#C2E8E4";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Middle Footer: 4 Multi-Columns */}
+          {/* Main 4-Column Footer Grid */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: 40,
-            padding: "48px 0 44px",
+            paddingBottom: 48,
           }}>
-            {/* Column 1: Mandate */}
-            <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+
+            {/* Column 1: Brand & Sector Mandate */}
+            <div style={{ maxWidth: 360 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+                <DashboardLogo size={52} darkBg={true} />
+                <div>
+                  <div style={{ fontFamily: FONT_PRIMARY, fontSize: 19, fontWeight: 700, color: T.white, lineHeight: 1.2 }}>
+                    WASH Sector North East Nigeria
+                  </div>
+                  <div style={{ fontSize: 11.5, color: "#8EACB2", fontFamily: FONT_MONO, marginTop: 3 }}>
+                    5W Activity Reporting &amp; Humanitarian Response Coverage
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#C2E8E4", marginBottom: 8 }}>
                 Sector Mandate
-              </h4>
-              <p style={{ fontSize: 14, lineHeight: 1.65, color: "#8EACB2", margin: "0 0 16px" }}>
+              </div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.65, color: "#8EACB2", margin: "0 0 16px" }}>
                 The WASH Sector coordinates humanitarian water, sanitation, and hygiene assistance across the conflict-affected states of Borno, Adamawa, and Yobe in North East Nigeria.
               </p>
-              <div style={{ fontSize: 13, color: "#5F7F85" }}>
-                Active Operational Nodes: Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
+
+              <div style={{
+                fontSize: 12,
+                color: "#7E9DA3",
+                background: "rgba(255,255,255,0.04)",
+                padding: "8px 12px",
+                borderRadius: 6,
+                border: "1px solid rgba(255,255,255,0.08)",
+                fontFamily: FONT_MONO,
+              }}>
+                📍 <strong>Active Operational Nodes:</strong> Maiduguri Central, Yola Sub-Office, Damaturu Sub-Office.
               </div>
             </div>
 
-            {/* Column 2: Platform Links */}
+            {/* Column 2: Platform Navigation (Quick Links) */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{
+                fontFamily: FONT_PRIMARY,
+                fontSize: 16.5,
+                fontWeight: 700,
+                color: T.white,
+                margin: "0 0 18px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.teal }} />
                 Platform Navigation
               </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.3 }}>
-                <li><a href="#overview" style={{ color: "#A2C1C6", textDecoration: "none" }}>Portal Overview</a></li>
-                <li><button onClick={() => handleAction("/submit-report")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Submit 5W Monthly Report</button></li>
-                <li><button onClick={() => handleAction("/coverage-dashboard")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Response Coverage Dashboard</button></li>
-                <li><button onClick={() => handleAction("/reports-list")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>All Submitted Reports</button></li>
-                <li><button onClick={() => handleAction("/partners")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14 }}>Humanitarian Partner Roster</button></li>
+
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.2 }}>
+                <li>
+                  <a href="#overview" style={{ color: "#A2C1C6", textDecoration: "none", transition: "color .15s", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ opacity: 0.5 }}>›</span> Portal Overview
+                  </a>
+                </li>
+                <li>
+                  <button onClick={() => handleAction("/submit-report")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ opacity: 0.5 }}>›</span> Submit 5W Monthly Report
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ opacity: 0.5 }}>›</span> Response Coverage Dashboard
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleAction("/reports-list")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ opacity: 0.5 }}>›</span> All Submitted Reports
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleAction("/partners")} style={{ background: "none", border: "none", padding: 0, color: "#A2C1C6", cursor: "pointer", fontSize: 14, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ opacity: 0.5 }}>›</span> Humanitarian Partner Roster
+                  </button>
+                </li>
+                {isAuthenticated && (
+                  <li>
+                    <button onClick={() => navigate("/admin/settings")} style={{ background: "none", border: "none", padding: 0, color: "#C1722F", cursor: "pointer", fontSize: 14, fontWeight: 600, fontFamily: FONT_PRIMARY, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ opacity: 0.5 }}>›</span> Sector Admin Console
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
 
-            {/* Column 3: Response Pillars & Resources */}
+            {/* Column 3: Key Resources & TWGs */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{
+                fontFamily: FONT_PRIMARY,
+                fontSize: 16.5,
+                fontWeight: 700,
+                color: T.white,
+                margin: "0 0 18px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.clay }} />
                 Key Resources &amp; TWGs
               </h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.3 }}>
-                <li><span style={{ color: "#A2C1C6" }}>Water Quality Technical Working Group</span></li>
-                <li><span style={{ color: "#A2C1C6" }}>Sanitation &amp; Sludge Management Protocol</span></li>
-                <li><span style={{ color: "#A2C1C6" }}>Hygiene Promotion in Cholera Outbreaks</span></li>
-                <li><span style={{ color: "#A2C1C6" }}>WASH in Primary Health Facilities (PHC)</span></li>
-                <li><span style={{ color: "#A2C1C6" }}>Humanitarian Response Plan (HRP) Matrix</span></li>
+
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 14, lineHeight: 2.2 }}>
+                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ opacity: 0.5 }}>•</span> Water Quality Technical Working Group
+                </li>
+                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ opacity: 0.5 }}>•</span> Sanitation &amp; Sludge Management Protocol
+                </li>
+                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ opacity: 0.5 }}>•</span> Hygiene Promotion in Cholera Outbreaks
+                </li>
+                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ opacity: 0.5 }}>•</span> WASH in Primary Health Facilities (PHC)
+                </li>
+                <li style={{ color: "#A2C1C6", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ opacity: 0.5 }}>•</span> Humanitarian Response Plan (HRP) Matrix
+                </li>
               </ul>
             </div>
 
-            {/* Column 4: Helpdesk & Coordination */}
+            {/* Column 4: Sector Helpdesk & Contact Info */}
             <div>
-              <h4 style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", fontSize: 16.5, fontWeight: 700, color: T.white, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <h4 style={{
+                fontFamily: FONT_PRIMARY,
+                fontSize: 16.5,
+                fontWeight: 700,
+                color: T.white,
+                margin: "0 0 18px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: T.green }} />
                 Sector Helpdesk
               </h4>
-              <div style={{ fontSize: 14, color: "#8EACB2", lineHeight: 1.9 }}>
-                <div><strong>Email:</strong> <a href={`mailto:${systemConfig.replyToEmail}`} style={{ color: "#61CCD8", textDecoration: "none" }}>{systemConfig.replyToEmail}</a></div>
-                <div><strong>Lead Coordinator:</strong> coordinator@washsector-ne.org</div>
-                <div><strong>Information Management:</strong> im@washsector-ne.org</div>
-                <div><strong>Emergency Hotline:</strong> {systemConfig.emergencyContact}</div>
-                <div style={{ marginTop: 14 }}>
+
+              <div style={{
+                fontSize: 14,
+                color: "#8EACB2",
+                lineHeight: 1.85,
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: 10,
+                padding: "16px 18px",
+              }}>
+                <div style={{ marginBottom: 8 }}>
+                  <strong style={{ color: T.white }}>Email:</strong>{" "}
+                  <a href="mailto:washcluster.nigeria@unicef.org" style={{ color: "#50D2E1", textDecoration: "none", fontWeight: 600 }}>
+                    washcluster.nigeria@unicef.org
+                  </a>
+                </div>
+
+                <div style={{ marginBottom: 8 }}>
+                  <strong style={{ color: T.white }}>Lead Coordinator:</strong>{" "}
+                  <span style={{ color: "#C2E8E4" }}>coordinator@washsector-ne.org</span>
+                </div>
+
+                <div style={{ marginBottom: 8 }}>
+                  <strong style={{ color: T.white }}>Information Management:</strong>{" "}
+                  <span style={{ color: "#C2E8E4" }}>im@washsector-ne.org</span>
+                </div>
+
+                <div style={{ marginBottom: 14 }}>
+                  <strong style={{ color: T.white }}>Emergency Hotline:</strong>{" "}
+                  <span style={{ color: "#F3DFC9", fontFamily: FONT_MONO, fontWeight: 700 }}>
+                    +234 (0) 800-WASH-HELP
+                  </span>
+                </div>
+
+                <div>
                   <span style={{
-                    display: "inline-block",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
                     padding: "4px 10px",
-                    borderRadius: 4,
-                    background: "rgba(46, 125, 71, 0.2)",
+                    borderRadius: 6,
+                    background: "rgba(46, 125, 71, 0.25)",
+                    border: "1px solid rgba(87, 206, 127, 0.4)",
                     color: "#57CE7F",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    fontFamily: FONT_MONO,
+                    letterSpacing: "0.04em",
                   }}>
                     ● SYSTEM STATUS: ONLINE &amp; OPERATIONAL
                   </span>
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Bottom Bar: Copyright & Humanitarian Principles */}
           <div style={{
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            paddingTop: 26,
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            paddingTop: 28,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -1504,16 +1719,17 @@ export default function LandingPage() {
               © 2026 WASH Sector North East Nigeria. All rights reserved. Managed under the humanitarian cluster approach.
             </div>
 
-            <div style={{ display: "flex", gap: 18 }}>
+            <div style={{ display: "flex", gap: 18, fontFamily: FONT_PRIMARY, fontWeight: 500 }}>
               <span>Humanity</span>
-              <span>·</span>
+              <span style={{ opacity: 0.3 }}>·</span>
               <span>Neutrality</span>
-              <span>·</span>
+              <span style={{ opacity: 0.3 }}>·</span>
               <span>Impartiality</span>
-              <span>·</span>
+              <span style={{ opacity: 0.3 }}>·</span>
               <span>Operational Independence</span>
             </div>
           </div>
+
         </div>
       </footer>
 
