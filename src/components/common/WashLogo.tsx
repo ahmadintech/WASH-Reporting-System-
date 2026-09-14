@@ -54,3 +54,6 @@ export const WashLogo: React.FC<WashLogoProps> = ({
 
   return content;
 };
+
+export default WashLogo;
+

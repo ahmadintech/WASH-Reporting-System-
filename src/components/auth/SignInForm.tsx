@@ -23,7 +23,7 @@ export default function SignInForm() {
     setTimeout(() => {
       loginAsRole(role);
       setLoading(false);
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     }, 250);
   };
 
@@ -37,7 +37,7 @@ export default function SignInForm() {
     setTimeout(() => {
       login(email, selectedRole);
       setLoading(false);
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     }, 250);
   };
 

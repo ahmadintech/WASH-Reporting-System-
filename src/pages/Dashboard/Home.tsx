@@ -1,49 +1,65 @@
+import React, { useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { useAuth } from "../../context/AuthContext";
 import AdminDashboard from "./AdminDashboard";
 import CoordinatorDashboard from "./CoordinatorDashboard";
-import PartnerDashboard from "./PartnerDashboard";
+import CoverageDashboard from "../Wash/CoverageDashboard";
 
 export default function Home() {
-  const { currentUser } = useAuth();
-  const role = currentUser?.role || "coordinator";
+  const { currentUser, isAuthenticated } = useAuth();
+  const role = currentUser?.role || "partner";
 
-  const getPageMeta = () => {
-    switch (role) {
-      case "admin":
-        return {
-          title: "Sector Administrator Console | WASH Sector North East Nigeria",
-          desc: "Full sector governance, 5W quality assurance, partner compliance, and master data controls.",
-        };
-      case "coordinator":
-        return {
-          title: "Cluster Coordination Desk | WASH Sector North East Nigeria",
-          desc: "Humanitarian gap analysis, LGA vulnerability matrix, cholera alerts, and inter-agency coordination.",
-        };
-      case "partner":
-        return {
-          title: `${currentUser?.organization || "Partner"} Portal | WASH 5W Reporting`,
-          desc: "Implementing partner field activity reporting, project tracking, and beneficiary demographics.",
-        };
-      default:
-        return {
-          title: "WASH 5W Activity Reporting Platform | North East Nigeria",
-          desc: "Humanitarian response monitoring for Borno, Adamawa, and Yobe states.",
-        };
-    }
-  };
-
-  const meta = getPageMeta();
+  // Tab switch for admin / coordinator: Management Console vs 5W Coverage Matrix
+  const [activeTab, setActiveTab] = useState<"management" | "coverage">("management");
 
   return (
     <>
-      <PageMeta title={meta.title} description={meta.desc} />
-      {role === "admin" ? (
-        <AdminDashboard />
-      ) : role === "partner" ? (
-        <PartnerDashboard />
+      <PageMeta
+        title="WASH Response Coverage Dashboard | North East Nigeria"
+        description="Sector activities, response coverage and coordination monitoring for Borno, Adamawa and Yobe."
+      />
+
+      {/* Role specific quick-switcher for Admin / Coordinator */}
+      {isAuthenticated && (role === "admin" || role === "coordinator") && (
+        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-800 mb-6 flex-wrap gap-3">
+          <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <button
+              onClick={() => setActiveTab("coverage")}
+              className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+                activeTab === "coverage"
+                  ? "bg-teal-800 text-white shadow-xs"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+              }`}
+            >
+              5W Coverage Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab("management")}
+              className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+                activeTab === "management"
+                  ? "bg-teal-800 text-white shadow-xs"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+              }`}
+            >
+              {role === "admin" ? "Admin Governance Console" : "Coordination Desk Console"}
+            </button>
+          </div>
+
+          <div className="text-xs text-gray-500 font-medium">
+            Active view: <span className="font-semibold text-teal-800 dark:text-teal-300">{activeTab === "coverage" ? "5W Response Monitoring Matrix" : role === "admin" ? "Administration" : "Coordination"}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Main View: If management tab active, show admin/coordinator console; otherwise show full Coverage Dashboard */}
+      {activeTab === "management" && isAuthenticated ? (
+        role === "admin" ? (
+          <AdminDashboard />
+        ) : (
+          <CoordinatorDashboard />
+        )
       ) : (
-        <CoordinatorDashboard />
+        <CoverageDashboard />
       )}
     </>
   );

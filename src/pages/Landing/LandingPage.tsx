@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useWashData } from "../../context/WashDataContext";
 import { useAuth } from "../../context/AuthContext";
+import { WASH_CLUSTER_MEMBERS } from "../../data/washClusterMembers";
 
 /* ─── Colour Palette ─────────────────────────────────────────────── */
 const T = {
@@ -628,39 +629,46 @@ export default function LandingPage() {
 
           {/* Desktop Navigation Menu (Rendered ONLY on Desktop >= 1024px) */}
           {windowWidth >= 1024 && (
-            <nav style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
+            <nav style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
               {[
-                { label: "Overview", href: "#overview" },
-                { label: "5W Architecture", href: "#5w-framework" },
-                { label: "BAY Coverage", href: "#coverage" },
-                { label: "Core Pillars", href: "#pillars" },
-                { label: "Resources & Hubs", href: "#resources" },
-                { label: "Partners", href: "#partners" },
+                { label: "Home", href: "/", isRoute: false },
+                { label: "Dashboard", href: "/coverage-dashboard", isRoute: true },
+                { label: "5W Reporting", href: "/submit-report", isRoute: true },
               ].map(item => (
-                <a
+                <button
                   key={item.label}
-                  href={item.href}
+                  onClick={() => {
+                    if (item.isRoute) {
+                      handleAction(item.href);
+                    } else {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
                   style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
                     textDecoration: "none",
-                    color: "#3F565C",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    padding: "7px 11px",
-                    borderRadius: 7,
+                    color: item.label === "Home" ? T.tealDeep : "#3F565C",
+                    fontSize: 14.5,
+                    fontWeight: 700,
+                    padding: "8px 16px",
+                    borderRadius: 8,
                     transition: "all .15s ease",
                     whiteSpace: "nowrap",
+                    fontFamily: FONT_PRIMARY,
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.color = T.tealDeep;
-                    e.currentTarget.style.background = "rgba(18, 112, 126, 0.07)";
+                    e.currentTarget.style.background = "rgba(18, 112, 126, 0.08)";
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.color = "#3F565C";
+                    e.currentTarget.style.color = item.label === "Home" ? T.tealDeep : "#3F565C";
                     e.currentTarget.style.background = "transparent";
                   }}
                 >
                   {item.label}
-                </a>
+                </button>
               ))}
             </nav>
           )}
@@ -744,30 +752,38 @@ export default function LandingPage() {
               maxWidth: "100%",
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
               {[
-                { label: "Overview", href: "#overview", icon: "fa-regular fa-compass" },
-                { label: "5W Architecture", href: "#5w-framework", icon: "fa-solid fa-cubes" },
-                { label: "BAY Coverage", href: "#coverage", icon: "fa-solid fa-map-location-dot" },
-                { label: "Core Pillars", href: "#pillars", icon: "fa-solid fa-layer-group" },
-                { label: "Resources & Hubs", href: "#resources", icon: "fa-regular fa-folder-open" },
-                { label: "Partners", href: "#partners", icon: "fa-solid fa-handshake" },
+                { label: "Home", href: "/", icon: "fa-regular fa-compass", isRoute: false },
+                { label: "Dashboard", href: "/coverage-dashboard", icon: "fa-solid fa-chart-pie", isRoute: true },
+                { label: "5W Reporting", href: "/submit-report", icon: "fa-solid fa-file-pen", isRoute: true },
               ].map(item => (
-                <a
+                <button
                   key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (item.isRoute) {
+                      handleAction(item.href);
+                    } else {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
                   style={{
-                    textDecoration: "none",
+                    background: "transparent",
+                    border: "none",
+                    width: "100%",
+                    textAlign: "left",
                     color: "#2C4044",
-                    fontSize: 15,
-                    fontWeight: 600,
-                    padding: "10px 14px",
+                    fontSize: 15.5,
+                    fontWeight: 700,
+                    padding: "12px 16px",
                     borderRadius: 8,
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
+                    cursor: "pointer",
                     transition: "all 0.15s ease",
+                    fontFamily: FONT_PRIMARY,
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.color = T.tealDeep;
@@ -778,9 +794,9 @@ export default function LandingPage() {
                     e.currentTarget.style.background = "transparent";
                   }}
                 >
-                  <i className={item.icon} style={{ color: T.teal, width: 20, textAlign: "center" }}></i>
+                  <i className={item.icon} style={{ color: T.teal, width: 22, fontSize: 16 }}></i>
                   {item.label}
-                </a>
+                </button>
               ))}
             </div>
 
@@ -934,38 +950,6 @@ export default function LandingPage() {
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 20 }}>analytics</span>
                 Explore Coverage Dashboard
-              </button>
-
-              <button
-                id="hero-partners-btn"
-                onClick={() => handleAction("/partners")}
-                style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  color: "#C2E8E4",
-                  border: "1.5px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: 10,
-                  padding: "16px 24px",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontFamily: FONT_PRIMARY,
-                  backdropFilter: "blur(4px)",
-                  transition: "color .15s, border-color .15s",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = T.white;
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = "#C2E8E4";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)";
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 19 }}>groups</span>
-                Partner Directory
               </button>
             </div>
           </div>
@@ -1605,8 +1589,8 @@ export default function LandingPage() {
                   <button onClick={() => handleAction("/reports-list")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
                     Reports Archive
                   </button>
-                  <button onClick={() => handleAction("/partners")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
-                    Partner Roster
+                  <button onClick={() => handleAction("/submit-report")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
+                    Submit 5W Report
                   </button>
                   <button onClick={() => handleAction("/coverage-dashboard")} style={{ background: T.white, border: `1px solid ${T.line}`, padding: "8px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, color: T.tealDeep, cursor: "pointer", fontFamily: FONT_PRIMARY }}>
                     Coverage Metrics
@@ -1707,39 +1691,7 @@ export default function LandingPage() {
 
           {/* Marquee Track with step-scroll animation */}
           <div className="partner-marquee-track" style={{ gap: 20, paddingLeft: 20 }}>
-            {[
-              { name: "UNICEF", role: "Cluster Lead Agency", type: "UN Agency", img: "/images/brand/brand-01.svg" },
-              { name: "WHO", role: "Water Quality & Cholera", type: "UN Agency", img: "/images/brand/brand-02.svg" },
-              { name: "IOM", role: "Camp WASH & Displacement", type: "UN Agency", img: "/images/brand/brand-03.svg" },
-              { name: "Action Against Hunger", role: "Nutrition & Hygiene", type: "INGO", img: "/images/brand/brand-04.svg" },
-              { name: "IRC", role: "Emergency WASH Response", type: "INGO", img: "/images/brand/brand-05.svg" },
-              { name: "Save the Children", role: "Child-Friendly Sanitation", type: "INGO", img: "/images/brand/brand-06.svg" },
-              { name: "Oxfam", role: "Public Health Promotion", type: "INGO", img: "/images/brand/brand-07.svg" },
-              { name: "Solidarités International", role: "Water Trucking & Chlorination", type: "INGO", img: "/images/brand/brand-08.svg" },
-              { name: "Norwegian Refugee Council", role: "Sanitation & Shelter WASH", type: "INGO", img: "/images/brand/brand-09.svg" },
-              { name: "Danish Refugee Council", role: "Community Infrastructure", type: "INGO", img: "/images/brand/brand-10.svg" },
-              { name: "Intersos", role: "Frontline Health Center WASH", type: "INGO", img: "/images/brand/brand-11.svg" },
-              { name: "Premiere Urgence", role: "Borehole Rehabilitation", type: "INGO", img: "/images/brand/brand-12.svg" },
-              { name: "UNHCR", role: "Refugee & IDP Settlements", type: "UN Agency", img: "/images/brand/brand-13.svg" },
-              { name: "CISP", role: "Hygiene Promotion & Kits", type: "INGO", img: "/images/brand/brand-14.svg" },
-              { name: "Malteser International", role: "Emergency Water Treatment", type: "INGO", img: "/images/brand/brand-15.svg" },
-              // Duplicate set to create infinite seamless loop
-              { name: "UNICEF", role: "Cluster Lead Agency", type: "UN Agency", img: "/images/brand/brand-01.svg" },
-              { name: "WHO", role: "Water Quality & Cholera", type: "UN Agency", img: "/images/brand/brand-02.svg" },
-              { name: "IOM", role: "Camp WASH & Displacement", type: "UN Agency", img: "/images/brand/brand-03.svg" },
-              { name: "Action Against Hunger", role: "Nutrition & Hygiene", type: "INGO", img: "/images/brand/brand-04.svg" },
-              { name: "IRC", role: "Emergency WASH Response", type: "INGO", img: "/images/brand/brand-05.svg" },
-              { name: "Save the Children", role: "Child-Friendly Sanitation", type: "INGO", img: "/images/brand/brand-06.svg" },
-              { name: "Oxfam", role: "Public Health Promotion", type: "INGO", img: "/images/brand/brand-07.svg" },
-              { name: "Solidarités International", role: "Water Trucking & Chlorination", type: "INGO", img: "/images/brand/brand-08.svg" },
-              { name: "Norwegian Refugee Council", role: "Sanitation & Shelter WASH", type: "INGO", img: "/images/brand/brand-09.svg" },
-              { name: "Danish Refugee Council", role: "Community Infrastructure", type: "INGO", img: "/images/brand/brand-10.svg" },
-              { name: "Intersos", role: "Frontline Health Center WASH", type: "INGO", img: "/images/brand/brand-11.svg" },
-              { name: "Premiere Urgence", role: "Borehole Rehabilitation", type: "INGO", img: "/images/brand/brand-12.svg" },
-              { name: "UNHCR", role: "Refugee & IDP Settlements", type: "UN Agency", img: "/images/brand/brand-13.svg" },
-              { name: "CISP", role: "Hygiene Promotion & Kits", type: "INGO", img: "/images/brand/brand-14.svg" },
-              { name: "Malteser International", role: "Emergency Water Treatment", type: "INGO", img: "/images/brand/brand-15.svg" },
-            ].map((p, idx) => (
+            {[...WASH_CLUSTER_MEMBERS, ...WASH_CLUSTER_MEMBERS].map((p, idx) => (
               <div
                 key={`${p.name}-${idx}`}
                 style={{
@@ -1771,24 +1723,28 @@ export default function LandingPage() {
                 }}
               >
                 <div style={{
-                  height: 48,
+                  height: 52,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 12,
+                  padding: "4px 8px",
+                  background: "#FFFFFF",
+                  borderRadius: 8,
+                  border: "1px solid #EEF3F1",
+                  width: "100%",
                 }}>
                   <img
-                    src={p.img}
+                    src={p.logo}
                     alt={p.name}
                     style={{
-                      maxHeight: 38,
-                      maxWidth: 130,
+                      maxHeight: 42,
+                      maxWidth: 160,
                       objectFit: "contain",
-                      filter: "grayscale(25%)",
                       transition: "filter 0.2s ease",
                     }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.filter = "none";
+                    onError={e => {
+                      (e.currentTarget as HTMLElement).style.display = "none";
                     }}
                   />
                 </div>
@@ -1797,31 +1753,26 @@ export default function LandingPage() {
                   fontSize: 14,
                   fontWeight: 700,
                   color: T.tealDeep,
-                  marginBottom: 3,
+                  marginBottom: 4,
+                  minHeight: 38,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}>
                   {p.name}
-                </div>
-                <div style={{
-                  fontFamily: FONT_PRIMARY,
-                  fontSize: 11,
-                  color: T.inkMuted,
-                  lineHeight: 1.3,
-                  marginBottom: 8,
-                }}>
-                  {p.role}
                 </div>
                 <span style={{
                   display: "inline-block",
                   padding: "2px 8px",
                   borderRadius: 12,
-                  fontSize: 10,
+                  fontSize: 10.5,
                   fontWeight: 600,
-                  background: p.type === "UN Agency" ? "#E4F0EF" : "#F5F3EF",
-                  color: p.type === "UN Agency" ? T.teal : "#7A5A35",
-                  border: `1px solid ${p.type === "UN Agency" ? "#CFE5E2" : "#E8DFC8"}`,
+                  background: p.category === "UN Agency" ? "#E4F0EF" : "#F5F3EF",
+                  color: p.category === "UN Agency" ? T.teal : "#7A5A35",
+                  border: `1px solid ${p.category === "UN Agency" ? "#CFE5E2" : "#E8DFC8"}`,
                   fontFamily: FONT_PRIMARY,
                 }}>
-                  {p.type}
+                  {p.category || "Global WASH Member"}
                 </span>
               </div>
             ))}
@@ -1831,7 +1782,7 @@ export default function LandingPage() {
         {/* Directory CTA */}
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <button
-            onClick={() => handleAction("/partners")}
+            onClick={() => handleAction("/coverage-dashboard")}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -1856,8 +1807,8 @@ export default function LandingPage() {
               e.currentTarget.style.color = T.teal;
             }}
           >
-            <i className="fa-solid fa-users"></i>
-            Explore Full Partner Directory &amp; Contacts
+            <i className="fa-solid fa-chart-pie"></i>
+            Explore Response Coverage Dashboard
             <i className="fa-solid fa-arrow-right" style={{ fontSize: 11 }}></i>
           </button>
         </div>
@@ -2061,12 +2012,12 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <button
-                    onClick={() => handleAction("/partners")}
+                    onClick={() => handleAction("/dashboard")}
                     style={{ background: "none", border: "none", padding: 0, color: "#A2BFC4", cursor: "pointer", fontSize: 15.5, fontFamily: FONT_PRIMARY, transition: "color 0.15s" }}
                     onMouseEnter={e => (e.currentTarget.style.color = T.white)}
                     onMouseLeave={e => (e.currentTarget.style.color = "#A2BFC4")}
                   >
-                    Humanitarian Partner Roster
+                    Partner Response Dashboard
                   </button>
                 </li>
                 <li>

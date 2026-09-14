@@ -32,25 +32,15 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
       return [
         {
           icon: <GridIcon />,
-          name: "Dashboard",
-          path: "/dashboard",
+          name: "Admin Console",
+          path: "/admin/dashboard",
         },
         {
           icon: <TableIcon />,
-          name: "Reports",
+          name: "Reports Queue",
           path: "/reports-list",
-          badge: "Queue",
+          badge: "Review",
           badgeColor: "bg-rose-500",
-        },
-        {
-          icon: <GroupIcon />,
-          name: "Partner Accreditation",
-          path: "/partners",
-        },
-        {
-          icon: <PieChartIcon />,
-          name: "Coverage & Analytics",
-          path: "/coverage-dashboard",
         },
         {
           icon: <UserIcon />,
@@ -61,7 +51,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
         },
         {
           icon: <PlugInIcon />,
-          name: "Settings",
+          name: "Sector Settings",
           path: "/admin/settings",
         },
       ];
@@ -69,25 +59,20 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
       return [
         {
           icon: <GridIcon />,
-          name: "Dashboard",
-          path: "/dashboard",
-        },
-        {
-          icon: <PieChartIcon />,
-          name: "Analytics",
-          path: "/coverage-dashboard",
-          badge: "HNRP",
-          badgeColor: "bg-brand-500",
+          name: "Coordinator Console",
+          path: "/admin/dashboard",
         },
         {
           icon: <TableIcon />,
-          name: "Submissions",
+          name: "Submissions Review",
           path: "/reports-list",
+          badge: "Queue",
+          badgeColor: "bg-brand-500",
         },
         {
-          icon: <GroupIcon />,
-          name: "Partners",
-          path: "/partners",
+          icon: <UserIcon />,
+          name: "Focal Points",
+          path: "/admin/users",
         },
       ];
     case "partner":
@@ -95,23 +80,13 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
       return [
         {
           icon: <GridIcon />,
-          name: "Dashboard",
-          path: "/dashboard",
-        },
-        {
-          icon: <PlusIcon />,
-          name: "Report",
-          path: "/submit-report",
+          name: "Partner Console",
+          path: "/admin/dashboard",
         },
         {
           icon: <TableIcon />,
           name: "My Submissions",
           path: "/reports-list",
-        },
-        {
-          icon: <PieChartIcon />,
-          name: "Analytics",
-          path: "/coverage-dashboard",
         },
       ];
   }
@@ -125,8 +100,18 @@ const othersItems: NavItem[] = [
   },
   {
     icon: <PlugInIcon />,
-    name: "Public Portal",
-    path: "/home",
+    name: "Public Portal (Home)",
+    path: "/",
+  },
+  {
+    icon: <PieChartIcon />,
+    name: "Public Coverage",
+    path: "/dashboard",
+  },
+  {
+    icon: <PlusIcon />,
+    name: "5W Reporting Form",
+    path: "/submit-report",
   },
 ];
 

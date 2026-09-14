@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WASH Sector 5W Reporting Tool — Adamawa, Borno &amp; Yobe</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#f6f4ee;
+    --ink:#1c2b22;
+    --ink-soft:#4a564d;
+    --line:#d8d2c2;
+    --card:#ffffff;
+    --who:#3d5a80;      /* slate blue - organisation */
+    --who-bg:#eaf0f6;
+    --where:#5c7a4a;    /* moss green - location */
+    --where-bg:#eef3e9;
+    --what:#b5651d;     /* clay orange - activity */
+    --what-bg:#faf0e4;
+    --whom:#8c4a6b;     /* plum - beneficiaries */
+    --whom-bg:#f6ecf1;
+    --when:#4a5568;     /* slate - timing/status */
+    --when-bg:#eceef0;
+    --accent:#2a6f6f;   /* teal - primary actions, water */
+    --accent-dark:#1d5252;
+    --danger:#a3402f;
+    --radius:3px;
+    --shadow:0 1px 2px rgba(28,43,34,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+  .sans{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;}
+  header.masthead{
+    background:var(--ink);
+    color:var(--paper);
+    padding:28px 24px 22px;
+    border-bottom:4px solid var(--accent);
+  }
+  .masthead-inner{max-width:1180px;margin:0 auto;}
+  .kicker{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    color:#a9c9c4;
+    margin:0 0 6px;
+  }
+  h1{
+    font-size:clamp(26px,4vw,38px);
+    margin:0 0 8px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    color:#cfd7d2;
+    font-size:14.5px;
+    max-width:640px;
+    margin:0;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  section.block{margin-top:34px;}
+  .block-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:14px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .block-head h2{
+    font-size:20px;
+    margin:0;
+    font-weight:600;
+  }
+  .block-head .tag{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:11px;
+    letter-spacing:0.03em;
+    padding:2px 8px;
+    border-radius:20px;
+    font-weight:600;
+  }
+  .tag-who{background:var(--who-bg);color:var(--who);}
+  .tag-where{background:var(--where-bg);color:var(--where);}
+  .tag-what{background:var(--what-bg);color:var(--what);}
+  .tag-whom{background:var(--whom-bg);color:var(--whom);}
+  .tag-when{background:var(--when-bg);color:var(--when);}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+  }
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px 18px;}
+
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .field .hint{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:10.5px;
+    color:#8a9088;
+    font-weight:400;
+    margin-top:-3px;
+  }
+  input,select,textarea{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:14px;
+    padding:8px 9px;
+    border:1px solid #c7c2b3;
+    border-radius:2px;
+    background:#fffefb;
+    color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+  }
+  input[readonly]{background:#efece3;color:#6b7268;}
+  textarea{resize:vertical;min-height:44px;}
+  fieldset{border:none;padding:0;margin:0;}
+  .subgroup{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px dashed var(--line);
+  }
+  .subgroup:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .subgroup-label{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    margin-bottom:10px;
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:20px;
+  }
+
+  .btnbar{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;align-items:center;}
+  button{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:3px;
+    border:1px solid transparent;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{background:#efece3;}
+  .btn-danger-text{background:transparent;color:var(--danger);border:none;font-size:12px;padding:4px 6px;text-decoration:underline;}
+
+  .status-msg{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:13px;
+    color:var(--accent-dark);
+    margin-left:auto;
+  }
+
+  table.records{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:12.5px;
+  }
+  table.records th{
+    text-align:left;
+    background:#efece3;
+    padding:8px 10px;
+    border-bottom:2px solid var(--line);
+    white-space:nowrap;
+    position:sticky;top:0;
+  }
+  table.records td{
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.records tr:hover td{background:#faf9f4;}
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);}
+  .pill{
+    display:inline-block;
+    padding:1px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+  }
+  .empty-state{
+    padding:36px 20px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:13.5px;
+  }
+  .count-badge{
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  footer{
+    max-width:1180px;margin:44px auto 0;padding:18px 24px 0;
+    font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;
+    font-size:11.5px;color:#8a9088;border-top:1px solid var(--line);
+  }
+  .req::after{content:" *";color:var(--danger);}
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr 1fr;}
+    header.masthead{padding:22px 16px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="kicker">WASH SECTOR &middot; RESPONSE MONITORING</p>
+    <h1>5W Reporting Tool</h1>
+    <p class="sub">Who, What, Where, Whom &amp; When — record and submit your WASH sector activities across Adamawa, Borno and Yobe. Built from the sector's official 5W matrix, with every dropdown from that template carried over.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- PARTNER CONTACT -->
+  <section class="block">
+    <div class="block-head">
+      <h2>Partner details</h2>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="pc-org" class="req">Organisation name</label>
+          <select id="pc-org"></select>
+        </div>
+        <div class="field">
+          <label for="pc-acronym">Acronym</label>
+          <input id="pc-acronym" readonly placeholder="Auto-fills from organisation">
+        </div>
+        <div class="field">
+          <label for="pc-type" class="req">Type of organisation</label>
+          <select id="pc-type"></select>
+        </div>
+        <div class="field">
+          <label for="pc-contact">Contact name</label>
+          <input id="pc-contact" placeholder="Full name">
+        </div>
+        <div class="field">
+          <label for="pc-phone">Phone number</label>
+          <input id="pc-phone" placeholder="+234...">
+        </div>
+        <div class="field">
+          <label for="pc-email">Email address</label>
+          <input id="pc-email" type="email" placeholder="name@organisation.org">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADD ACTIVITY RECORD -->
+  <section class="block">
+    <div class="block-head">
+      <h2>Add an activity record</h2>
+      <span class="count-badge" id="edit-indicator"></span>
+    </div>
+    <div class="card">
+      <form id="record-form">
+
+        <div class="subgroup">
+          <span class="subgroup-label tag-who">WHO</span>
+          <div class="grid">
+            <div class="field">
+              <label for="f-month" class="req">Reporting month</label>
+              <select id="f-month" required></select>
+            </div>
+            <div class="field">
+              <label for="f-repdate" class="req">Date of reporting</label>
+              <input id="f-repdate" type="date" required>
+            </div>
+            <div class="field">
+              <label for="f-orgname" class="req">Organisation name</label>
+              <select id="f-orgname" required></select>
+            </div>
+            <div class="field">
+              <label for="f-acronym">Acronym</label>
+              <input id="f-acronym" readonly>
+            </div>
+            <div class="field">
+              <label for="f-orgtype" class="req">Type</label>
+              <select id="f-orgtype" required></select>
+            </div>
+            <div class="field">
+              <label for="f-donor" class="req">Donor</label>
+              <select id="f-donor" required></select>
+            </div>
+            <div class="field">
+              <label for="f-impartner">Implementing partner</label>
+              <input id="f-impartner" placeholder="Name of implementing partner">
+            </div>
+          </div>
+        </div>
+
+        <div class="subgroup">
+          <span class="subgroup-label tag-where">WHERE</span>
+          <div class="grid">
+            <div class="field">
+              <label for="f-state" class="req">State</label>
+              <select id="f-state" required></select>
+            </div>
+            <div class="field">
+              <label for="f-pcode1">Pcode ADM1</label>
+              <input id="f-pcode1" readonly>
+            </div>
+            <div class="field">
+              <label for="f-lga" class="req">LGA</label>
+              <select id="f-lga" required disabled><option value="">Select a state first</option></select>
+            </div>
+            <div class="field">
+              <label for="f-pcode2">Pcode ADM2</label>
+              <input id="f-pcode2" readonly>
+            </div>
+            <div class="field">
+              <label for="f-ward" class="req">Ward</label>
+              <select id="f-ward" required disabled><option value="">Select an LGA first</option></select>
+            </div>
+            <div class="field">
+              <label for="f-pcode3">Pcode ADM3</label>
+              <input id="f-pcode3" readonly>
+            </div>
+            <div class="field">
+              <label for="f-loctype" class="req">Type of location</label>
+              <select id="f-loctype" required></select>
+            </div>
+            <div class="field">
+              <label for="f-locname">Location name</label>
+              <input id="f-locname" placeholder="Village / community / site">
+            </div>
+            <div class="field">
+              <label for="f-locpop">Location population</label>
+              <input id="f-locpop" type="number" min="0" placeholder="Estimated total">
+            </div>
+            <div class="field">
+              <label for="f-latlong">Latitude, longitude</label>
+              <input id="f-latlong" placeholder="e.g. 11.223344, 13.445566">
+              <span class="hint">Boreholes, wells &amp; sanitation facilities only</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="subgroup">
+          <span class="subgroup-label tag-what">WHAT</span>
+          <div class="grid">
+            <div class="field">
+              <label for="f-emergtype" class="req">Intervention / emergency type</label>
+              <select id="f-emergtype" required></select>
+            </div>
+            <div class="field">
+              <label for="f-domain" class="req">WASH domain</label>
+              <select id="f-domain" required></select>
+            </div>
+            <div class="field">
+              <label for="f-activity" class="req">Activity</label>
+              <select id="f-activity" required disabled><option value="">Select a domain first</option></select>
+            </div>
+            <div class="field" style="grid-column:span 2;">
+              <label for="f-indicator">Indicator</label>
+              <textarea id="f-indicator" readonly rows="2"></textarea>
+            </div>
+            <div class="field">
+              <label for="f-unit">Unit</label>
+              <input id="f-unit" readonly>
+            </div>
+            <div class="field">
+              <label for="f-hrp" class="req">Is HRP activity?</label>
+              <select id="f-hrp" required></select>
+            </div>
+            <div class="field">
+              <label for="f-qplanned">Quantity planned</label>
+              <input id="f-qplanned" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="f-qachieved">Quantity achieved</label>
+              <input id="f-qachieved" type="number" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="subgroup">
+          <span class="subgroup-label tag-whom">WHOM</span>
+          <div class="grid">
+            <div class="field">
+              <label for="f-beneftype" class="req">Beneficiary type</label>
+              <select id="f-beneftype" required></select>
+            </div>
+            <div class="field">
+              <label for="f-boys">Beneficiaries — boys</label>
+              <input id="f-boys" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="f-girls">Beneficiaries — girls</label>
+              <input id="f-girls" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="f-men">Beneficiaries — men</label>
+              <input id="f-men" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="f-women">Beneficiaries — women</label>
+              <input id="f-women" type="number" min="0">
+            </div>
+            <div class="field">
+              <label for="f-totalbenef">Total beneficiaries</label>
+              <input id="f-totalbenef" type="number" min="0">
+              <span class="hint">Fills in automatically from the four fields above; edit directly only if disaggregation is unavailable</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="subgroup">
+          <span class="subgroup-label tag-when">WHEN</span>
+          <div class="grid">
+            <div class="field">
+              <label for="f-startdate" class="req">Starting date</label>
+              <input id="f-startdate" type="date" required>
+            </div>
+            <div class="field">
+              <label for="f-enddate">End date</label>
+              <input id="f-enddate" type="date">
+            </div>
+            <div class="field">
+              <label for="f-status" class="req">Status</label>
+              <select id="f-status" required></select>
+            </div>
+            <div class="field" style="grid-column:span 2;">
+              <label for="f-comments">Comments</label>
+              <textarea id="f-comments" rows="2" placeholder="e.g. donor name if 'Other' selected above"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="btnbar">
+          <button type="submit" class="btn-primary" id="submit-btn">Add record</button>
+          <button type="button" class="btn-ghost" id="clear-btn">Clear form</button>
+          <span class="status-msg" id="form-status"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- RECORDS TABLE -->
+  <section class="block">
+    <div class="block-head">
+      <h2>Activity records</h2>
+      <span class="count-badge" id="record-count">0 records</span>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="table-holder"></div>
+    </div>
+    <div class="btnbar">
+      <button type="button" class="btn-primary" id="export-xlsx-btn">Download as Excel (.xlsx)</button>
+      <button type="button" class="btn-ghost" id="export-csv-btn">Download as CSV</button>
+      <button type="button" class="btn-ghost" id="clear-all-btn">Clear all records</button>
+    </div>
+  </section>
+
+  <footer>
+    Structured from the WASH Sector 5W matrix template. Location lists cover Adamawa, Borno and Yobe states; activity, domain and indicator lists follow the sector's standard vocabulary. Data entered here stays in your browser tab until exported — export before closing or reloading the page.
+  </footer>
+</div>
+
+<script id="wash-data" type="application/json">{"months": ["January 2026", "February 2026", "March 2026", "April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026", "November 2026", "December 2026"], "orgTypesPartner": ["Government", "International NGO", "National NGO", "Red Cross and Crescent Movement", "UN Agency"], "orgTypesMatrix": ["INGO", "National NGO", "UN"], "donors": ["BMZ/KfW", "CIDA", "DANIDA", "ECHO", "FCDO", "GAC", "GFFO", "IOM - RRF", "OCHA - NHF", "Other", "NORAD", "Qatar Foundation", "RRM", "SIDA", "UNICEF", "USAID - BHA"], "orgNames": [["Action Against Hunger", "AAH"], ["Adamawa Rural Water Supply And Sanitation Agency", "ADRUWASSA"], ["Aduba Relief Care Foundation", "ARCF"], ["Advocacy For Resilience And Innovative Solutions For The Youths, Women, And Children Empowerment", "ARISE"], ["AfriYouth Mindset for Innovation and Entrepreneurship Development Initiative", "AfriYouth MIEDI"], ["Alheri Peace Building and Empowerment Foundation", "APBEF"], ["Almagda Community Development Initiative", "ACDI"], ["Anchor for Life Support and Resilience", "ALSAR"], ["ASA Health Partners Consulting", "AHPC"], ["Ayuba Alamson Foundation", "AAF"], ["Bedada Care Foundation", "BECFO"], ["Bela Community Development Initiative", "BELA-CODE"], ["Belgra Care Foundation", "BCF"], ["Blues Charity Aid Foundation Namur", "BCAFN"], ["Boaid Humanitarian Foundation", "BOAID"], ["Borno Rural Water Supply And Sanitation Agency", "BoRUWASSA"], ["Brandlife vision foundation", "BLVF"], ["Care Best Initiative Cbi", "CBI"], ["Care First Community Initiative", "CFCI"], ["Care Ways Initiative For Youth And Women Support Development", "CAREWI"], ["Catholic Caritas Foundation Of Nigeria", "CCFN"], ["Catholic Relief Service", "CRS"], ["Cedar Foundation For Disability", "CEDAR"], ["Center for Advocacy, Resilience and Empowerment", "CARE Initiative"], ["Center For Advocacy, Transparency, And Accountability Initiative", "CATAI"], ["Center for child care and human development", "C3HD"], ["Child Protection And Women Empowerment Initiative -Cpwei", "CPWEI"], ["Child protection and women empowerment initiative.", "CPWEI"], ["Christian Aid", "CAID"], ["Christian Rural And Urban Development Association Of Nigeria Crudan", "CRUDAN"], ["Civil Soceity Fr Poverty Eradication", "CISCOPE"], ["Communal Support Foundation of Nigeria", "COSFON"], ["Community Engagement and Social Development Initiative", "CESDI"], ["Concern For Women And Children Development Foundation", "COWACDI"], ["Concern On Climate Change For The Community Initiative", "FOURCi"], ["Create A Wonderful World Initiative", "CWI"], ["Danish Refugee Council", "DRC"], ["Danuwa Empowerment Foundation", "DEF"], ["Daurama Foundation", "DF"], ["Delight Affection Foundation", "DAF"], ["Dorcas Sisters Foundation", "DSF"], ["Elela-Care Humanitarian And Development Organization", "ECM"], ["El-Ezhar Care Initiative", "ECI"], ["Enrich Girl Child Of Their Right Initiative", "EGCI"], ["Eremale Foundation", "EF"], ["FHI360", "FHI360"], ["First Step Action For Children Initiative (Fsaci", "FSACI"], ["Foundation for Climate Action and Sustainable Development", "F-CASD"], ["Foundation For Empowerment And Support For Youth And Displaced Persons", "FESYD-P"], ["Future Resilience And Development Foundation", "FRAD"], ["Garkuwa Youth Initiative for Development", "G-YID"], ["Gender Equality and Empowerment of Women and Children Initiative", "GEEWCI"], ["Gender Equality Peace And Development Centre", "GEPaDC"], ["Gibran Books And Values Society Of Nigeria", "GBVS"], ["Global Grassroots Succour Initiative", "GGSI"], ["Global peace Development", "GPD"], ["Global Village Healthcare Initiative For Africa", "GHIV Africa"], ["Goalprime Organization Nigeria", "GPON"], ["Godiyah Cherished Care for Humanitarian Response Initiative", "GCCHRI"], ["Grassroot Initiative For Strengthening Community Resilience", "GISCOR"], ["Grassroot Lifesaving Outreach", "LESGO"], ["Green Concern For Development", "GREENCODE"], ["Green Generation Initiative", "GGi"], ["Green Water Analyte And Ecological Development.", "GWAED"], ["Grow Strong Foundation", "GSF"], ["Hand-in-Hand Empowerment Initiative", "HiH"], ["Heed The Child Initiative", "HCI"], ["Hope 360 Initiative for Peace", "HOPE360"], ["Hope for Street Children and Vulnerable People Foundation", "HOPLE"], ["HopeAid Humanitarian Foundation", "HHF"], ["Hopeful Women Initiative", "HWI"], ["Idaniya Women and Girl Child Initiative", "IWaGI"], ["International Medical Corps", "IMC"], ["International Organization For Migration", "IOM"], ["International Rescue Commitee", "IRC"], ["INTERSOS", "INTERSOS"], ["Jami Al Hakeem Foundation", "JHF"], ["Jen Initiative For Integrity And Development", "JIID"], ["Jidda Community Care Foundation", "JC2F"], ["Jireh Doo Foundation", "JDF"], ["Justice Development And Peace Commission Maiduguri", "JDPC"], ["Kumbal Support Initiative", "KSi"], ["Lake Chad Peace And Development Initiative", "LCPD"], ["Life At Best Development Initiative", "LABDI"], ["Life Helpers Initiative", "LHI"], ["Lindii Peace Foundation", "LPF"], ["Malteser International", "MAL"], ["Media Communication For Health And Development Initiative", "MECOMHEDI"], ["Mercy Corps", "MERCYCORPS"], ["Monclub International", "MCI"], ["Multi Aid And Charity Initiaitive", "MACI"], ["Murmushi People's Development Foundation", "MPDF"], ["New Foundation For Displaced Person'S", "NFDP"], ["Nkafamiya Rescue Mission", "NRM"], ["North East Youth Initiative For Development", "NEYIF"], ["Norwegian Church Aid", "NCA"], ["Norwegian Refugee Council", "NRC"], ["Novel Alliance For Development Aid", "NADA"], ["OXFAM", "OXFAM"], ["Peacebuilding And Livelihood Restoration Initiative", "PALRI"], ["Portrait of lake child initiative", "PLCI"], ["Pride Initaitives", "PRIDE"], ["Rapid Action Aid Initiative", "RAAI"], ["Rays Of Change Development Initiative", "RCDI"], ["Reawakening And Development Initiative", "RADI"], ["Rehabilitation Empowerment And Better Health Initiative", "REBHI"], ["Relief For Community Outreach & Development", "RECOD"], ["Rising Hope Initiative for Sustainable Development", "RHISD"], ["Roadmap For Women And Youth Development", "RAWYOD"], ["Sahei Gender Development Initiative", "SGDi"], ["Save The Children International", "SCI"], ["Save The Slum Initiative", "STSI"], ["Secours Islamique France", "SIF"], ["Sirri Care Foundation", "SIRRI CARE"], ["Solidarites International", "SI"], ["Sorasun Foundation", "SRF"], ["SOS Children’s Villages Nigeria", "SOSCVN"], ["Speed Relief Humanitarian Organization", "SRHO"], ["Superior Life And Care Initiative", "SLACI"], ["Taimako Community Development Initiative", "TCDI"], ["Tallafi Initiative For Child And Women Development", "TIWOD"], ["Terre Des Hommes", "TDH"], ["The Big Smile Foundation", "TBSF"], ["The Mentor Initiative", "TMI"], ["Thlama Peace Foundation", "TPF"], ["Transcultural Psychosocial organization", "TPO"], ["Turum Aid Initiative", "TAI"], ["Uam Foundation", "UAMF"], ["UNICEF", "UNICEF"], ["Unified Culture Promotion Foundation", "UNICPF"], ["Valfasam Care Initiative", "VCI"], ["Vision for Inclusive Solutions and Transparency Initiative", "VISTA Initiative"], ["Voice of Women in Nigeria Leadership Initiative", "VOWNLI"], ["Water Supply And Sanitation Initiative", "WASSI"], ["Yasmeen Life Foundation", "YLF"], ["Yerwa Empowerment Foundation", "YEF"], ["Yobe Rural Water Supply And Sanitation Agency", "YoRUWASSA"], ["Young Prodigy Hunamitarian Organization", "YPHO"], ["Youth Integrated For Positive Development Initiative", "YIPDI"], ["Zai Development Foundation", "ZDF"], ["ZOA", "ZOA"]], "states": ["Adamawa", "Borno", "Yobe"], "admin2": [["Adamawa", "NG002", "Demsa", "NG002001"], ["Adamawa", "NG002", "Fufore", "NG002002"], ["Adamawa", "NG002", "Ganye", "NG002003"], ["Adamawa", "NG002", "Girei", "NG002004"], ["Adamawa", "NG002", "Gombi", "NG002005"], ["Adamawa", "NG002", "Guyuk", "NG002006"], ["Adamawa", "NG002", "Hong", "NG002007"], ["Adamawa", "NG002", "Jada", "NG002008"], ["Adamawa", "NG002", "Lamurde", "NG002009"], ["Adamawa", "NG002", "Madagali", "NG002010"], ["Adamawa", "NG002", "Maiha", "NG002011"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012"], ["Adamawa", "NG002", "Michika", "NG002013"], ["Adamawa", "NG002", "Mubi North", "NG002014"], ["Adamawa", "NG002", "Mubi South", "NG002015"], ["Adamawa", "NG002", "Numan", "NG002016"], ["Adamawa", "NG002", "Shelleng", "NG002017"], ["Adamawa", "NG002", "Song", "NG002018"], ["Adamawa", "NG002", "Toungo", "NG002019"], ["Adamawa", "NG002", "Yola North", "NG002020"], ["Adamawa", "NG002", "Yola South", "NG002021"], ["Borno", "NG008", "Abadam", "NG008001"], ["Borno", "NG008", "Askira/Uba", "NG008002"], ["Borno", "NG008", "Bama", "NG008003"], ["Borno", "NG008", "Bayo", "NG008004"], ["Borno", "NG008", "Biu", "NG008005"], ["Borno", "NG008", "Chibok", "NG008006"], ["Borno", "NG008", "Damboa", "NG008007"], ["Borno", "NG008", "Dikwa", "NG008008"], ["Borno", "NG008", "Gubio", "NG008009"], ["Borno", "NG008", "Guzamala", "NG008010"], ["Borno", "NG008", "Gwoza", "NG008011"], ["Borno", "NG008", "Hawul", "NG008012"], ["Borno", "NG008", "Jere", "NG008013"], ["Borno", "NG008", "Kaga", "NG008014"], ["Borno", "NG008", "Kala/Balge", "NG008015"], ["Borno", "NG008", "Konduga", "NG008016"], ["Borno", "NG008", "Kukawa", "NG008017"], ["Borno", "NG008", "Kwaya Kusar", "NG008018"], ["Borno", "NG008", "Mafa", "NG008019"], ["Borno", "NG008", "Magumeri", "NG008020"], ["Borno", "NG008", "Maiduguri", "NG008021"], ["Borno", "NG008", "Marte", "NG008022"], ["Borno", "NG008", "Mobbar", "NG008023"], ["Borno", "NG008", "Monguno", "NG008024"], ["Borno", "NG008", "Ngala", "NG008025"], ["Borno", "NG008", "Nganzai", "NG008026"], ["Borno", "NG008", "Shani", "NG008027"], ["Yobe", "NG036", "Bade", "NG036001"], ["Yobe", "NG036", "Bursari", "NG036002"], ["Yobe", "NG036", "Damaturu", "NG036003"], ["Yobe", "NG036", "Fika", "NG036004"], ["Yobe", "NG036", "Fune", "NG036005"], ["Yobe", "NG036", "Geidam", "NG036006"], ["Yobe", "NG036", "Gujba", "NG036007"], ["Yobe", "NG036", "Gulani", "NG036008"], ["Yobe", "NG036", "Jakusko", "NG036009"], ["Yobe", "NG036", "Karasuwa", "NG036010"], ["Yobe", "NG036", "Machina", "NG036011"], ["Yobe", "NG036", "Nangere", "NG036012"], ["Yobe", "NG036", "Nguru", "NG036013"], ["Yobe", "NG036", "Potiskum", "NG036014"], ["Yobe", "NG036", "Tarmua", "NG036015"], ["Yobe", "NG036", "Yunusari", "NG036016"], ["Yobe", "NG036", "Yusufari", "NG036017"]], "admin3": [["Adamawa", "NG002", "Demsa", "NG002001", "Bille", "NG002001001"], ["Adamawa", "NG002", "Demsa", "NG002001", "Borrong", "NG002001002"], ["Adamawa", "NG002", "Demsa", "NG002001", "Demsa", "NG002001003"], ["Adamawa", "NG002", "Demsa", "NG002001", "Dilli", "NG002001004"], ["Adamawa", "NG002", "Demsa", "NG002001", "Dong", "NG002001005"], ["Adamawa", "NG002", "Demsa", "NG002001", "Dwam", "NG002001006"], ["Adamawa", "NG002", "Demsa", "NG002001", "Gwamba", "NG002001007"], ["Adamawa", "NG002", "Demsa", "NG002001", "Kpasham", "NG002001008"], ["Adamawa", "NG002", "Demsa", "NG002001", "Mbula", "NG002001009"], ["Adamawa", "NG002", "Demsa", "NG002001", "Nassarawo Demsa", "NG002001010"], ["Adamawa", "NG002", "Fufore", "NG002002", "Beti", "NG002002001"], ["Adamawa", "NG002", "Fufore", "NG002002", "Farang", "NG002002002"], ["Adamawa", "NG002", "Fufore", "NG002002", "Fufore", "NG002002003"], ["Adamawa", "NG002", "Fufore", "NG002002", "Gurin", "NG002002004"], ["Adamawa", "NG002", "Fufore", "NG002002", "Karlahi", "NG002002005"], ["Adamawa", "NG002", "Fufore", "NG002002", "Mayo Inne", "NG002002006"], ["Adamawa", "NG002", "Fufore", "NG002002", "Pariya", "NG002002007"], ["Adamawa", "NG002", "Fufore", "NG002002", "Ribadu", "NG002002008"], ["Adamawa", "NG002", "Fufore", "NG002002", "Uki Tuki", "NG002002009"], ["Adamawa", "NG002", "Fufore", "NG002002", "Wuro Bokki", "NG002002010"], ["Adamawa", "NG002", "Fufore", "NG002002", "Yadim", "NG002002011"], ["Adamawa", "NG002", "Ganye", "NG002003", "Bakari Goso", "NG002003001"], ["Adamawa", "NG002", "Ganye", "NG002003", "Gamu", "NG002003002"], ["Adamawa", "NG002", "Ganye", "NG002003", "Ganye 1", "NG002003003"], ["Adamawa", "NG002", "Ganye", "NG002003", "Ganye 2", "NG002003004"], ["Adamawa", "NG002", "Ganye", "NG002003", "Gurumpawo", "NG002003005"], ["Adamawa", "NG002", "Ganye", "NG002003", "Jaggu", "NG002003006"], ["Adamawa", "NG002", "Ganye", "NG002003", "Sangassumi", "NG002003007"], ["Adamawa", "NG002", "Ganye", "NG002003", "Sugu", "NG002003008"], ["Adamawa", "NG002", "Ganye", "NG002003", "Timdore", "NG002003009"], ["Adamawa", "NG002", "Ganye", "NG002003", "Yebbi", "NG002003010"], ["Adamawa", "NG002", "Girei", "NG002004", "Dakri", "NG002004001"], ["Adamawa", "NG002", "Girei", "NG002004", "Damare", "NG002004002"], ["Adamawa", "NG002", "Girei", "NG002004", "Gereng", "NG002004003"], ["Adamawa", "NG002", "Girei", "NG002004", "Girei 1", "NG002004004"], ["Adamawa", "NG002", "Girei", "NG002004", "Girei 2", "NG002004005"], ["Adamawa", "NG002", "Girei", "NG002004", "Jera Bakari", "NG002004006"], ["Adamawa", "NG002", "Girei", "NG002004", "Jera Bonyo", "NG002004007"], ["Adamawa", "NG002", "Girei", "NG002004", "Modire", "NG002004008"], ["Adamawa", "NG002", "Girei", "NG002004", "Tambo", "NG002004009"], ["Adamawa", "NG002", "Girei", "NG002004", "Wuro Dole", "NG002004010"], ["Adamawa", "NG002", "Gombi", "NG002005", "Boga", "NG002005001"], ["Adamawa", "NG002", "Gombi", "NG002005", "Duwa", "NG002005002"], ["Adamawa", "NG002", "Gombi", "NG002005", "Gaanda", "NG002005003"], ["Adamawa", "NG002", "Gombi", "NG002005", "Gabon", "NG002005004"], ["Adamawa", "NG002", "Gombi", "NG002005", "Garkida", "NG002005005"], ["Adamawa", "NG002", "Gombi", "NG002005", "Gombi North", "NG002005006"], ["Adamawa", "NG002", "Gombi", "NG002005", "Gombi South", "NG002005007"], ["Adamawa", "NG002", "Gombi", "NG002005", "Guyaku", "NG002005008"], ["Adamawa", "NG002", "Gombi", "NG002005", "Tawa", "NG002005009"], ["Adamawa", "NG002", "Gombi", "NG002005", "Yang", "NG002005010"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Banjiram", "NG002006001"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Bobini", "NG002006002"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Bodeno", "NG002006003"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Chikila", "NG002006004"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Dukul", "NG002006005"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Dumna", "NG002006006"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Guyuk", "NG002006007"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Kola", "NG002006008"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Lokoro", "NG002006009"], ["Adamawa", "NG002", "Guyuk", "NG002006", "Purakayo", "NG002006010"], ["Adamawa", "NG002", "Hong", "NG002007", "Bangshika", "NG002007001"], ["Adamawa", "NG002", "Hong", "NG002007", "Daksiri", "NG002007002"], ["Adamawa", "NG002", "Hong", "NG002007", "Garaha", "NG002007003"], ["Adamawa", "NG002", "Hong", "NG002007", "Gaya-sikalmi", "NG002007004"], ["Adamawa", "NG002", "Hong", "NG002007", "Hildi", "NG002007005"], ["Adamawa", "NG002", "Hong", "NG002007", "Hong", "NG002007006"], ["Adamawa", "NG002", "Hong", "NG002007", "Hoserezum", "NG002007007"], ["Adamawa", "NG002", "Hong", "NG002007", "Kwarhi", "NG002007008"], ["Adamawa", "NG002", "Hong", "NG002007", "Mayo Lope", "NG002007009"], ["Adamawa", "NG002", "Hong", "NG002007", "Shangui", "NG002007010"], ["Adamawa", "NG002", "Hong", "NG002007", "Thilbang", "NG002007011"], ["Adamawa", "NG002", "Hong", "NG002007", "Uba", "NG002007012"], ["Adamawa", "NG002", "Jada", "NG002008", "Danaba", "NG002008001"], ["Adamawa", "NG002", "Jada", "NG002008", "Jada 1", "NG002008002"], ["Adamawa", "NG002", "Jada", "NG002008", "Jada 2", "NG002008003"], ["Adamawa", "NG002", "Jada", "NG002008", "Koma 1", "NG002008004"], ["Adamawa", "NG002", "Jada", "NG002008", "Koma 2", "NG002008005"], ["Adamawa", "NG002", "Jada", "NG002008", "Leko", "NG002008006"], ["Adamawa", "NG002", "Jada", "NG002008", "Mapeo", "NG002008007"], ["Adamawa", "NG002", "Jada", "NG002008", "Mayo Kalaye", "NG002008008"], ["Adamawa", "NG002", "Jada", "NG002008", "Mbullo", "NG002008009"], ["Adamawa", "NG002", "Jada", "NG002008", "Nyibago", "NG002008010"], ["Adamawa", "NG002", "Jada", "NG002008", "Yeli", "NG002008011"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Dubange", "NG002009001"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Gyawana", "NG002009002"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Lafiya", "NG002009003"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Lamurde", "NG002009004"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Ngbakawo", "NG002009006"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Ngbebogun", "NG002009005"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Opalo", "NG002009007"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Rigange", "NG002009008"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Suwa", "NG002009009"], ["Adamawa", "NG002", "Lamurde", "NG002009", "Waduku", "NG002009010"], ["Adamawa", "NG002", "Madagali", "NG002010", "Bebel", "NG002010001"], ["Adamawa", "NG002", "Madagali", "NG002010", "Duhu", "NG002010002"], ["Adamawa", "NG002", "Madagali", "NG002010", "Gulak", "NG002010003"], ["Adamawa", "NG002", "Madagali", "NG002010", "Hyambula", "NG002010004"], ["Adamawa", "NG002", "Madagali", "NG002010", "Kirchinga", "NG002010005"], ["Adamawa", "NG002", "Madagali", "NG002010", "Madagali", "NG002010006"], ["Adamawa", "NG002", "Madagali", "NG002010", "Pallam", "NG002010007"], ["Adamawa", "NG002", "Madagali", "NG002010", "Sukur", "NG002010008"], ["Adamawa", "NG002", "Madagali", "NG002010", "Waga-chakawa", "NG002010009"], ["Adamawa", "NG002", "Madagali", "NG002010", "Wula", "NG002010010"], ["Adamawa", "NG002", "Maiha", "NG002011", "Bebel", "NG002011001"], ["Adamawa", "NG002", "Maiha", "NG002011", "Humbutudi", "NG002011002"], ["Adamawa", "NG002", "Maiha", "NG002011", "Konkol", "NG002011003"], ["Adamawa", "NG002", "Maiha", "NG002011", "Maiha Gari", "NG002011004"], ["Adamawa", "NG002", "Maiha", "NG002011", "Manjekin", "NG002011005"], ["Adamawa", "NG002", "Maiha", "NG002011", "Mayo Nguli", "NG002011006"], ["Adamawa", "NG002", "Maiha", "NG002011", "Pakka", "NG002011007"], ["Adamawa", "NG002", "Maiha", "NG002011", "Sorau A", "NG002011008"], ["Adamawa", "NG002", "Maiha", "NG002011", "Sorau B", "NG002011009"], ["Adamawa", "NG002", "Maiha", "NG002011", "Tambajam", "NG002011010"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Bajama", "NG002012001"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Binyeri", "NG002012002"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Gang Fada", "NG002012003"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Gengle", "NG002012004"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Gorobi", "NG002012005"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Jereng", "NG002012008"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Mayo Farang", "NG002012006"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Mbilla", "NG002012007"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Ndikong", "NG002012009"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Ribadu", "NG002012010"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Tola", "NG002012011"], ["Adamawa", "NG002", "Mayo-Belwa", "NG002012", "Yoffo", "NG002012012"], ["Adamawa", "NG002", "Michika", "NG002013", "Bazza Margi", "NG002013001"], ["Adamawa", "NG002", "Michika", "NG002013", "Futuless", "NG002013002"], ["Adamawa", "NG002", "Michika", "NG002013", "Garta", "NG002013003"], ["Adamawa", "NG002", "Michika", "NG002013", "Jigalambu", "NG002013004"], ["Adamawa", "NG002", "Michika", "NG002013", "Madzi", "NG002013005"], ["Adamawa", "NG002", "Michika", "NG002013", "Michika 1", "NG002013006"], ["Adamawa", "NG002", "Michika", "NG002013", "Michika 2", "NG002013007"], ["Adamawa", "NG002", "Michika", "NG002013", "Moda/Dlaka", "NG002013009"], ["Adamawa", "NG002", "Michika", "NG002013", "Munkavachitta", "NG002013010"], ["Adamawa", "NG002", "Michika", "NG002013", "Ninkisi/Wuro Ngiki", "NG002013008"], ["Adamawa", "NG002", "Michika", "NG002013", "Sina Kamale", "NG002013011"], ["Adamawa", "NG002", "Michika", "NG002013", "Tsukumu/Tilijo", "NG002013012"], ["Adamawa", "NG002", "Michika", "NG002013", "Tumbara/Ngabili", "NG002013014"], ["Adamawa", "NG002", "Michika", "NG002013", "Vih/Boka", "NG002013015"], ["Adamawa", "NG002", "Michika", "NG002013", "Wambilimi/Tili", "NG002013016"], ["Adamawa", "NG002", "Michika", "NG002013", "Zah", "NG002013013"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Bahuli", "NG002014001"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Betso", "NG002014002"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Digil", "NG002014003"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Kolere", "NG002014004"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Lokuwa", "NG002014005"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Mayo Bani", "NG002014006"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Mijilu", "NG002014007"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Muchalla", "NG002014008"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Sabon Layi", "NG002014009"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Vimtim", "NG002014010"], ["Adamawa", "NG002", "Mubi North", "NG002014", "Yelwa", "NG002014011"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Dirbishi", "NG002015001"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Duvu", "NG002015002"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Gella", "NG002015003"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Gude", "NG002015004"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Kwaja", "NG002015005"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Lamurde", "NG002015006"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Mugulbu", "NG002015007"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Mujara", "NG002015008"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Nassarawo", "NG002015009"], ["Adamawa", "NG002", "Mubi South", "NG002015", "Nduku", "NG002015010"], ["Adamawa", "NG002", "Numan", "NG002016", "Bare", "NG002016001"], ["Adamawa", "NG002", "Numan", "NG002016", "Bwalki", "NG002016002"], ["Adamawa", "NG002", "Numan", "NG002016", "Gamadiyo", "NG002016003"], ["Adamawa", "NG002", "Numan", "NG002016", "Imburu", "NG002016004"], ["Adamawa", "NG002", "Numan", "NG002016", "Kodomti", "NG002016005"], ["Adamawa", "NG002", "Numan", "NG002016", "Numan 1", "NG002016006"], ["Adamawa", "NG002", "Numan", "NG002016", "Numan 2", "NG002016007"], ["Adamawa", "NG002", "Numan", "NG002016", "Numan 3", "NG002016008"], ["Adamawa", "NG002", "Numan", "NG002016", "Sabon Pegi", "NG002016009"], ["Adamawa", "NG002", "Numan", "NG002016", "Vulpi", "NG002016010"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Bakta", "NG002017001"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Bodwai", "NG002017002"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Gundo", "NG002017003"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Gwapopolok", "NG002017004"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Jumbul", "NG002017005"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Ketembere", "NG002017006"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Kiri", "NG002017007"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Libbo", "NG002017008"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Shelleng", "NG002017009"], ["Adamawa", "NG002", "Shelleng", "NG002017", "Talum", "NG002017010"], ["Adamawa", "NG002", "Song", "NG002018", "Dirma", "NG002018001"], ["Adamawa", "NG002", "Song", "NG002018", "Dumne", "NG002018002"], ["Adamawa", "NG002", "Song", "NG002018", "Gudu Mboi", "NG002018003"], ["Adamawa", "NG002", "Song", "NG002018", "Kilange Funa", "NG002018004"], ["Adamawa", "NG002", "Song", "NG002018", "Kilange Hirna", "NG002018005"], ["Adamawa", "NG002", "Song", "NG002018", "Sigire", "NG002018006"], ["Adamawa", "NG002", "Song", "NG002018", "Song Gari", "NG002018007"], ["Adamawa", "NG002", "Song", "NG002018", "Song Waje", "NG002018008"], ["Adamawa", "NG002", "Song", "NG002018", "Suktu", "NG002018009"], ["Adamawa", "NG002", "Song", "NG002018", "Waltandi", "NG002018010"], ["Adamawa", "NG002", "Song", "NG002018", "Zumo", "NG002018011"], ["Adamawa", "NG002", "Toungo", "NG002019", "Dawo 1", "NG002019001"], ["Adamawa", "NG002", "Toungo", "NG002019", "Dawo 2", "NG002019002"], ["Adamawa", "NG002", "Toungo", "NG002019", "Gumti", "NG002019003"], ["Adamawa", "NG002", "Toungo", "NG002019", "Kiri 1", "NG002019004"], ["Adamawa", "NG002", "Toungo", "NG002019", "Kiri 2", "NG002019005"], ["Adamawa", "NG002", "Toungo", "NG002019", "Kogin Baba 1", "NG002019006"], ["Adamawa", "NG002", "Toungo", "NG002019", "Kogin Baba 2", "NG002019007"], ["Adamawa", "NG002", "Toungo", "NG002019", "Toungo 1", "NG002019008"], ["Adamawa", "NG002", "Toungo", "NG002019", "Toungo 2", "NG002019009"], ["Adamawa", "NG002", "Toungo", "NG002019", "Toungo 3", "NG002019010"], ["Adamawa", "NG002", "Yola North", "NG002020", "Ajiya", "NG002020001"], ["Adamawa", "NG002", "Yola North", "NG002020", "Alkalawa", "NG002020002"], ["Adamawa", "NG002", "Yola North", "NG002020", "Doubeli", "NG002020003"], ["Adamawa", "NG002", "Yola North", "NG002020", "Gwadabawa", "NG002020004"], ["Adamawa", "NG002", "Yola North", "NG002020", "Jambutu", "NG002020005"], ["Adamawa", "NG002", "Yola North", "NG002020", "Karewa", "NG002020006"], ["Adamawa", "NG002", "Yola North", "NG002020", "Limawa", "NG002020007"], ["Adamawa", "NG002", "Yola North", "NG002020", "Luggere", "NG002020008"], ["Adamawa", "NG002", "Yola North", "NG002020", "Nassarawo", "NG002020009"], ["Adamawa", "NG002", "Yola North", "NG002020", "Rumde", "NG002020010"], ["Adamawa", "NG002", "Yola North", "NG002020", "Yelwa", "NG002020011"], ["Adamawa", "NG002", "Yola South", "NG002021", "Adarawo", "NG002021001"], ["Adamawa", "NG002", "Yola South", "NG002021", "Bako", "NG002021002"], ["Adamawa", "NG002", "Yola South", "NG002021", "Bole Yolde Pate", "NG002021003"], ["Adamawa", "NG002", "Yola South", "NG002021", "Makama A", "NG002021004"], ["Adamawa", "NG002", "Yola South", "NG002021", "Makama B", "NG002021005"], ["Adamawa", "NG002", "Yola South", "NG002021", "Mbamba", "NG002021006"], ["Adamawa", "NG002", "Yola South", "NG002021", "Mbamoi", "NG002021007"], ["Adamawa", "NG002", "Yola South", "NG002021", "Namtari", "NG002021008"], ["Adamawa", "NG002", "Yola South", "NG002021", "Ngurore", "NG002021009"], ["Adamawa", "NG002", "Yola South", "NG002021", "Toungo", "NG002021010"], ["Adamawa", "NG002", "Yola South", "NG002021", "Yolde Kohi", "NG002021011"], ["Borno", "NG008", "Abadam", "NG008001", "Arege", "NG008001001"], ["Borno", "NG008", "Abadam", "NG008001", "Banowa", "NG008001002"], ["Borno", "NG008", "Abadam", "NG008001", "Busuna", "NG008001006"], ["Borno", "NG008", "Abadam", "NG008001", "Foguwa", "NG008001003"], ["Borno", "NG008", "Abadam", "NG008001", "Jabullam", "NG008001004"], ["Borno", "NG008", "Abadam", "NG008001", "Kessa'A", "NG008001007"], ["Borno", "NG008", "Abadam", "NG008001", "Kudokurgo", "NG008001005"], ["Borno", "NG008", "Abadam", "NG008001", "Yau", "NG008001008"], ["Borno", "NG008", "Abadam", "NG008001", "Yawa", "NG008001009"], ["Borno", "NG008", "Abadam", "NG008001", "Yitiwa", "NG008001010"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Askira East", "NG008002001"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Dille Huyim", "NG008002003"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Hausari Tampul", "NG008002004"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Hausari Zadawa", "NG008002013"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Lassa", "NG008002006"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Mussa", "NG008002007"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Ngohi", "NG008002008"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Ngulde", "NG008002009"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Ngurthlavu Kopa", "NG008002005"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Rumirgu Chul", "NG008002002"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Uba", "NG008002010"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Uvu Uda", "NG008002011"], ["Borno", "NG008", "Askira/Uba", "NG008002", "Wamdeo Giwi", "NG008002012"], ["Borno", "NG008", "Bama", "NG008003", "Abbaram", "NG008003007"], ["Borno", "NG008", "Bama", "NG008003", "Amchaka", "NG008003008"], ["Borno", "NG008", "Bama", "NG008003", "Andara", "NG008003001"], ["Borno", "NG008", "Bama", "NG008003", "Banki", "NG008003002"], ["Borno", "NG008", "Bama", "NG008003", "Bogomari", "NG008003012"], ["Borno", "NG008", "Bama", "NG008003", "Darajamal", "NG008003003"], ["Borno", "NG008", "Bama", "NG008003", "Goniri", "NG008003009"], ["Borno", "NG008", "Bama", "NG008003", "Gulumba", "NG008003004"], ["Borno", "NG008", "Bama", "NG008003", "Kasugula", "NG008003005"], ["Borno", "NG008", "Bama", "NG008003", "Kumshe", "NG008003006"], ["Borno", "NG008", "Bama", "NG008003", "Shehuri", "NG008003011"], ["Borno", "NG008", "Bama", "NG008003", "Soye", "NG008003010"], ["Borno", "NG008", "Bama", "NG008003", "Yabiri", "NG008003013"], ["Borno", "NG008", "Bama", "NG008003", "Zageri", "NG008003014"], ["Borno", "NG008", "Bayo", "NG008004", "Balbaya", "NG008004001"], ["Borno", "NG008", "Bayo", "NG008004", "Briyel", "NG008004002"], ["Borno", "NG008", "Bayo", "NG008004", "Fikhayel", "NG008004003"], ["Borno", "NG008", "Bayo", "NG008004", "Gamadadi", "NG008004004"], ["Borno", "NG008", "Bayo", "NG008004", "Jara-Dali", "NG008004005"], ["Borno", "NG008", "Bayo", "NG008004", "Jara-Gol", "NG008004006"], ["Borno", "NG008", "Bayo", "NG008004", "Limanti", "NG008004007"], ["Borno", "NG008", "Bayo", "NG008004", "Telli", "NG008004008"], ["Borno", "NG008", "Bayo", "NG008004", "Wuyo", "NG008004009"], ["Borno", "NG008", "Bayo", "NG008004", "Zara", "NG008004010"], ["Borno", "NG008", "Biu", "NG008005", "Buratai", "NG008005001"], ["Borno", "NG008", "Biu", "NG008005", "Dugja", "NG008005003"], ["Borno", "NG008", "Biu", "NG008005", "Galdimari", "NG008005006"], ["Borno", "NG008", "Biu", "NG008005", "Garubula", "NG008005004"], ["Borno", "NG008", "Biu", "NG008005", "Gunda", "NG008005002"], ["Borno", "NG008", "Biu", "NG008005", "Gur", "NG008005005"], ["Borno", "NG008", "Biu", "NG008005", "Mandaragirau", "NG008005007"], ["Borno", "NG008", "Biu", "NG008005", "Miringa", "NG008005008"], ["Borno", "NG008", "Biu", "NG008005", "Sulumthla", "NG008005009"], ["Borno", "NG008", "Biu", "NG008005", "Yawi", "NG008005010"], ["Borno", "NG008", "Biu", "NG008005", "Zarawuyaku", "NG008005011"], ["Borno", "NG008", "Chibok", "NG008006", "Garu", "NG008006001"], ["Borno", "NG008", "Chibok", "NG008006", "Gatamarwa", "NG008006004"], ["Borno", "NG008", "Chibok", "NG008006", "Kautikari", "NG008006005"], ["Borno", "NG008", "Chibok", "NG008006", "Korongilum", "NG008006006"], ["Borno", "NG008", "Chibok", "NG008006", "Kuburmbula", "NG008006007"], ["Borno", "NG008", "Chibok", "NG008006", "Likama", "NG008006002"], ["Borno", "NG008", "Chibok", "NG008006", "Mbalala", "NG008006008"], ["Borno", "NG008", "Chibok", "NG008006", "Mbokura", "NG008006009"], ["Borno", "NG008", "Chibok", "NG008006", "Pemi", "NG008006010"], ["Borno", "NG008", "Chibok", "NG008006", "Shirarkir", "NG008006011"], ["Borno", "NG008", "Chibok", "NG008006", "Whuntaku", "NG008006003"], ["Borno", "NG008", "Damboa", "NG008007", "Ajigin A", "NG008007001"], ["Borno", "NG008", "Damboa", "NG008007", "Ajigin B", "NG008007002"], ["Borno", "NG008", "Damboa", "NG008007", "Azir Multe", "NG008007003"], ["Borno", "NG008", "Damboa", "NG008007", "Bego", "NG008007004"], ["Borno", "NG008", "Damboa", "NG008007", "Damboa Central", "NG008007005"], ["Borno", "NG008", "Damboa", "NG008007", "Gumsuri", "NG008007006"], ["Borno", "NG008", "Damboa", "NG008007", "Kafa Mafi", "NG008007007"], ["Borno", "NG008", "Damboa", "NG008007", "Mulgo Kopchi", "NG008007008"], ["Borno", "NG008", "Damboa", "NG008007", "Nzuda Wuyaram", "NG008007009"], ["Borno", "NG008", "Damboa", "NG008007", "Wawa Korode", "NG008007010"], ["Borno", "NG008", "Dikwa", "NG008008", "Afuye", "NG008008009"], ["Borno", "NG008", "Dikwa", "NG008008", "Boboshe", "NG008008001"], ["Borno", "NG008", "Dikwa", "NG008008", "Dikwa", "NG008008002"], ["Borno", "NG008", "Dikwa", "NG008008", "Gajibo", "NG008008003"], ["Borno", "NG008", "Dikwa", "NG008008", "M. Kaza", "NG008008006"], ["Borno", "NG008", "Dikwa", "NG008008", "M. Maja", "NG008008005"], ["Borno", "NG008", "Dikwa", "NG008008", "Margata", "NG008008004"], ["Borno", "NG008", "Dikwa", "NG008008", "Muliye", "NG008008007"], ["Borno", "NG008", "Dikwa", "NG008008", "Ngudoram", "NG008008008"], ["Borno", "NG008", "Dikwa", "NG008008", "Ufaye", "NG008008010"], ["Borno", "NG008", "Gubio", "NG008009", "Ardimini", "NG008009001"], ["Borno", "NG008", "Gubio", "NG008009", "Dabira", "NG008009002"], ["Borno", "NG008", "Gubio", "NG008009", "Felo", "NG008009003"], ["Borno", "NG008", "Gubio", "NG008009", "Gamawu", "NG008009004"], ["Borno", "NG008", "Gubio", "NG008009", "Gazabure", "NG008009005"], ["Borno", "NG008", "Gubio", "NG008009", "Gubio 1", "NG008009006"], ["Borno", "NG008", "Gubio", "NG008009", "Gubio 2", "NG008009007"], ["Borno", "NG008", "Gubio", "NG008009", "Kingowa", "NG008009008"], ["Borno", "NG008", "Gubio", "NG008009", "Ngetra", "NG008009009"], ["Borno", "NG008", "Gubio", "NG008009", "Zowo", "NG008009010"], ["Borno", "NG008", "Guzamala", "NG008010", "Aduwa", "NG008010001"], ["Borno", "NG008", "Guzamala", "NG008010", "Gudumbali East", "NG008010002"], ["Borno", "NG008", "Guzamala", "NG008010", "Gudumbali West", "NG008010003"], ["Borno", "NG008", "Guzamala", "NG008010", "Guworam", "NG008010004"], ["Borno", "NG008", "Guzamala", "NG008010", "Guzamala East", "NG008010005"], ["Borno", "NG008", "Guzamala", "NG008010", "Guzamala West", "NG008010006"], ["Borno", "NG008", "Guzamala", "NG008010", "Kingarawa", "NG008010007"], ["Borno", "NG008", "Guzamala", "NG008010", "Mairari", "NG008010008"], ["Borno", "NG008", "Guzamala", "NG008010", "Moduri", "NG008010009"], ["Borno", "NG008", "Guzamala", "NG008010", "Wamiri", "NG008010010"], ["Borno", "NG008", "Gwoza", "NG008011", "Ashigashiya", "NG008011001"], ["Borno", "NG008", "Gwoza", "NG008011", "Bita Izge", "NG008011002"], ["Borno", "NG008", "Gwoza", "NG008011", "Bulabulin", "NG008011007"], ["Borno", "NG008", "Gwoza", "NG008011", "Chikide", "NG008011009"], ["Borno", "NG008", "Gwoza", "NG008011", "Gava Agapalawa", "NG008011004"], ["Borno", "NG008", "Gwoza", "NG008011", "Guduf A&B", "NG008011005"], ["Borno", "NG008", "Gwoza", "NG008011", "Hambagda", "NG008011008"], ["Borno", "NG008", "Gwoza", "NG008011", "Hausari", "NG008011006"], ["Borno", "NG008", "Gwoza", "NG008011", "Kirawa", "NG008011010"], ["Borno", "NG008", "Gwoza", "NG008011", "Kuranabasa", "NG008011011"], ["Borno", "NG008", "Gwoza", "NG008011", "Ngoshe", "NG008011012"], ["Borno", "NG008", "Gwoza", "NG008011", "Pulka Bokko", "NG008011013"], ["Borno", "NG008", "Gwoza", "NG008011", "Wala Warabe", "NG008011003"], ["Borno", "NG008", "Hawul", "NG008012", "Bilingwi", "NG008012001"], ["Borno", "NG008", "Hawul", "NG008012", "Grim Damchoba", "NG008012002"], ["Borno", "NG008", "Hawul", "NG008012", "Gwangang Chata", "NG008012003"], ["Borno", "NG008", "Hawul", "NG008012", "Hizhibwala", "NG008012004"], ["Borno", "NG008", "Hawul", "NG008012", "Kidda", "NG008012005"], ["Borno", "NG008", "Hawul", "NG008012", "Kwajaffa", "NG008012006"], ["Borno", "NG008", "Hawul", "NG008012", "Kwayabura", "NG008012007"], ["Borno", "NG008", "Hawul", "NG008012", "Marama Kidang", "NG008012008"], ["Borno", "NG008", "Hawul", "NG008012", "Pama Whitambaya", "NG008012009"], ["Borno", "NG008", "Hawul", "NG008012", "Puba Vidau", "NG008012010"], ["Borno", "NG008", "Hawul", "NG008012", "Sakwa Hema", "NG008012011"], ["Borno", "NG008", "Hawul", "NG008012", "Shaffa", "NG008012012"], ["Borno", "NG008", "Jere", "NG008013", "Alau", "NG008013001"], ["Borno", "NG008", "Jere", "NG008013", "Dala", "NG008013003"], ["Borno", "NG008", "Jere", "NG008013", "Dusuma", "NG008013004"], ["Borno", "NG008", "Jere", "NG008013", "Galtimari", "NG008013002"], ["Borno", "NG008", "Jere", "NG008013", "Gomari", "NG008013005"], ["Borno", "NG008", "Jere", "NG008013", "Gongulong", "NG008013006"], ["Borno", "NG008", "Jere", "NG008013", "Khadammari", "NG008013010"], ["Borno", "NG008", "Jere", "NG008013", "Maimusari", "NG008013007"], ["Borno", "NG008", "Jere", "NG008013", "Mairi", "NG008013008"], ["Borno", "NG008", "Jere", "NG008013", "Mashamari", "NG008013009"], ["Borno", "NG008", "Jere", "NG008013", "Old Maiduguri", "NG008013011"], ["Borno", "NG008", "Jere", "NG008013", "Tuba", "NG008013012"], ["Borno", "NG008", "Kaga", "NG008014", "Benisheikh", "NG008014002"], ["Borno", "NG008", "Kaga", "NG008014", "Borgozo", "NG008014003"], ["Borno", "NG008", "Kaga", "NG008014", "Dogoma", "NG008014004"], ["Borno", "NG008", "Kaga", "NG008014", "Dongo", "NG008014005"], ["Borno", "NG008", "Kaga", "NG008014", "Fai", "NG008014001"], ["Borno", "NG008", "Kaga", "NG008014", "Galangi", "NG008014006"], ["Borno", "NG008", "Kaga", "NG008014", "Guwo", "NG008014007"], ["Borno", "NG008", "Kaga", "NG008014", "Karagawaru", "NG008014008"], ["Borno", "NG008", "Kaga", "NG008014", "Mainok", "NG008014009"], ["Borno", "NG008", "Kaga", "NG008014", "Marguba", "NG008014010"], ["Borno", "NG008", "Kaga", "NG008014", "Ngamdu", "NG008014011"], ["Borno", "NG008", "Kaga", "NG008014", "Shettimari", "NG008014012"], ["Borno", "NG008", "Kaga", "NG008014", "Tobolo", "NG008014013"], ["Borno", "NG008", "Kaga", "NG008014", "Wajiro", "NG008014014"], ["Borno", "NG008", "Kaga", "NG008014", "Wassaram", "NG008014015"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Daima", "NG008015009"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Jarawa", "NG008015001"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Jilbe", "NG008015002"], ["Borno", "NG008", "Kala/Balge", "NG008015", "K Kaudi", "NG008015003"], ["Borno", "NG008", "Kala/Balge", "NG008015", "K Kumaga", "NG008015005"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Kala", "NG008015004"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Mada", "NG008015006"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Moholo", "NG008015007"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Rann", "NG008015008"], ["Borno", "NG008", "Kala/Balge", "NG008015", "Sigal", "NG008015010"], ["Borno", "NG008", "Konduga", "NG008016", "Ajiri", "NG008016011"], ["Borno", "NG008", "Konduga", "NG008016", "Auno", "NG008016001"], ["Borno", "NG008", "Konduga", "NG008016", "Dalori", "NG008016002"], ["Borno", "NG008", "Konduga", "NG008016", "Dalwa", "NG008016009"], ["Borno", "NG008", "Konduga", "NG008016", "Jakana", "NG008016004"], ["Borno", "NG008", "Konduga", "NG008016", "Kawuri", "NG008016005"], ["Borno", "NG008", "Konduga", "NG008016", "Konduga", "NG008016007"], ["Borno", "NG008", "Konduga", "NG008016", "Malari", "NG008016003"], ["Borno", "NG008", "Konduga", "NG008016", "Yabal", "NG008016008"], ["Borno", "NG008", "Konduga", "NG008016", "Yajiwa", "NG008016010"], ["Borno", "NG008", "Konduga", "NG008016", "Yale", "NG008016006"], ["Borno", "NG008", "Kukawa", "NG008017", "Alagarno", "NG008017001"], ["Borno", "NG008", "Kukawa", "NG008017", "Baga", "NG008017002"], ["Borno", "NG008", "Kukawa", "NG008017", "Barwati", "NG008017009"], ["Borno", "NG008", "Kukawa", "NG008017", "Bundur", "NG008017003"], ["Borno", "NG008", "Kukawa", "NG008017", "Dogoshi", "NG008017004"], ["Borno", "NG008", "Kukawa", "NG008017", "Doro", "NG008017005"], ["Borno", "NG008", "Kukawa", "NG008017", "Kauwa", "NG008017006"], ["Borno", "NG008", "Kukawa", "NG008017", "Kekeno", "NG008017007"], ["Borno", "NG008", "Kukawa", "NG008017", "Kukawa", "NG008017008"], ["Borno", "NG008", "Kukawa", "NG008017", "Yoyo", "NG008017010"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Bila Gusi", "NG008018002"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Guwal", "NG008018003"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Gwandi", "NG008018001"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Kubuku", "NG008018004"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Kurba Gayi", "NG008018005"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Kwaya Kusar", "NG008018006"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Peta", "NG008018007"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Wada", "NG008018008"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Wawa", "NG008018009"], ["Borno", "NG008", "Kwaya Kusar", "NG008018", "Yimirdalang", "NG008018010"], ["Borno", "NG008", "Mafa", "NG008019", "Ajiri", "NG008019002"], ["Borno", "NG008", "Mafa", "NG008019", "Gawa", "NG008019003"], ["Borno", "NG008", "Mafa", "NG008019", "Koshebe", "NG008019004"], ["Borno", "NG008", "Mafa", "NG008019", "Lege", "NG008019005"], ["Borno", "NG008", "Mafa", "NG008019", "Limanti", "NG008019006"], ["Borno", "NG008", "Mafa", "NG008019", "Loskuri", "NG008019007"], ["Borno", "NG008", "Mafa", "NG008019", "Ma'Afa", "NG008019008"], ["Borno", "NG008", "Mafa", "NG008019", "Mafa", "NG008019009"], ["Borno", "NG008", "Mafa", "NG008019", "Masu", "NG008019010"], ["Borno", "NG008", "Mafa", "NG008019", "Mujigine", "NG008019011"], ["Borno", "NG008", "Mafa", "NG008019", "Tamsu Ngamdua", "NG008019012"], ["Borno", "NG008", "Mafa", "NG008019", "Zangebe", "NG008019001"], ["Borno", "NG008", "Magumeri", "NG008020", "Ardoram", "NG008020001"], ["Borno", "NG008", "Magumeri", "NG008020", "Ayi Yasku", "NG008020002"], ["Borno", "NG008", "Magumeri", "NG008020", "Borno Yesu", "NG008020003"], ["Borno", "NG008", "Magumeri", "NG008020", "Furram", "NG008020004"], ["Borno", "NG008", "Magumeri", "NG008020", "Gajigana", "NG008020005"], ["Borno", "NG008", "Magumeri", "NG008020", "Hoyo Chingowa", "NG008020007"], ["Borno", "NG008", "Magumeri", "NG008020", "Kalizoram", "NG008020008"], ["Borno", "NG008", "Magumeri", "NG008020", "Kararam", "NG008020009"], ["Borno", "NG008", "Magumeri", "NG008020", "Kupti", "NG008020010"], ["Borno", "NG008", "Magumeri", "NG008020", "Magumeri", "NG008020011"], ["Borno", "NG008", "Magumeri", "NG008020", "Ngamma", "NG008020012"], ["Borno", "NG008", "Magumeri", "NG008020", "Ngubala Bamma", "NG008020013"], ["Borno", "NG008", "Magumeri", "NG008020", "Titiwa", "NG008020006"], ["Borno", "NG008", "Maiduguri", "NG008021", "Bolori I", "NG008021001"], ["Borno", "NG008", "Maiduguri", "NG008021", "Bolori II", "NG008021002"], ["Borno", "NG008", "Maiduguri", "NG008021", "Bulabulin", "NG008021003"], ["Borno", "NG008", "Maiduguri", "NG008021", "Fezzan", "NG008021004"], ["Borno", "NG008", "Maiduguri", "NG008021", "Gamboru", "NG008021005"], ["Borno", "NG008", "Maiduguri", "NG008021", "Gwange I", "NG008021006"], ["Borno", "NG008", "Maiduguri", "NG008021", "Gwange II", "NG008021007"], ["Borno", "NG008", "Maiduguri", "NG008021", "Gwange III", "NG008021008"], ["Borno", "NG008", "Maiduguri", "NG008021", "Hausari", "NG008021009"], ["Borno", "NG008", "Maiduguri", "NG008021", "Lamisula", "NG008021010"], ["Borno", "NG008", "Maiduguri", "NG008021", "Limanti", "NG008021011"], ["Borno", "NG008", "Maiduguri", "NG008021", "Mafoni", "NG008021012"], ["Borno", "NG008", "Maiduguri", "NG008021", "Maisandari", "NG008021013"], ["Borno", "NG008", "Maiduguri", "NG008021", "Shehuri North", "NG008021014"], ["Borno", "NG008", "Maiduguri", "NG008021", "Shehuri South", "NG008021015"], ["Borno", "NG008", "Marte", "NG008022", "A Lawant", "NG008022002"], ["Borno", "NG008", "Marte", "NG008022", "Ala", "NG008022001"], ["Borno", "NG008", "Marte", "NG008022", "Badairi", "NG008022011"], ["Borno", "NG008", "Marte", "NG008022", "Borsori", "NG008022003"], ["Borno", "NG008", "Marte", "NG008022", "Gumna", "NG008022004"], ["Borno", "NG008", "Marte", "NG008022", "Kabulawa", "NG008022005"], ["Borno", "NG008", "Marte", "NG008022", "Kirenowa", "NG008022006"], ["Borno", "NG008", "Marte", "NG008022", "Kulli", "NG008022007"], ["Borno", "NG008", "Marte", "NG008022", "Marte", "NG008022008"], ["Borno", "NG008", "Marte", "NG008022", "Musune", "NG008022010"], ["Borno", "NG008", "Marte", "NG008022", "Muwalli", "NG008022009"], ["Borno", "NG008", "Marte", "NG008022", "Njine", "NG008022012"], ["Borno", "NG008", "Marte", "NG008022", "Zaga Ngalori", "NG008022013"], ["Borno", "NG008", "Mobbar", "NG008023", "Asaga", "NG008023001"], ["Borno", "NG008", "Mobbar", "NG008023", "Bogum", "NG008023002"], ["Borno", "NG008", "Mobbar", "NG008023", "Chamba", "NG008023003"], ["Borno", "NG008", "Mobbar", "NG008023", "Damasak", "NG008023004"], ["Borno", "NG008", "Mobbar", "NG008023", "Duji", "NG008023005"], ["Borno", "NG008", "Mobbar", "NG008023", "Gashigar", "NG008023006"], ["Borno", "NG008", "Mobbar", "NG008023", "Kareto", "NG008023007"], ["Borno", "NG008", "Mobbar", "NG008023", "Layi", "NG008023008"], ["Borno", "NG008", "Mobbar", "NG008023", "Zari", "NG008023010"], ["Borno", "NG008", "Mobbar", "NG008023", "Zulum Umarti", "NG008023009"], ["Borno", "NG008", "Monguno", "NG008024", "Damakuli", "NG008024001"], ["Borno", "NG008", "Monguno", "NG008024", "Kaguram", "NG008024002"], ["Borno", "NG008", "Monguno", "NG008024", "Kumalia", "NG008024003"], ["Borno", "NG008", "Monguno", "NG008024", "Mandala", "NG008024004"], ["Borno", "NG008", "Monguno", "NG008024", "Mintar", "NG008024005"], ["Borno", "NG008", "Monguno", "NG008024", "Mofio", "NG008024006"], ["Borno", "NG008", "Monguno", "NG008024", "Monguno", "NG008024007"], ["Borno", "NG008", "Monguno", "NG008024", "Ngurno", "NG008024008"], ["Borno", "NG008", "Monguno", "NG008024", "Sure", "NG008024009"], ["Borno", "NG008", "Monguno", "NG008024", "Wulo", "NG008024010"], ["Borno", "NG008", "Monguno", "NG008024", "Yele", "NG008024011"], ["Borno", "NG008", "Monguno", "NG008024", "Zulum", "NG008024012"], ["Borno", "NG008", "Ngala", "NG008025", "Fuye", "NG008025001"], ["Borno", "NG008", "Ngala", "NG008025", "Gamboru A", "NG008025007"], ["Borno", "NG008", "Ngala", "NG008025", "Gamboru B", "NG008025002"], ["Borno", "NG008", "Ngala", "NG008025", "Gamboru C", "NG008025003"], ["Borno", "NG008", "Ngala", "NG008025", "Logumane", "NG008025004"], ["Borno", "NG008", "Ngala", "NG008025", "Ndufu", "NG008025005"], ["Borno", "NG008", "Ngala", "NG008025", "Ngala", "NG008025006"], ["Borno", "NG008", "Ngala", "NG008025", "Shehuri", "NG008025009"], ["Borno", "NG008", "Ngala", "NG008025", "Warshele", "NG008025010"], ["Borno", "NG008", "Ngala", "NG008025", "Wulgo", "NG008025011"], ["Borno", "NG008", "Nganzai", "NG008026", "Alarge", "NG008026001"], ["Borno", "NG008", "Nganzai", "NG008026", "Badu", "NG008026002"], ["Borno", "NG008", "Nganzai", "NG008026", "Damaram", "NG008026003"], ["Borno", "NG008", "Nganzai", "NG008026", "Gadai", "NG008026004"], ["Borno", "NG008", "Nganzai", "NG008026", "Gajiram", "NG008026005"], ["Borno", "NG008", "Nganzai", "NG008026", "Jigalta", "NG008026006"], ["Borno", "NG008", "Nganzai", "NG008026", "Kuda", "NG008026007"], ["Borno", "NG008", "Nganzai", "NG008026", "Kurnawa", "NG008026008"], ["Borno", "NG008", "Nganzai", "NG008026", "Maiwa", "NG008026009"], ["Borno", "NG008", "Nganzai", "NG008026", "Miye", "NG008026010"], ["Borno", "NG008", "Nganzai", "NG008026", "Sabsabuwa", "NG008026011"], ["Borno", "NG008", "Nganzai", "NG008026", "Sugundare", "NG008026012"], ["Borno", "NG008", "Shani", "NG008027", "Bargu", "NG008027001"], ["Borno", "NG008", "Shani", "NG008027", "Buma", "NG008027002"], ["Borno", "NG008", "Shani", "NG008027", "Gasi", "NG008027003"], ["Borno", "NG008", "Shani", "NG008027", "Gora", "NG008027004"], ["Borno", "NG008", "Shani", "NG008027", "Gwalasho", "NG008027005"], ["Borno", "NG008", "Shani", "NG008027", "Gwaskara", "NG008027006"], ["Borno", "NG008", "Shani", "NG008027", "Kombo", "NG008027007"], ["Borno", "NG008", "Shani", "NG008027", "Kubo", "NG008027008"], ["Borno", "NG008", "Shani", "NG008027", "Lakundum", "NG008027009"], ["Borno", "NG008", "Shani", "NG008027", "Shani", "NG008027010"], ["Borno", "NG008", "Shani", "NG008027", "Walama", "NG008027011"], ["Yobe", "NG036", "Bade", "NG036001", "Dagona", "NG036001001"], ["Yobe", "NG036", "Bade", "NG036001", "Dawayo", "NG036001002"], ["Yobe", "NG036", "Bade", "NG036001", "Gwio-Kura", "NG036001003"], ["Yobe", "NG036", "Bade", "NG036001", "Katuzu", "NG036001004"], ["Yobe", "NG036", "Bade", "NG036001", "Lawan Fannami", "NG036001005"], ["Yobe", "NG036", "Bade", "NG036001", "Lawan Musa", "NG036001006"], ["Yobe", "NG036", "Bade", "NG036001", "Sabon Gari", "NG036001007"], ["Yobe", "NG036", "Bade", "NG036001", "Sarkin Hausawa", "NG036001008"], ["Yobe", "NG036", "Bade", "NG036001", "Tsugum Tagali", "NG036001009"], ["Yobe", "NG036", "Bade", "NG036001", "Zango", "NG036001010"], ["Yobe", "NG036", "Bursari", "NG036002", "Bayamari", "NG036002001"], ["Yobe", "NG036", "Bursari", "NG036002", "Danani", "NG036002002"], ["Yobe", "NG036", "Bursari", "NG036002", "Dapchi", "NG036002003"], ["Yobe", "NG036", "Bursari", "NG036002", "Guba Dapso", "NG036002004"], ["Yobe", "NG036", "Bursari", "NG036002", "Guji Metalari", "NG036002005"], ["Yobe", "NG036", "Bursari", "NG036002", "Jawa G Dole", "NG036002006"], ["Yobe", "NG036", "Bursari", "NG036002", "Juluri Damnawa", "NG036002007"], ["Yobe", "NG036", "Bursari", "NG036002", "Kaliyari", "NG036002008"], ["Yobe", "NG036", "Bursari", "NG036002", "Kurnawa", "NG036002009"], ["Yobe", "NG036", "Bursari", "NG036002", "Masaba", "NG036002010"], ["Yobe", "NG036", "Damaturu", "NG036003", "Bindigari Pawari", "NG036003001"], ["Yobe", "NG036", "Damaturu", "NG036003", "Damakasu", "NG036003002"], ["Yobe", "NG036", "Damaturu", "NG036003", "Damaturu Central", "NG036003003"], ["Yobe", "NG036", "Damaturu", "NG036003", "Gambir Moduri", "NG036003004"], ["Yobe", "NG036", "Damaturu", "NG036003", "Kalallawa Gabai", "NG036003005"], ["Yobe", "NG036", "Damaturu", "NG036003", "Kukareta Warsala", "NG036003006"], ["Yobe", "NG036", "Damaturu", "NG036003", "Maisandari Wi", "NG036003007"], ["Yobe", "NG036", "Damaturu", "NG036003", "Murfakalam", "NG036003008"], ["Yobe", "NG036", "Damaturu", "NG036003", "Nayinawa", "NG036003009"], ["Yobe", "NG036", "Damaturu", "NG036003", "Njiwaji Gwange", "NG036003010"], ["Yobe", "NG036", "Damaturu", "NG036003", "Sasawa Kabaru", "NG036003011"], ["Yobe", "NG036", "Fika", "NG036004", "Fika Anze", "NG036004001"], ["Yobe", "NG036", "Fika", "NG036004", "Gadaka", "NG036004002"], ["Yobe", "NG036", "Fika", "NG036004", "Garu", "NG036004003"], ["Yobe", "NG036", "Fika", "NG036004", "Gudi Dozi", "NG036004004"], ["Yobe", "NG036", "Fika", "NG036004", "Janga", "NG036004005"], ["Yobe", "NG036", "Fika", "NG036004", "Mubi Fussami", "NG036004006"], ["Yobe", "NG036", "Fika", "NG036004", "Ngalda", "NG036004007"], ["Yobe", "NG036", "Fika", "NG036004", "Shoye", "NG036004008"], ["Yobe", "NG036", "Fika", "NG036004", "Turmi Malori", "NG036004009"], ["Yobe", "NG036", "Fika", "NG036004", "Zangaya Mazawaun", "NG036004010"], ["Yobe", "NG036", "Fune", "NG036005", "Alagarno", "NG036005001"], ["Yobe", "NG036", "Fune", "NG036005", "Borno Kiji", "NG036005002"], ["Yobe", "NG036", "Fune", "NG036005", "Damagum A", "NG036005003"], ["Yobe", "NG036", "Fune", "NG036005", "Damagum B", "NG036005004"], ["Yobe", "NG036", "Fune", "NG036005", "Daura A", "NG036005005"], ["Yobe", "NG036", "Fune", "NG036005", "Daura B", "NG036005006"], ["Yobe", "NG036", "Fune", "NG036005", "Jajere", "NG036005007"], ["Yobe", "NG036", "Fune", "NG036005", "Kayeri", "NG036005008"], ["Yobe", "NG036", "Fune", "NG036005", "Kollere Kafaje", "NG036005009"], ["Yobe", "NG036", "Fune", "NG036005", "Marmari Gudugurka", "NG036005010"], ["Yobe", "NG036", "Fune", "NG036005", "Mashio", "NG036005011"], ["Yobe", "NG036", "Fune", "NG036005", "Ngelzarma A", "NG036005012"], ["Yobe", "NG036", "Fune", "NG036005", "Ngelzarma B", "NG036005013"], ["Yobe", "NG036", "Geidam", "NG036006", "Asheikri 1", "NG036006001"], ["Yobe", "NG036", "Geidam", "NG036006", "Asheikri 2", "NG036006002"], ["Yobe", "NG036", "Geidam", "NG036006", "Balle", "NG036006003"], ["Yobe", "NG036", "Geidam", "NG036006", "Borko", "NG036006004"], ["Yobe", "NG036", "Geidam", "NG036006", "Fukurti", "NG036006005"], ["Yobe", "NG036", "Geidam", "NG036006", "Futchimiram", "NG036006006"], ["Yobe", "NG036", "Geidam", "NG036006", "Gumsa", "NG036006007"], ["Yobe", "NG036", "Geidam", "NG036006", "Hausari", "NG036006008"], ["Yobe", "NG036", "Geidam", "NG036006", "Jororo", "NG036006009"], ["Yobe", "NG036", "Geidam", "NG036006", "Kusur", "NG036006010"], ["Yobe", "NG036", "Geidam", "NG036006", "Ma'Anna", "NG036006011"], ["Yobe", "NG036", "Gujba", "NG036007", "Buni Gari", "NG036007001"], ["Yobe", "NG036", "Gujba", "NG036007", "Buni Yadi", "NG036007002"], ["Yobe", "NG036", "Gujba", "NG036007", "Dadingel", "NG036007003"], ["Yobe", "NG036", "Gujba", "NG036007", "Goniri", "NG036007004"], ["Yobe", "NG036", "Gujba", "NG036007", "Gotala", "NG036007005"], ["Yobe", "NG036", "Gujba", "NG036007", "Gujba", "NG036007006"], ["Yobe", "NG036", "Gujba", "NG036007", "Mandunari", "NG036007007"], ["Yobe", "NG036", "Gujba", "NG036007", "Mutai", "NG036007008"], ["Yobe", "NG036", "Gujba", "NG036007", "Ngurbuwa", "NG036007009"], ["Yobe", "NG036", "Gujba", "NG036007", "Wagir", "NG036007010"], ["Yobe", "NG036", "Gulani", "NG036008", "Bara", "NG036008001"], ["Yobe", "NG036", "Gulani", "NG036008", "Bularafa", "NG036008002"], ["Yobe", "NG036", "Gulani", "NG036008", "Bumsa", "NG036008003"], ["Yobe", "NG036", "Gulani", "NG036008", "Dokshi", "NG036008004"], ["Yobe", "NG036", "Gulani", "NG036008", "Gabai", "NG036008005"], ["Yobe", "NG036", "Gulani", "NG036008", "Gagure", "NG036008006"], ["Yobe", "NG036", "Gulani", "NG036008", "Garin Tuwo", "NG036008007"], ["Yobe", "NG036", "Gulani", "NG036008", "Gulani", "NG036008008"], ["Yobe", "NG036", "Gulani", "NG036008", "Kushimaga", "NG036008009"], ["Yobe", "NG036", "Gulani", "NG036008", "Njibulwa", "NG036008010"], ["Yobe", "NG036", "Gulani", "NG036008", "Ruhu", "NG036008011"], ["Yobe", "NG036", "Gulani", "NG036008", "Teteba", "NG036008012"], ["Yobe", "NG036", "Jakusko", "NG036009", "Buduwa", "NG036009001"], ["Yobe", "NG036", "Jakusko", "NG036009", "Dumbari", "NG036009002"], ["Yobe", "NG036", "Jakusko", "NG036009", "Gidgid Bayam", "NG036009003"], ["Yobe", "NG036", "Jakusko", "NG036009", "Gorgoram", "NG036009004"], ["Yobe", "NG036", "Jakusko", "NG036009", "Jaba", "NG036009005"], ["Yobe", "NG036", "Jakusko", "NG036009", "Jakusko", "NG036009006"], ["Yobe", "NG036", "Jakusko", "NG036009", "Jawur Katamma", "NG036009007"], ["Yobe", "NG036", "Jakusko", "NG036009", "Lafiya Loi Loi", "NG036009008"], ["Yobe", "NG036", "Jakusko", "NG036009", "Muguram", "NG036009009"], ["Yobe", "NG036", "Jakusko", "NG036009", "Zabudum Dachia", "NG036009010"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Bukarti", "NG036010001"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Fajiganari", "NG036010002"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Garin Gawo", "NG036010003"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Gasma", "NG036010004"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Jajeri", "NG036010005"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Jaji Maji", "NG036010006"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Karasuwa Galu", "NG036010007"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Karauswa Garu Guna", "NG036010008"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Wachakal", "NG036010009"], ["Yobe", "NG036", "Karasuwa", "NG036010", "Waro", "NG036010010"], ["Yobe", "NG036", "Machina", "NG036011", "Bogo", "NG036011001"], ["Yobe", "NG036", "Machina", "NG036011", "Damai", "NG036011002"], ["Yobe", "NG036", "Machina", "NG036011", "Dole", "NG036011003"], ["Yobe", "NG036", "Machina", "NG036011", "Falimaram", "NG036011004"], ["Yobe", "NG036", "Machina", "NG036011", "Konkomma", "NG036011005"], ["Yobe", "NG036", "Machina", "NG036011", "Kukayasku", "NG036011006"], ["Yobe", "NG036", "Machina", "NG036011", "Lamisu", "NG036011007"], ["Yobe", "NG036", "Machina", "NG036011", "Machina", "NG036011008"], ["Yobe", "NG036", "Machina", "NG036011", "Maskandare", "NG036011009"], ["Yobe", "NG036", "Machina", "NG036011", "Taganama", "NG036011010"], ["Yobe", "NG036", "Nangere", "NG036012", "Chilariye", "NG036012001"], ["Yobe", "NG036", "Nangere", "NG036012", "Chukuriya", "NG036012002"], ["Yobe", "NG036", "Nangere", "NG036012", "Dawasa", "NG036012003"], ["Yobe", "NG036", "Nangere", "NG036012", "Dazigau", "NG036012004"], ["Yobe", "NG036", "Nangere", "NG036012", "Degubi", "NG036012005"], ["Yobe", "NG036", "Nangere", "NG036012", "Dudduye", "NG036012006"], ["Yobe", "NG036", "Nangere", "NG036012", "Kukuri", "NG036012007"], ["Yobe", "NG036", "Nangere", "NG036012", "Langawa Darin", "NG036012008"], ["Yobe", "NG036", "Nangere", "NG036012", "Nangere", "NG036012009"], ["Yobe", "NG036", "Nangere", "NG036012", "Tikau", "NG036012010"], ["Yobe", "NG036", "Nangere", "NG036012", "Watinani", "NG036012011"], ["Yobe", "NG036", "Nguru", "NG036013", "Afunori", "NG036013001"], ["Yobe", "NG036", "Nguru", "NG036013", "Bulabulin", "NG036013002"], ["Yobe", "NG036", "Nguru", "NG036013", "Bulanguwa", "NG036013003"], ["Yobe", "NG036", "Nguru", "NG036013", "Dabule", "NG036013004"], ["Yobe", "NG036", "Nguru", "NG036013", "Dumsai", "NG036013005"], ["Yobe", "NG036", "Nguru", "NG036013", "Hausari", "NG036013006"], ["Yobe", "NG036", "Nguru", "NG036013", "Kanuri", "NG036013007"], ["Yobe", "NG036", "Nguru", "NG036013", "Maja Kura", "NG036013008"], ["Yobe", "NG036", "Nguru", "NG036013", "Ngarbi", "NG036013009"], ["Yobe", "NG036", "Nguru", "NG036013", "Nglaiwa", "NG036013010"], ["Yobe", "NG036", "Potiskum", "NG036014", "Bare Bari", "NG036014001"], ["Yobe", "NG036", "Potiskum", "NG036014", "Bolewa A", "NG036014002"], ["Yobe", "NG036", "Potiskum", "NG036014", "Bolewa B", "NG036014003"], ["Yobe", "NG036", "Potiskum", "NG036014", "Danchuwa", "NG036014004"], ["Yobe", "NG036", "Potiskum", "NG036014", "Dogo Tebo", "NG036014005"], ["Yobe", "NG036", "Potiskum", "NG036014", "Dogon Nini", "NG036014006"], ["Yobe", "NG036", "Potiskum", "NG036014", "Hausawa Asibiti", "NG036014007"], ["Yobe", "NG036", "Potiskum", "NG036014", "Mamudo", "NG036014008"], ["Yobe", "NG036", "Potiskum", "NG036014", "Ngojin", "NG036014009"], ["Yobe", "NG036", "Potiskum", "NG036014", "Yerimaram", "NG036014010"], ["Yobe", "NG036", "Tarmua", "NG036015", "Babangida", "NG036015001"], ["Yobe", "NG036", "Tarmua", "NG036015", "Biriri", "NG036015002"], ["Yobe", "NG036", "Tarmua", "NG036015", "Goduram", "NG036015003"], ["Yobe", "NG036", "Tarmua", "NG036015", "Jumbam", "NG036015004"], ["Yobe", "NG036", "Tarmua", "NG036015", "Koriyel", "NG036015005"], ["Yobe", "NG036", "Tarmua", "NG036015", "Lantaiwa", "NG036015006"], ["Yobe", "NG036", "Tarmua", "NG036015", "Mafa", "NG036015007"], ["Yobe", "NG036", "Tarmua", "NG036015", "Manda Da'A", "NG036015008"], ["Yobe", "NG036", "Tarmua", "NG036015", "Shekau", "NG036015009"], ["Yobe", "NG036", "Tarmua", "NG036015", "Sungul Koka", "NG036015010"], ["Yobe", "NG036", "Yunusari", "NG036016", "Bultuwa", "NG036016001"], ["Yobe", "NG036", "Yunusari", "NG036016", "Degaltura", "NG036016002"], ["Yobe", "NG036", "Yunusari", "NG036016", "Dekwa", "NG036016003"], ["Yobe", "NG036", "Yunusari", "NG036016", "Dilala", "NG036016004"], ["Yobe", "NG036", "Yunusari", "NG036016", "Kafiya", "NG036016005"], ["Yobe", "NG036", "Yunusari", "NG036016", "Mairari", "NG036016006"], ["Yobe", "NG036", "Yunusari", "NG036016", "Mozogun", "NG036016007"], ["Yobe", "NG036", "Yunusari", "NG036016", "Toshia", "NG036016008"], ["Yobe", "NG036", "Yunusari", "NG036016", "Yunusari", "NG036016009"], ["Yobe", "NG036", "Yunusari", "NG036016", "Zabudum Dachia", "NG036016010"], ["Yobe", "NG036", "Yusufari", "NG036017", "Bulatura", "NG036017001"], ["Yobe", "NG036", "Yusufari", "NG036017", "Gumshi", "NG036017002"], ["Yobe", "NG036", "Yusufari", "NG036017", "Guya", "NG036017003"], ["Yobe", "NG036", "Yusufari", "NG036017", "Jebuwa", "NG036017004"], ["Yobe", "NG036", "Yusufari", "NG036017", "Kumagannam", "NG036017005"], ["Yobe", "NG036", "Yusufari", "NG036017", "Maimalari", "NG036017006"], ["Yobe", "NG036", "Yusufari", "NG036017", "Mayori", "NG036017007"], ["Yobe", "NG036", "Yusufari", "NG036017", "Sumbar", "NG036017008"], ["Yobe", "NG036", "Yusufari", "NG036017", "Tulotulo", "NG036017009"], ["Yobe", "NG036", "Yusufari", "NG036017", "Yusufari", "NG036017010"]], "locationTypes": ["Community", "Health Center", "IDPs Camp", "IDPs in Host Community Shelters", "Refugee Camp", "School"], "emergencyTypes": ["Cholera", "Flooding", "Malnutrition", "Fire-outbreak", "Conflict", "Refugees", "Nexus"], "domains": ["Water", "Sanitation", "Hygiene"], "activityTable": [["Water", "Borehole Construction", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Boreholes"], ["Water", "Borehole upgrade", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Boreholes"], ["Water", "Borehole Rehabilitation", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Boreholes"], ["Water", "Reticulation Construction", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Boreholes"], ["Water", "Reticulation Rehabilitation", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Boreholes"], ["Water", "Water System - O & M", "indicator 3: Number of affected people have water systems functionality supported by sustained operation and maintenance services.", "# of Water System"], ["Water", "WASHCOMs - Capacity building - Equipments", "indicator 3: Number of affected people have water systems functionality supported by sustained operation and maintenance services.", "# of WASHCOM Equipped"], ["Water", "WASHCOMs - Capacity building - Trainings", "indicator 3: Number of affected people have water systems functionality supported by sustained operation and maintenance services.", "# of WASHCOM Trained"], ["Water", "Water treatment chemicals (HH)", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of People Reached"], ["Water", "Chlorination - Water supply system", "indicator 2: Number of affected people have safe and equitable access to a sufficient quantity of water for domestic needs, as per the sector's standards.", "# of Water System"], ["Water", "Water Trucking", "indicator 1: Number of people having access to emergency safe water facilities and services as per sector's standards", "# of litres trucked"], ["Water", "CVA", "indicator 10: Number of Households receiving cash transfers and or vouchers to meet their WASH needs including top-ups", "# of People Reached"], ["Sanitation", "Installation of Hand Washing Station", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Handwashing stations installed"], ["Sanitation", "Latrine - O & M", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Latrine construction - Emergency", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Latrine construction - Institutional", "indicator 4: Number of Health Care Facilities, Nutritional Centers, temporary learning centers (TLC), Child Friendly Spaces (CFS), schools and other relevant public places assisted with appropriate emergency WASH facilities supporting affected children.", "# of Latrines"], ["Sanitation", "Latrine Construction (HH)", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Latrine construction - Communal", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Latrine desludgin", "indicator 6: Number of people benefiting from sustained desludging and cleaning of their latrines as per sector's standard", "# of Latrines"], ["Sanitation", "Latrine Rehabilitation   Emergency", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Latrine Rehabilitation - Institutional", "indicator 4: Number of Health Care Facilities, Nutritional Centers, temporary learning centers (TLC), Child Friendly Spaces (CFS), schools and other relevant public places assisted with appropriate emergency WASH facilities supporting affected children.", "# of Latrines"], ["Sanitation", "Latrine Rehabilitation - Communal", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of Latrines"], ["Sanitation", "Sanitation  Kits Distribution", "indicator 7: Number of IDPs in camps having access to sustained solid waste management services", "# of Kits"], ["Sanitation", "Shower - O & M", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of showers"], ["Sanitation", "Shower construction - Emergency", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of showers"], ["Sanitation", "Shower Rehabilitation   Emergency", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of showers"], ["Sanitation", "Shower Rehabilitation - Communal", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of showers"], ["Sanitation", "Shower construction - Communal", "indicator 5: Number of affected people have safe and dignified access to improved sanitation facilities, as per the sector's standard.", "# of showers"], ["Sanitation", "Drainage canal cleaning", "indicator 7: Number of IDPs in camps having access to sustained solid waste management services", "# of Communities"], ["Sanitation", "CVA", "indicator 10: Number of Households receiving cash transfers and or vouchers to meet their WASH needs including top-ups", "# of People Reached"], ["Hygiene", "WASH & Dignity Kits (Hygiene Kits)", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Kits"], ["Hygiene", "Replenishment Kit", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Kits"], ["Hygiene", "MHM Kits", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Kits"], ["Hygiene", "Hygiene Kits", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Kits"], ["Hygiene", "Cholera Kit provision", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Kits"], ["Hygiene", "Hygiene promotions -Host community", "indicator 8: Number of affected people benefit from community tailored gender and age-sensitive hygiene messages aiming at hygienic behavior and practices as per the sector's standards.", "# of People Reached"], ["Hygiene", "Hygiene promotions - IDP sites", "indicator 8: Number of affected people benefit from community tailored gender and age-sensitive hygiene messages aiming at hygienic behavior and practices as per the sector's standards.", "# of People Reached"], ["Hygiene", "Hygiene promotions - institutions", "indicator 8: Number of affected people benefit from community tailored gender and age-sensitive hygiene messages aiming at hygienic behavior and practices as per the sector's standards.", "# of People Reached"], ["Hygiene", "Post Distribution Monitoring", "indicator 9: Number of people assisted with WASH NFIs (hygiene kits, replenishment hygiene kits, WASH cholera kits, WASH Nutrition kits, sanitation kits and MHM kits).", "# of Household survey"], ["Hygiene", "CVA", "indicator 10: Number of Households receiving cash transfers and or vouchers to meet their WASH needs including top-ups", "# of People Reached"]], "hrpOptions": ["Yes", "Nexus-Development", "Nexus-Durable Solution"], "beneficiaryTypes": ["Host communities", "IDPs", "Refugees", "Returnees"], "statusOptions": ["Cancelled", "Completed", "In progress", "Planned", "Suspended"]}</script>
+<script>
+(function(){
+  "use strict";
+  const DATA = JSON.parse(document.getElementById('wash-data').textContent);
+
+  const COLUMNS = [
+    {key:'month', header:'Reporting Month\n(Select in the dropdown list)'},
+    {key:'repdate', header:'Date of Reporting\nDD/MM/YYYY'},
+    {key:'orgname', header:'Organisation Name\n(Select in the dropdown list)'},
+    {key:'acronym', header:'Acronym\n(Autofill)'},
+    {key:'orgtype', header:'Type\n(Select in the dropdown list)'},
+    {key:'donor', header:'Donor\n(Select in the dropdown list)'},
+    {key:'impartner', header:'Implementing Partners'},
+    {key:'state', header:'State\n(Select in the dropdown list)'},
+    {key:'pcode1', header:'Pcode_ADM1\n(automatically filled)'},
+    {key:'lga', header:'LGA\n(Select in the dropdown list)'},
+    {key:'pcode2', header:'Pcode_ADM2\n(automatically filled)'},
+    {key:'ward', header:'Ward\n(Select in the dropdown list)'},
+    {key:'pcode3', header:'Pcode_ADM3\n(automatically filled)'},
+    {key:'loctype', header:'Type of Location\n(Select in the dropdown list)'},
+    {key:'locname', header:'Location Name'},
+    {key:'locpop', header:'Location Population'},
+    {key:'latlong', header:'Latitude, Longitude'},
+    {key:'emergtype', header:'Intervention / Emergency Type\n(Select in the dropdown list)'},
+    {key:'domain', header:'WASH Domain\n(Select in the dropdown list)'},
+    {key:'activity', header:'Activity\n(Select in the dropdown list)'},
+    {key:'indicator', header:'Indicators\n(automatically filled)'},
+    {key:'unit', header:'Unit\n(automatically filled)'},
+    {key:'hrp', header:'Is HRP activity?\n(Select in the dropdown list)'},
+    {key:'qplanned', header:'Quantity Planned'},
+    {key:'qachieved', header:'Quantity Achieved'},
+    {key:'beneftype', header:'Beneficiary Type\n(Select in the dropdown list)'},
+    {key:'boys', header:'#Beneficiary Boys'},
+    {key:'girls', header:'#Beneficiary Girl'},
+    {key:'men', header:'#Beneficiary Men'},
+    {key:'women', header:'#Beneficiary Women'},
+    {key:'totalbenef', header:'# Total Beneficiary'},
+    {key:'startdate', header:'Starting date\nDD/MM/YYYY'},
+    {key:'enddate', header:'End date\nDD/MM/YYYY'},
+    {key:'status', header:'Status\n(Select in the dropdown list)'},
+    {key:'comments', header:'Comments'}
+  ];
+
+  let records = [];
+  let editIndex = null;
+
+  // ---------- helpers ----------
+  function fillSelect(sel, options, placeholder){
+    sel.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = placeholder || 'Select…';
+    sel.appendChild(ph);
+    options.forEach(opt=>{
+      const o = document.createElement('option');
+      o.value = opt;
+      o.textContent = opt;
+      sel.appendChild(o);
+    });
+  }
+
+  function uniq(arr){ return [...new Set(arr)]; }
+
+  // ---------- populate static dropdowns ----------
+  const orgNameList = DATA.orgNames.map(r=>r[0]);
+  const acronymByOrg = {};
+  DATA.orgNames.forEach(r=>{ acronymByOrg[r[0]] = r[1]; });
+
+  fillSelect(document.getElementById('pc-org'), orgNameList, 'Select organisation…');
+  fillSelect(document.getElementById('pc-type'), DATA.orgTypesPartner, 'Select type…');
+  fillSelect(document.getElementById('f-month'), DATA.months, 'Select month…');
+  fillSelect(document.getElementById('f-orgname'), orgNameList, 'Select organisation…');
+  fillSelect(document.getElementById('f-orgtype'), DATA.orgTypesMatrix, 'Select type…');
+  fillSelect(document.getElementById('f-donor'), DATA.donors, 'Select donor…');
+  fillSelect(document.getElementById('f-state'), DATA.states, 'Select state…');
+  fillSelect(document.getElementById('f-loctype'), DATA.locationTypes, 'Select location type…');
+  fillSelect(document.getElementById('f-emergtype'), DATA.emergencyTypes, 'Select emergency type…');
+  fillSelect(document.getElementById('f-domain'), DATA.domains, 'Select domain…');
+  fillSelect(document.getElementById('f-hrp'), DATA.hrpOptions, 'Select…');
+  fillSelect(document.getElementById('f-beneftype'), DATA.beneficiaryTypes, 'Select beneficiary type…');
+  fillSelect(document.getElementById('f-status'), DATA.statusOptions, 'Select status…');
+
+  // ---------- Partner Contact: org -> acronym ----------
+  document.getElementById('pc-org').addEventListener('change', function(){
+    document.getElementById('pc-acronym').value = acronymByOrg[this.value] || '';
+    // Mirror into the record form default if it's currently empty
+    const fOrg = document.getElementById('f-orgname');
+    if (!fOrg.value){
+      fOrg.value = this.value;
+      fOrg.dispatchEvent(new Event('change'));
+    }
+    const pcType = document.getElementById('pc-type').value;
+  });
+
+  // ---------- record form: org -> acronym ----------
+  document.getElementById('f-orgname').addEventListener('change', function(){
+    document.getElementById('f-acronym').value = acronymByOrg[this.value] || '';
+  });
+
+  // ---------- State -> LGA -> Ward cascade ----------
+  const lgaSel = document.getElementById('f-lga');
+  const wardSel = document.getElementById('f-ward');
+
+  document.getElementById('f-state').addEventListener('change', function(){
+    const state = this.value;
+    document.getElementById('f-pcode1').value = '';
+    document.getElementById('f-pcode2').value = '';
+    document.getElementById('f-pcode3').value = '';
+    wardSel.innerHTML = '<option value="">Select an LGA first</option>';
+    wardSel.disabled = true;
+
+    if (!state){
+      lgaSel.innerHTML = '<option value="">Select a state first</option>';
+      lgaSel.disabled = true;
+      return;
+    }
+    const rowsForState = DATA.admin2.filter(r=>r[0]===state);
+    document.getElementById('f-pcode1').value = rowsForState.length ? rowsForState[0][1] : '';
+    const lgas = uniq(rowsForState.map(r=>r[2]));
+    fillSelect(lgaSel, lgas, 'Select LGA…');
+    lgaSel.disabled = false;
+  });
+
+  lgaSel.addEventListener('change', function(){
+    const lga = this.value;
+    document.getElementById('f-pcode3').value = '';
+    if (!lga){
+      document.getElementById('f-pcode2').value = '';
+      wardSel.innerHTML = '<option value="">Select an LGA first</option>';
+      wardSel.disabled = true;
+      return;
+    }
+    const match = DATA.admin2.find(r=>r[2]===lga && r[0]===document.getElementById('f-state').value);
+    document.getElementById('f-pcode2').value = match ? match[3] : '';
+
+    const rowsForLga = DATA.admin3.filter(r=>r[2]===lga);
+    const wards = uniq(rowsForLga.map(r=>r[4]));
+    fillSelect(wardSel, wards, 'Select ward…');
+    wardSel.disabled = false;
+  });
+
+  wardSel.addEventListener('change', function(){
+    const ward = this.value;
+    if (!ward){ document.getElementById('f-pcode3').value=''; return; }
+    const match = DATA.admin3.find(r=>r[4]===ward && r[2]===lgaSel.value);
+    document.getElementById('f-pcode3').value = match ? match[5] : '';
+  });
+
+  // ---------- Domain -> Activity -> Indicator/Unit cascade ----------
+  const activitySel = document.getElementById('f-activity');
+
+  document.getElementById('f-domain').addEventListener('change', function(){
+    const domain = this.value;
+    document.getElementById('f-indicator').value = '';
+    document.getElementById('f-unit').value = '';
+    if (!domain){
+      activitySel.innerHTML = '<option value="">Select a domain first</option>';
+      activitySel.disabled = true;
+      return;
+    }
+    const rowsForDomain = DATA.activityTable.filter(r=>r[0]===domain);
+    const activities = uniq(rowsForDomain.map(r=>r[1]));
+    fillSelect(activitySel, activities, 'Select activity…');
+    activitySel.disabled = false;
+  });
+
+  activitySel.addEventListener('change', function(){
+    const activity = this.value;
+    if (!activity){
+      document.getElementById('f-indicator').value = '';
+      document.getElementById('f-unit').value = '';
+      return;
+    }
+    const domain = document.getElementById('f-domain').value;
+    const match = DATA.activityTable.find(r=>r[0]===domain && r[1]===activity);
+    document.getElementById('f-indicator').value = match ? match[2] : '';
+    document.getElementById('f-unit').value = match ? match[3] : '';
+  });
+
+  // ---------- beneficiary auto-sum ----------
+  function recalcTotalBenef(){
+    const b = parseFloat(document.getElementById('f-boys').value)||0;
+    const g = parseFloat(document.getElementById('f-girls').value)||0;
+    const m = parseFloat(document.getElementById('f-men').value)||0;
+    const w = parseFloat(document.getElementById('f-women').value)||0;
+    const sum = b+g+m+w;
+    document.getElementById('f-totalbenef').value = sum>0 ? sum : '';
+  }
+  ['f-boys','f-girls','f-men','f-women'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', recalcTotalBenef);
+  });
+
+  // ---------- form field map ----------
+  const FIELD_IDS = {
+    month:'f-month', repdate:'f-repdate', orgname:'f-orgname', acronym:'f-acronym',
+    orgtype:'f-orgtype', donor:'f-donor', impartner:'f-impartner', state:'f-state',
+    pcode1:'f-pcode1', lga:'f-lga', pcode2:'f-pcode2', ward:'f-ward', pcode3:'f-pcode3',
+    loctype:'f-loctype', locname:'f-locname', locpop:'f-locpop', latlong:'f-latlong',
+    emergtype:'f-emergtype', domain:'f-domain', activity:'f-activity', indicator:'f-indicator',
+    unit:'f-unit', hrp:'f-hrp', qplanned:'f-qplanned', qachieved:'f-qachieved',
+    beneftype:'f-beneftype', boys:'f-boys', girls:'f-girls', men:'f-men', women:'f-women',
+    totalbenef:'f-totalbenef', startdate:'f-startdate', enddate:'f-enddate', status:'f-status',
+    comments:'f-comments'
+  };
+
+  function readForm(){
+    const rec = {};
+    Object.keys(FIELD_IDS).forEach(k=>{
+      rec[k] = document.getElementById(FIELD_IDS[k]).value;
+    });
+    return rec;
+  }
+
+  function resetForm(){
+    document.getElementById('record-form').reset();
+    lgaSel.innerHTML = '<option value="">Select a state first</option>';
+    lgaSel.disabled = true;
+    wardSel.innerHTML = '<option value="">Select an LGA first</option>';
+    wardSel.disabled = true;
+    activitySel.innerHTML = '<option value="">Select a domain first</option>';
+    activitySel.disabled = true;
+    document.getElementById('f-pcode1').value='';
+    document.getElementById('f-pcode2').value='';
+    document.getElementById('f-pcode3').value='';
+    document.getElementById('f-indicator').value='';
+    document.getElementById('f-unit').value='';
+    document.getElementById('f-acronym').value='';
+    editIndex = null;
+    document.getElementById('submit-btn').textContent = 'Add record';
+    document.getElementById('edit-indicator').textContent = '';
+  }
+
+  function fmtDateForDisplay(iso){
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function renderTable(){
+    const holder = document.getElementById('table-holder');
+    document.getElementById('record-count').textContent =
+      records.length + (records.length===1 ? ' record' : ' records');
+
+    if (!records.length){
+      holder.innerHTML = '<div class="empty-state">No activity records yet — fill in the form above and select "Add record".</div>';
+      return;
+    }
+
+    let html = '<div class="table-scroll"><table class="records"><thead><tr>';
+    html += '<th>#</th><th>Month</th><th>Org (Acronym)</th><th>State / LGA / Ward</th>';
+    html += '<th>Domain</th><th>Activity</th><th>Status</th><th>Total benef.</th><th></th>';
+    html += '</tr></thead><tbody>';
+
+    const domainColor = {Water:'var(--who)', Sanitation:'var(--where)', Hygiene:'var(--whom)'};
+
+    records.forEach((r,i)=>{
+      html += '<tr>';
+      html += `<td>${i+1}</td>`;
+      html += `<td>${escapeHtml(r.month)}</td>`;
+      html += `<td>${escapeHtml(r.orgname)}${r.acronym ? ' ('+escapeHtml(r.acronym)+')' : ''}</td>`;
+      html += `<td>${escapeHtml(r.state)} / ${escapeHtml(r.lga)} / ${escapeHtml(r.ward)}</td>`;
+      html += `<td><span class="pill" style="background:var(--what-bg);color:var(--what);">${escapeHtml(r.domain)}</span></td>`;
+      html += `<td>${escapeHtml(r.activity)}</td>`;
+      html += `<td>${escapeHtml(r.status)}</td>`;
+      html += `<td>${escapeHtml(r.totalbenef)}</td>`;
+      html += `<td><button type="button" class="btn-danger-text" data-action="edit" data-idx="${i}">Edit</button> <button type="button" class="btn-danger-text" data-action="delete" data-idx="${i}">Delete</button></td>`;
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    holder.innerHTML = html;
+
+    holder.querySelectorAll('button[data-action]').forEach(btn=>{
+      btn.addEventListener('click', function(){
+        const idx = parseInt(this.getAttribute('data-idx'),10);
+        const action = this.getAttribute('data-action');
+        if (action==='delete'){
+          if (confirm('Delete this record?')){
+            records.splice(idx,1);
+            renderTable();
+          }
+        } else if (action==='edit'){
+          loadRecordIntoForm(idx);
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    if (s===undefined || s===null) return '';
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function loadRecordIntoForm(idx){
+    const r = records[idx];
+    editIndex = idx;
+
+    document.getElementById('f-month').value = r.month;
+    document.getElementById('f-repdate').value = r.repdate;
+    document.getElementById('f-orgname').value = r.orgname;
+    document.getElementById('f-acronym').value = r.acronym;
+    document.getElementById('f-orgtype').value = r.orgtype;
+    document.getElementById('f-donor').value = r.donor;
+    document.getElementById('f-impartner').value = r.impartner;
+
+    document.getElementById('f-state').value = r.state;
+    document.getElementById('f-state').dispatchEvent(new Event('change'));
+    setTimeout(()=>{
+      lgaSel.value = r.lga;
+      lgaSel.dispatchEvent(new Event('change'));
+      setTimeout(()=>{
+        wardSel.value = r.ward;
+        wardSel.dispatchEvent(new Event('change'));
+      },0);
+    },0);
+
+    document.getElementById('f-loctype').value = r.loctype;
+    document.getElementById('f-locname').value = r.locname;
+    document.getElementById('f-locpop').value = r.locpop;
+    document.getElementById('f-latlong').value = r.latlong;
+
+    document.getElementById('f-emergtype').value = r.emergtype;
+    document.getElementById('f-domain').value = r.domain;
+    document.getElementById('f-domain').dispatchEvent(new Event('change'));
+    setTimeout(()=>{
+      activitySel.value = r.activity;
+      activitySel.dispatchEvent(new Event('change'));
+    },0);
+
+    document.getElementById('f-hrp').value = r.hrp;
+    document.getElementById('f-qplanned').value = r.qplanned;
+    document.getElementById('f-qachieved').value = r.qachieved;
+
+    document.getElementById('f-beneftype').value = r.beneftype;
+    document.getElementById('f-boys').value = r.boys;
+    document.getElementById('f-girls').value = r.girls;
+    document.getElementById('f-men').value = r.men;
+    document.getElementById('f-women').value = r.women;
+    document.getElementById('f-totalbenef').value = r.totalbenef;
+
+    document.getElementById('f-startdate').value = r.startdate;
+    document.getElementById('f-enddate').value = r.enddate;
+    document.getElementById('f-status').value = r.status;
+    document.getElementById('f-comments').value = r.comments;
+
+    document.getElementById('submit-btn').textContent = 'Save changes';
+    document.getElementById('edit-indicator').textContent = 'Editing record #' + (idx+1);
+    document.getElementById('record-form').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // ---------- form submit ----------
+  document.getElementById('record-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const rec = readForm();
+    if (editIndex !== null){
+      records[editIndex] = rec;
+    } else {
+      records.push(rec);
+    }
+    renderTable();
+    resetForm();
+    const msg = document.getElementById('form-status');
+    msg.textContent = 'Saved.';
+    setTimeout(()=>{ msg.textContent=''; }, 2500);
+  });
+
+  document.getElementById('clear-btn').addEventListener('click', resetForm);
+
+  document.getElementById('clear-all-btn').addEventListener('click', function(){
+    if (records.length && confirm('Remove all ' + records.length + ' records? This cannot be undone.')){
+      records = [];
+      renderTable();
+    }
+  });
+
+  // ---------- export ----------
+  function buildAoA(){
+    const header = COLUMNS.map(c=>c.header.split('\n')[0]);
+    const aoa = [header];
+    records.forEach(r=>{
+      aoa.push(COLUMNS.map(c=>{
+        if (c.key==='repdate' || c.key==='startdate' || c.key==='enddate'){
+          return fmtDateForDisplay(r[c.key]);
+        }
+        return r[c.key] !== undefined ? r[c.key] : '';
+      }));
+    });
+    return aoa;
+  }
+
+  document.getElementById('export-xlsx-btn').addEventListener('click', function(){
+    if (!records.length){ alert('Add at least one record before exporting.'); return; }
+    const aoa = buildAoA();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = COLUMNS.map(()=>({wch:20}));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '1_MATRIX');
+    const orgName = document.getElementById('pc-org').value || 'Partner';
+    const fname = `WASH_5W_${orgName.replace(/[^a-z0-9]+/gi,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    XLSX.writeFile(wb, fname);
+  });
+
+  document.getElementById('export-csv-btn').addEventListener('click', function(){
+    if (!records.length){ alert('Add at least one record before exporting.'); return; }
+    const aoa = buildAoA();
+    const csv = aoa.map(row=>row.map(cell=>{
+      const s = String(cell===undefined||cell===null?'':cell);
+      return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',')).join('\r\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `WASH_5W_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- init ----------
+  resetForm();
+  renderTable();
+})();
+
+</script>
+</body>
+</html>

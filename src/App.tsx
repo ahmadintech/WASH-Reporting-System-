@@ -18,6 +18,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WashDataProvider } from "./context/WashDataContext";
 import LandingPage from "./pages/Landing/LandingPage";
 
+import PublicLayout from "./layout/PublicLayout";
+
 /**
  * Route guard that strictly restricts access to users with the 'admin' role.
  */
@@ -45,31 +47,24 @@ function MainRoutes() {
 
   return (
     <Routes>
-      {/* Primary First Pages: Public Portal at / and /home */}
+      {/* 1. Standalone Public Pages (Landing, Coverage Dashboard, 5W Reporting) */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/home" element={<LandingPage />} />
       <Route path="/landing" element={<LandingPage />} />
 
-      {/* Internal Role-based Dashboard (Requires authentication via AppLayout) */}
-      <Route path="/dashboard" element={<AppLayout />}>
-        <Route index element={<Home />} />
+      {/* Public Pages with Dedicated Top Navbar (Home, Dashboard, 5W Reporting) - NO Sidebar */}
+      <Route element={<PublicLayout />}>
+        <Route path="/dashboard" element={<CoverageDashboard />} />
+        <Route path="/coverage-dashboard" element={<CoverageDashboard />} />
+        <Route path="/submit-report" element={<SubmitReport />} />
       </Route>
 
-      {/* Protected App Routes (Always require authentication via AppLayout) */}
-      <Route element={<AppLayout />}>
-        <Route path="/submit-report" element={<SubmitReport />} />
-        <Route path="/coverage-dashboard" element={<CoverageDashboard />} />
-        <Route path="/reports-list" element={<ReportsList />} />
+      {/* 2. State Coordinator and Admin Workspace (Requires authentication via AppLayout with sidebar) */}
+      <Route path="/admin" element={<AppLayout />}>
+        <Route index element={<Home />} />
+        <Route path="dashboard" element={<Home />} />
         <Route
-          path="partners"
-          element={
-            <AdminOrCoordinatorRoute>
-              <PartnersDirectory />
-            </AdminOrCoordinatorRoute>
-          }
-        />
-        <Route
-          path="admin/settings"
+          path="settings"
           element={
             <AdminRoute>
               <SectorSettings />
@@ -77,53 +72,32 @@ function MainRoutes() {
           }
         />
         <Route
-          path="admin/users"
+          path="users"
           element={
             <AdminOrCoordinatorRoute>
               <UserManagement />
             </AdminOrCoordinatorRoute>
           }
         />
-        <Route path="profile" element={<UserProfiles />} />
-        <Route path="form-elements" element={<FormElements />} />
-        <Route path="basic-tables" element={<BasicTables />} />
-        <Route path="blank" element={<Blank />} />
+      </Route>
+
+      {/* Internal Management Routes (with AppSidebar) */}
+      <Route element={<AppLayout />}>
+        <Route path="/coordinator/dashboard" element={<Home />} />
+        <Route path="/reports-list" element={<ReportsList />} />
+        <Route path="/profile" element={<UserProfiles />} />
+        <Route path="/form-elements" element={<FormElements />} />
+        <Route path="/basic-tables" element={<BasicTables />} />
+        <Route path="/blank" element={<Blank />} />
+        <Route path="/partners" element={<Navigate to="/dashboard" replace />} />
       </Route>
 
       {/* Legacy /TailAdmin Base Path Support */}
       <Route path="/TailAdmin" element={<AppLayout />}>
         <Route index element={<Home />} />
-        <Route path="submit-report" element={<SubmitReport />} />
-        <Route path="coverage-dashboard" element={<CoverageDashboard />} />
+        <Route path="dashboard" element={<Home />} />
         <Route path="reports-list" element={<ReportsList />} />
-        <Route
-          path="partners"
-          element={
-            <AdminOrCoordinatorRoute>
-              <PartnersDirectory />
-            </AdminOrCoordinatorRoute>
-          }
-        />
-        <Route
-          path="admin/settings"
-          element={
-            <AdminRoute>
-              <SectorSettings />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="admin/users"
-          element={
-            <AdminOrCoordinatorRoute>
-              <UserManagement />
-            </AdminOrCoordinatorRoute>
-          }
-        />
         <Route path="profile" element={<UserProfiles />} />
-        <Route path="form-elements" element={<FormElements />} />
-        <Route path="basic-tables" element={<BasicTables />} />
-        <Route path="blank" element={<Blank />} />
       </Route>
 
       {/* Legacy TailAdmin aliases */}

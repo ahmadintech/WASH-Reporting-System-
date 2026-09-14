@@ -21,32 +21,52 @@ export interface WashReport {
   
   // 01 WHO
   orgName: string;
+  acronym?: string;
   orgType: string;
   focalPoint: string;
+  phone?: string;
   email: string;
   donor?: string;
+  implPartners?: string;
+  reportMonth?: string;
+  reportDate?: string;
 
   // 02 WHAT
+  domain?: string;
+  emergType?: string;
   activityType: string;
   activityOther?: string;
-  quantity: number | string;
-  unit: string;
+  indicator?: string;
   indicatorDesc?: string;
+  unit: string;
+  hrp?: string;
+  qtyPlanned?: number | string;
+  qtyAchieved?: number | string;
+  quantity: number | string;
 
   // 03 WHERE
   state: 'Borno' | 'Adamawa' | 'Yobe';
+  pcode1?: string;
   lga: string;
+  pcode2?: string;
   ward?: string;
-  settlement?: string;
+  pcode3?: string;
+  siteType?: string;
   locationType: string;
+  settlement?: string;
+  locationName?: string;
+  locationPop?: number | string;
+  latlong?: string;
 
   // 04 WHEN
   period: string; // YYYY-MM
-  status: 'Planned' | 'Ongoing' | 'Completed';
+  status: 'Planned' | 'Ongoing' | 'Completed' | 'Cancelled' | 'Suspended' | 'In progress';
   startDate?: string;
   endDate?: string;
+  comments?: string;
 
   // 05 FOR WHOM
+  benefType?: string;
   populationGroup: string;
   pwd: number;
   men: number;
@@ -55,6 +75,51 @@ export interface WashReport {
   girls: number;
   total: number;
 }
+
+export interface ActivityRecord {
+  id: string;
+  recordNumber: number;
+  isExpanded?: boolean;
+
+  // WHERE
+  state: 'Borno' | 'Adamawa' | 'Yobe';
+  pcode1: string;
+  lga: string;
+  pcode2: string;
+  ward: string;
+  pcode3: string;
+  siteType: string;
+  locationName: string;
+  locationPop: number | string;
+  latlong: string;
+
+  // WHAT
+  emergType: string;
+  domain: string;
+  activityType: string;
+  indicator: string;
+  unit: string;
+  hrp: string;
+  qtyPlanned: number | string;
+  qtyAchieved: number | string;
+
+  // FOR WHOM
+  benefType: string;
+  populationGroup: string;
+  boys: number;
+  girls: number;
+  men: number;
+  women: number;
+  pwd: number;
+  total: number;
+
+  // WHEN
+  startDate: string;
+  endDate: string;
+  status: 'Planned' | 'Ongoing' | 'Completed' | 'Cancelled' | 'Suspended' | 'In progress';
+  comments: string;
+}
+
 
 export const LGA_BY_STATE: Record<'Borno' | 'Adamawa' | 'Yobe', string[]> = {
   Borno: [
