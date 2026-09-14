@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { useWashData } from "../../context/WashDataContext";
-import { useAuth } from "../../context/AuthContext";
 import { WashReport, ALL_ACTIVITIES } from "../../types/wash";
 import {
   WASH_5W_LGAS_BY_STATE,
@@ -11,11 +10,33 @@ import {
   WASH_5W_DOMAINS,
 } from "../../data/wash5wData";
 
-export default function CoverageDashboard() {
-  const { reports, deleteReport, exportCsv } = useWashData();
-  const { currentUser, isAuthenticated } = useAuth();
+/* ─── Standard Design Tokens (Outfit & Palette) ───────────────────── */
+const T = {
+  tealDarkest: "#061B20",
+  tealDeep:    "#0B3C46",
+  teal:        "#12707E",
+  tealMedium:  "#1D8A99",
+  tealLight:   "#4EAAB6",
+  tealSoft:    "#E4F2F1",
+  tealSubtle:  "#F0F7F6",
+  clay:        "#C1722F",
+  clayHover:   "#A75D22",
+  claySoft:    "#FDF1E6",
+  sand:        "#F7F4EE",
+  green:       "#2E7D47",
+  greenSoft:   "#E6F4EA",
+  line:        "#E1E6E2",
+  ink:         "#132327",
+  inkMuted:    "#485B60",
+  inkLight:    "#728489",
+  white:       "#FFFFFF",
+};
 
-  // Filters state - open & interactive for all users (public, partner, coordinator, admin)
+export default function CoverageDashboard() {
+  const { reports, exportCsv } = useWashData();
+
+  // Filters state - public interactive observatory
+  const [filterDomain, setFilterDomain] = useState<string>("");
   const [filterState, setFilterState] = useState<string>("");
   const [filterLga, setFilterLga] = useState<string>("");
   const [filterActivity, setFilterActivity] = useState<string>("");
@@ -29,7 +50,7 @@ export default function CoverageDashboard() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
-  // Detail Modal state
+  // Record Inspection Modal state
   const [selectedReport, setSelectedReport] = useState<WashReport | null>(null);
 
   // Dynamic LGAs based on selected state
@@ -37,7 +58,6 @@ export default function CoverageDashboard() {
     if (filterState && WASH_5W_LGAS_BY_STATE[filterState]) {
       return WASH_5W_LGAS_BY_STATE[filterState].map((l) => l.name);
     }
-    // All LGAs combined
     const all: string[] = [];
     Object.values(WASH_5W_LGAS_BY_STATE).forEach((lgas) => {
       lgas.forEach((l) => all.push(l.name));
@@ -57,6 +77,7 @@ export default function CoverageDashboard() {
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (filterDomain) count++;
     if (filterState) count++;
     if (filterLga) count++;
     if (filterActivity) count++;
@@ -67,6 +88,7 @@ export default function CoverageDashboard() {
     if (searchTerm) count++;
     return count;
   }, [
+    filterDomain,
     filterState,
     filterLga,
     filterActivity,
@@ -80,6 +102,7 @@ export default function CoverageDashboard() {
   // Filtered dataset
   const filteredReports = useMemo(() => {
     return reports.filter((r) => {
+      if (filterDomain && r.domain && r.domain !== filterDomain) return false;
       if (filterState && r.state !== filterState) return false;
       if (filterLga && r.lga.toLowerCase() !== filterLga.toLowerCase()) return false;
       if (filterActivity && r.activityType !== filterActivity) return false;
@@ -112,6 +135,7 @@ export default function CoverageDashboard() {
     });
   }, [
     reports,
+    filterDomain,
     filterState,
     filterLga,
     filterActivity,
@@ -129,13 +153,13 @@ export default function CoverageDashboard() {
     return filteredReports.slice(start, start + itemsPerPage);
   }, [filteredReports, currentPage]);
 
-  // Filtered stats
+  // Filtered statistics
   const statReports = filteredReports.length;
   const statBeneficiaries = filteredReports.reduce((acc, r) => acc + (Number(r.total) || 0), 0);
   const statPartners = new Set(filteredReports.map((r) => r.orgName.trim()).filter(Boolean)).size;
   const statLgas = new Set(filteredReports.filter((r) => r.lga).map((r) => `${r.state}|${r.lga}`)).size;
 
-  // Additional stats: Demographics
+  // Demographics
   const statWomen = filteredReports.reduce((acc, r) => acc + (Number(r.women) || 0), 0);
   const statGirls = filteredReports.reduce((acc, r) => acc + (Number(r.girls) || 0), 0);
   const statMen = filteredReports.reduce((acc, r) => acc + (Number(r.men) || 0), 0);
@@ -172,23 +196,50 @@ export default function CoverageDashboard() {
     });
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 7);
+      .slice(0, 6);
   }, [filteredReports]);
 
   const maxActivityCount = Math.max(...activityCounts.map((a) => a[1]), 1);
 
   // Chart data: Status breakdown
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { Completed: 0, Ongoing: 0, Planned: 0, Suspended: 0 };
+    const counts: Record<string, number> = {
+      Completed: 0,
+      Ongoing: 0,
+      Planned: 0,
+      Suspended: 0,
+    };
     filteredReports.forEach((r) => {
-      const s = r.status ? r.status.charAt(0).toUpperCase() + r.status.slice(1).toLowerCase() : "Planned";
-      if (counts[s] !== undefined) counts[s]++;
+      const s = (r.status || "Planned").toLowerCase();
+      if (s.includes("complete")) counts.Completed++;
+      else if (s.includes("ongoing")) counts.Ongoing++;
+      else if (s.includes("suspend")) counts.Suspended++;
       else counts.Planned++;
     });
     return counts;
   }, [filteredReports]);
 
-  const handleClearFilters = () => {
+  // Chart data: Domain Reach
+  const domainTotals = useMemo(() => {
+    const counts: Record<string, number> = {
+      "Water Supply": 0,
+      "Sanitation": 0,
+      "Hygiene Promotion": 0,
+      "WASH in Institutions": 0,
+    };
+    filteredReports.forEach((r) => {
+      const d = r.domain || "Water Supply";
+      if (counts[d] !== undefined) {
+        counts[d] += Number(r.total) || 0;
+      } else {
+        counts["Water Supply"] += Number(r.total) || 0;
+      }
+    });
+    return counts;
+  }, [filteredReports]);
+
+  const resetFilters = () => {
+    setFilterDomain("");
     setFilterState("");
     setFilterLga("");
     setFilterActivity("");
@@ -200,35 +251,23 @@ export default function CoverageDashboard() {
     setCurrentPage(1);
   };
 
-  const handleDelete = (r: WashReport) => {
-    const canDelete =
-      currentUser?.role === "admin" ||
-      currentUser?.role === "coordinator" ||
-      (currentUser?.role === "partner" &&
-        r.orgName.toLowerCase().includes((currentUser.organization || "").toLowerCase()));
-
-    if (!canDelete) {
-      alert("Permission notice: Please sign in with appropriate administrative credentials to delete this report.");
-      return;
-    }
-
-    if (confirm(`Delete 5W response record for "${r.orgName} — ${r.activityType} (${r.lga})"? This cannot be undone.`)) {
-      deleteReport(r.id);
-    }
-  };
-
   const statusBadge = (status: string) => {
     const s = (status || "planned").toLowerCase();
-    let bg = "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
+    let bg = "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
+    let dot = "bg-amber-500";
     if (s.includes("complete")) {
-      bg = "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800";
+      bg = "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800";
+      dot = "bg-emerald-500";
     } else if (s.includes("ongoing")) {
-      bg = "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800";
+      bg = "bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800";
+      dot = "bg-sky-500";
     } else if (s.includes("suspend")) {
-      bg = "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800";
+      bg = "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800";
+      dot = "bg-rose-500";
     }
     return (
-      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${bg}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${bg}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
         {status || "Planned"}
       </span>
     );
@@ -238,69 +277,222 @@ export default function CoverageDashboard() {
     <>
       <PageMeta
         title="Coverage Dashboard | WASH Sector North East Nigeria"
-        description="Public 5W response coverage monitoring matrix, partner interventions and beneficiary demographics across Borno, Adamawa, and Yobe states."
+        description="Public 5W response coverage monitoring observatory, partner interventions and beneficiary demographics across Borno, Adamawa, and Yobe states."
       />
 
-      <div className="space-y-6 pb-12">
-        {/* Top Header Card mirroring WASH 5W Reporting Platform HTML */}
-        <div className="rounded-xl border border-teal-800/20 bg-gradient-to-r from-teal-950 via-teal-900 to-teal-800 p-6 sm:p-7 text-white shadow-md relative overflow-hidden">
-          <div className="absolute right-0 top-0 -mt-8 -mr-8 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-mono text-xs text-teal-300 uppercase tracking-widest font-semibold">
-                  Response Monitoring Matrix
+      <div className="space-y-6 pb-16 font-sans">
+        {/* ════════════════════════════════════════════════════════════════
+            1. HERO OBSERVATORY HEADER (Public Read-Only Banner)
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="rounded-2xl border border-teal-800/30 bg-gradient-to-r from-[#061B20] via-[#0B3C46] to-[#12707E] p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute right-0 top-0 -mt-10 -mr-10 w-80 h-80 rounded-full bg-white/5 pointer-events-none blur-2xl" />
+          <div className="absolute left-1/2 bottom-0 -mb-12 w-64 h-64 rounded-full bg-teal-400/10 pointer-events-none blur-3xl" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2.5 mb-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-mono px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Public Response Observatory
                 </span>
-                <span className="text-teal-400">·</span>
-                <span className="bg-teal-700/60 border border-teal-500/40 text-teal-200 text-[11px] font-mono px-2 py-0.5 rounded font-medium">
-                  BORNO · ADAMAWA · YOBE
+                <span className="text-teal-300">·</span>
+                <span className="bg-teal-900/80 border border-teal-400/30 text-teal-200 text-xs font-mono px-2.5 py-0.5 rounded-md font-semibold">
+                  BAY STATES · 2026 CYCLE
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-serif">
-                Coverage Dashboard
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white font-serif leading-tight">
+                WASH Response Coverage Dashboard
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-teal-100 max-w-2xl leading-relaxed">
-                Aggregated WASH humanitarian interventions, sector reach, and geographical coverage.
-                All data is synchronized with the approved 5W sector monitoring framework.
+              <p className="mt-2 text-sm sm:text-base text-teal-100/90 leading-relaxed">
+                Aggregated multi-agency water, sanitation, and hygiene assistance across Borno, Adamawa, and Yobe states. 
+                Data synchronized in real-time from official 5W partner submissions.
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {/* Header Right: Read-Only Actions (CSV Export & Submit Report Navigation) */}
+            <div className="flex items-center gap-3 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={() => exportCsv(filteredReports)}
+                className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/30 px-4 py-2.5 text-xs sm:text-sm font-bold transition-all backdrop-blur-md shadow-sm"
+                title="Download current filtered dataset as CSV"
+              >
+                <svg className="w-4 h-4 text-teal-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Export 5W Data (CSV)</span>
+              </button>
+
               <Link
                 to="/submit-report"
-                className="inline-flex items-center gap-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 text-xs sm:text-sm font-bold shadow-md transition-all"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#C1722F] hover:bg-[#A75D22] text-white px-4 py-2.5 text-xs sm:text-sm font-bold shadow-lg transition-all"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span>+ Submit 5W Report</span>
+                <span>Submit 5W Report</span>
               </Link>
-              <button
-                onClick={() => exportCsv(filteredReports)}
-                className="inline-flex items-center gap-2 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/25 px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all backdrop-blur-sm"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Export CSV ({filteredReports.length})</span>
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Filter Section */}
-        <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
-          <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100 dark:border-gray-700/70">
+        {/* ════════════════════════════════════════════════════════════════
+            2. QUICK DOMAIN PILLS
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider font-mono mr-1">
+            Domain:
+          </span>
+          {[
+            { label: "All Interventions", value: "" },
+            { label: "Water Supply", value: "Water Supply" },
+            { label: "Sanitation", value: "Sanitation" },
+            { label: "Hygiene Promotion", value: "Hygiene Promotion" },
+            { label: "WASH in Institutions", value: "WASH in Institutions" },
+          ].map((d) => {
+            const active = filterDomain === d.value;
+            return (
+              <button
+                key={d.label}
+                type="button"
+                onClick={() => {
+                  setFilterDomain(d.value);
+                  setCurrentPage(1);
+                }}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${
+                  active
+                    ? "bg-teal-900 text-white border-teal-900 shadow-xs"
+                    : "bg-white text-gray-700 hover:bg-teal-50 border-gray-200 hover:border-teal-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
+                }`}
+              >
+                {d.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ════════════════════════════════════════════════════════════════
+            3. 7 CORE HUMANITARIAN KPI CARDS
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4">
+          {/* Card 1: Reports Submitted */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/80 dark:border-gray-700 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Reports</span>
+              <span className="w-2 h-2 rounded-full bg-teal-600" />
+            </div>
+            <div className="text-2xl font-extrabold text-[#0B3C46] dark:text-white mt-2 font-mono">
+              {statReports.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+              5W records matched
+            </div>
+          </div>
+
+          {/* Card 2: Beneficiaries Reached */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-teal-200/80 dark:border-teal-800 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-teal-900 dark:text-teal-300">People Reached</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            </div>
+            <div className="text-2xl font-extrabold text-teal-800 dark:text-teal-300 mt-2 font-mono">
+              {statBeneficiaries.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-teal-700 dark:text-teal-400 mt-1 font-medium">
+              Verified reach
+            </div>
+          </div>
+
+          {/* Card 3: Partners Reporting */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/80 dark:border-gray-700 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Partners</span>
+              <span className="w-2 h-2 rounded-full bg-blue-500" />
+            </div>
+            <div className="text-2xl font-extrabold text-gray-900 dark:text-white mt-2 font-mono">
+              {statPartners}
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+              Reporting agencies
+            </div>
+          </div>
+
+          {/* Card 4: LGAs Covered */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/80 dark:border-gray-700 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">LGAs</span>
+              <span className="w-2 h-2 rounded-full bg-indigo-500" />
+            </div>
+            <div className="text-2xl font-extrabold text-gray-900 dark:text-white mt-2 font-mono">
+              {statLgas} <span className="text-xs text-gray-400 font-normal">/ 65</span>
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+              Admin-2 areas
+            </div>
+          </div>
+
+          {/* Card 5: IDPs Reached */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-200/80 dark:border-amber-800 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-amber-900 dark:text-amber-300">IDPs Assisted</span>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/60 px-1.5 py-0.5 rounded">
+                {idpPct}%
+              </span>
+            </div>
+            <div className="text-2xl font-extrabold text-amber-800 dark:text-amber-300 mt-2 font-mono">
+              {statIdps.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-1">
+              Displaced persons
+            </div>
+          </div>
+
+          {/* Card 6: Women & Girls */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-rose-200/80 dark:border-rose-800 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-rose-900 dark:text-rose-300">Women &amp; Girls</span>
+              <span className="text-[10px] font-bold text-rose-700 bg-rose-100 dark:bg-rose-900/60 px-1.5 py-0.5 rounded">
+                {femalePct}%
+              </span>
+            </div>
+            <div className="text-2xl font-extrabold text-rose-800 dark:text-rose-300 mt-2 font-mono">
+              {femaleTotal.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-rose-700 dark:text-rose-400 mt-1">
+              Female reach ratio
+            </div>
+          </div>
+
+          {/* Card 7: PWD */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-purple-200/80 dark:border-purple-800 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-purple-900 dark:text-purple-300">Disabilities (PWD)</span>
+              <span className="w-2 h-2 rounded-full bg-purple-500" />
+            </div>
+            <div className="text-2xl font-extrabold text-purple-800 dark:text-purple-300 mt-2 font-mono">
+              {statPwd.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-purple-700 dark:text-purple-400 mt-1">
+              Inclusion metric
+            </div>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════════════════════════════
+            4. MULTI-DIMENSIONAL FILTER BAR (Public Read-Only Filters)
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 p-4 sm:p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-teal-700 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-teal-700 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <h2 className="text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">
-                Interactive Filters
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider font-mono">
+                Multi-Dimensional 5W Filters
               </h2>
               {activeFilterCount > 0 && (
-                <span className="bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {activeFilterCount} active
+                <span className="bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-300 text-xs font-bold px-2 py-0.5 rounded-full">
+                  {activeFilterCount} Active
                 </span>
               )}
             </div>
@@ -308,23 +500,39 @@ export default function CoverageDashboard() {
             {activeFilterCount > 0 && (
               <button
                 type="button"
-                onClick={handleClearFilters}
-                className="text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 flex items-center gap-1 transition-colors"
+                onClick={resetFilters}
+                className="text-xs font-bold text-teal-800 dark:text-teal-300 hover:text-teal-950 hover:underline inline-flex items-center gap-1"
               >
-                <span>Reset all filters</span>
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
+                <span>Reset all filters</span>
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-            {/* State */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Search Input */}
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                placeholder="Search partner, LGA, ward..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 focus:border-transparent outline-none"
+              />
+            </div>
+
+            {/* State Filter */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                State
-              </label>
               <select
                 value={filterState}
                 onChange={(e) => {
@@ -332,29 +540,28 @@ export default function CoverageDashboard() {
                   setFilterLga("");
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
-                <option value="">All States</option>
-                <option value="Borno">Borno ({reports.filter((r) => r.state === "Borno").length})</option>
-                <option value="Adamawa">Adamawa ({reports.filter((r) => r.state === "Adamawa").length})</option>
-                <option value="Yobe">Yobe ({reports.filter((r) => r.state === "Yobe").length})</option>
+                <option value="">All States (Borno, Adamawa, Yobe)</option>
+                <option value="Borno">Borno State</option>
+                <option value="Adamawa">Adamawa State</option>
+                <option value="Yobe">Yobe State</option>
               </select>
             </div>
 
-            {/* LGA */}
+            {/* Dynamic LGA Filter */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                LGA
-              </label>
               <select
                 value={filterLga}
                 onChange={(e) => {
                   setFilterLga(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
-                <option value="">All LGAs ({availableLgas.length})</option>
+                <option value="">
+                  {filterState ? `All LGAs in ${filterState}` : "All LGAs (Select State to filter)"}
+                </option>
                 {availableLgas.map((lga) => (
                   <option key={lga} value={lga}>
                     {lga}
@@ -363,20 +570,17 @@ export default function CoverageDashboard() {
               </select>
             </div>
 
-            {/* Activity Type */}
+            {/* Activity Type Filter */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                Activity Type
-              </label>
               <select
                 value={filterActivity}
                 onChange={(e) => {
                   setFilterActivity(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
-                <option value="">All Activities</option>
+                <option value="">All Activity Types</option>
                 {ALL_ACTIVITIES.map((act) => (
                   <option key={act} value={act}>
                     {act}
@@ -387,18 +591,15 @@ export default function CoverageDashboard() {
 
             {/* Reporting Period */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                Reporting Period
-              </label>
               <select
                 value={filterPeriod}
                 onChange={(e) => {
                   setFilterPeriod(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
-                <option value="">All Periods</option>
+                <option value="">All Reporting Periods</option>
                 {availablePeriods.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -407,18 +608,15 @@ export default function CoverageDashboard() {
               </select>
             </div>
 
-            {/* Status */}
+            {/* Implementation Status */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                Status
-              </label>
               <select
                 value={filterStatus}
                 onChange={(e) => {
                   setFilterStatus(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
                 <option value="">All Statuses</option>
                 {WASH_5W_STATUS_LIST.map((s) => (
@@ -431,165 +629,75 @@ export default function CoverageDashboard() {
 
             {/* Population Group */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                Population Group
-              </label>
               <select
                 value={filterPopGroup}
                 onChange={(e) => {
                   setFilterPopGroup(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               >
-                <option value="">All Groups</option>
-                {WASH_5W_BENEFICIARY_TYPES.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
+                <option value="">All Population Groups</option>
+                {WASH_5W_BENEFICIARY_TYPES.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Organisation / Partner Search */}
+            {/* Partner Organization Filter */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
-                Partner / Org
-              </label>
               <input
                 type="text"
+                placeholder="Filter by reporting partner..."
                 value={filterOrg}
                 onChange={(e) => {
                   setFilterOrg(e.target.value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search partner name..."
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                className="w-full py-2 px-3 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-700 outline-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Stat Cards - Snapshot Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {/* Reports Filtered */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Reports Submitted
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-teal-900 dark:text-teal-200 font-mono">
-              {statReports.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-gray-400">active submissions</div>
-          </div>
-
-          {/* Beneficiaries Reached */}
-          <div className="rounded-xl border border-emerald-200/60 bg-emerald-50/40 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/20 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-              Beneficiaries Reached
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-400 font-mono">
-              {statBeneficiaries.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-emerald-600 dark:text-emerald-400">individuals assisted</div>
-          </div>
-
-          {/* Partners Active */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Partners Reporting
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-teal-900 dark:text-teal-200 font-mono">
-              {statPartners.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-gray-400">accredited agencies</div>
-          </div>
-
-          {/* LGAs Covered */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              LGAs Covered
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-amber-700 dark:text-amber-400 font-mono">
-              {statLgas.toLocaleString()}
-              <span className="text-xs text-gray-400 font-normal ml-1">/ 65</span>
-            </div>
-            <div className="mt-0.5 text-[10px] text-gray-400">across BAY states</div>
-          </div>
-
-          {/* IDPs Reached */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              IDPs Assisted
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-teal-900 dark:text-teal-200 font-mono">
-              {statIdps.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-teal-700 dark:text-teal-400 font-medium">
-              {idpPct}% of total reached
-            </div>
-          </div>
-
-          {/* Women & Girls Reached */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Women &amp; Girls
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-purple-700 dark:text-purple-300 font-mono">
-              {femaleTotal.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-purple-600 dark:text-purple-400 font-medium">
-              {femalePct}% female ratio
-            </div>
-          </div>
-
-          {/* PWD Reached */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-800 shadow-xs">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Persons with Disabilities
-            </div>
-            <div className="mt-1.5 text-2xl sm:text-3xl font-bold text-teal-900 dark:text-teal-200 font-mono">
-              {statPwd.toLocaleString()}
-            </div>
-            <div className="mt-0.5 text-[10px] text-gray-400">vulnerability focus</div>
-          </div>
-        </div>
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* ════════════════════════════════════════════════════════════════
+            5. ANALYTICAL CHARTS & VISUALIZATIONS (4 Core Breakdown Cards)
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Chart 1: Beneficiaries by State */}
-          <div className="lg:col-span-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-teal-900 dark:text-teal-200 uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider font-mono">
                   Beneficiaries Reached by State
                 </h3>
-                <p className="text-[11px] text-gray-400">Distribution across Borno, Adamawa and Yobe</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Borno, Adamawa, and Yobe reach comparison
+                </p>
               </div>
-              <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800 px-2 py-0.5 rounded">
-                {statBeneficiaries.toLocaleString()} Total
+              <span className="text-xs font-bold text-teal-800 dark:text-teal-300 font-mono">
+                Total: {statBeneficiaries.toLocaleString()}
               </span>
             </div>
 
-            <div className="space-y-4 pt-1">
-              {Object.entries(stateTotals).map(([st, count]) => {
-                const pct = statBeneficiaries > 0 ? Math.round((count / statBeneficiaries) * 100) : 0;
-                const barWidth = Math.round((count / maxStateTotal) * 100);
+            <div className="space-y-4">
+              {Object.entries(stateTotals).map(([st, total]) => {
+                const pct = Math.round((total / maxStateTotal) * 100) || 0;
+                const share = statBeneficiaries > 0 ? Math.round((total / statBeneficiaries) * 100) : 0;
                 return (
-                  <div key={st} className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-gray-800 dark:text-white font-bold flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-teal-600" />
-                        {st} State
-                      </span>
-                      <span className="font-mono text-teal-900 dark:text-teal-300">
-                        {count.toLocaleString()} ({pct}%)
+                  <div key={st}>
+                    <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
+                      <span className="text-gray-800 dark:text-gray-200 font-bold">{st} State</span>
+                      <span className="font-mono text-gray-600 dark:text-gray-300">
+                        {total.toLocaleString()} ({share}%)
                       </span>
                     </div>
-                    <div className="w-full h-5 bg-gray-100 dark:bg-gray-700/70 rounded-md overflow-hidden p-0.5">
+                    <div className="w-full h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-teal-700 to-teal-500 rounded-sm transition-all duration-500"
-                        style={{ width: `${Math.max(barWidth, count > 0 ? 5 : 0)}%` }}
+                        className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-teal-700 to-teal-500"
+                        style={{ width: `${pct}%` }}
                       />
                     </div>
                   </div>
@@ -598,284 +706,263 @@ export default function CoverageDashboard() {
             </div>
           </div>
 
-          {/* Chart 2: Reports by Activity Type */}
-          <div className="lg:col-span-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+          {/* Chart 2: Domain Reach Distribution */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-teal-900 dark:text-teal-200 uppercase tracking-wider">
-                  Top Activities Reported
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider font-mono">
+                  Intervention Reach by Domain
                 </h3>
-                <p className="text-[11px] text-gray-400">Breakdown of interventions submitted</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Volume of assistance delivered per technical pillar
+                </p>
               </div>
-              <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded">
-                {statReports} Submissions
-              </span>
+              <span className="text-xs font-mono text-gray-400">4 Pillars</span>
             </div>
 
-            <div className="space-y-3 pt-1">
-              {activityCounts.length === 0 ? (
-                <div className="py-8 text-center text-xs text-gray-400">No activity data for current filter</div>
-              ) : (
-                activityCounts.map(([act, count]) => {
-                  const barWidth = Math.round((count / maxActivityCount) * 100);
-                  return (
-                    <div key={act} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-700 dark:text-gray-300 truncate max-w-xs font-medium" title={act}>
-                          {act}
-                        </span>
-                        <span className="font-mono font-bold text-amber-700 dark:text-amber-400 shrink-0">
-                          {count} {count === 1 ? "report" : "reports"}
-                        </span>
-                      </div>
-                      <div className="w-full h-3 bg-gray-100 dark:bg-gray-700/70 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.max(barWidth, 6)}%` }}
-                        />
-                      </div>
+            <div className="space-y-3.5">
+              {Object.entries(domainTotals).map(([domain, val]) => {
+                const share = statBeneficiaries > 0 ? Math.round((val / statBeneficiaries) * 100) : 0;
+                return (
+                  <div key={domain}>
+                    <div className="flex items-center justify-between text-xs mb-1 font-medium">
+                      <span className="text-gray-800 dark:text-gray-200 truncate max-w-[200px]">{domain}</span>
+                      <span className="font-mono text-gray-600 dark:text-gray-300">
+                        {val.toLocaleString()} ({share}%)
+                      </span>
                     </div>
-                  );
-                })
-              )}
+                    <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500 bg-[#C1722F]"
+                        style={{ width: `${Math.min(100, share)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Chart 3: Demographics Breakdown */}
-          <div className="lg:col-span-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+          {/* Chart 3: Demographic Reach Breakdown */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-teal-900 dark:text-teal-200 uppercase tracking-wider">
-                  Demographic Breakdown (FOR WHOM)
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider font-mono">
+                  Demographic Breakdown
                 </h3>
-                <p className="text-[11px] text-gray-400">Age, gender and vulnerability matrix</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Gender and inclusion ratios of people assisted
+                </p>
               </div>
-              <span className="text-xs font-mono font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded">
-                {statBeneficiaries.toLocaleString()} Individuals
+              <span className="text-xs font-bold text-rose-700 dark:text-rose-400 font-mono">
+                {femalePct}% Female
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-pink-50/60 dark:bg-pink-950/30 border border-pink-100 dark:border-pink-900/40">
-                <div className="text-[10px] uppercase font-bold text-pink-700 dark:text-pink-300">Women (18+)</div>
-                <div className="text-base font-bold font-mono text-pink-800 dark:text-pink-200 mt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+              <div className="p-3 rounded-lg bg-pink-50 dark:bg-pink-950/40 border border-pink-200/60 dark:border-pink-900">
+                <div className="text-[11px] font-semibold text-pink-700 dark:text-pink-400 uppercase">Women</div>
+                <div className="text-base font-bold text-pink-950 dark:text-pink-200 font-mono mt-1">
                   {statWomen.toLocaleString()}
                 </div>
+                <div className="text-[10px] text-pink-600 dark:text-pink-400 mt-0.5">
+                  {statBeneficiaries > 0 ? Math.round((statWomen / statBeneficiaries) * 100) : 0}%
+                </div>
               </div>
-              <div className="p-3 rounded-lg bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
-                <div className="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-300">Girls (&lt;18)</div>
-                <div className="text-base font-bold font-mono text-indigo-800 dark:text-indigo-200 mt-1">
+
+              <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900">
+                <div className="text-[11px] font-semibold text-rose-700 dark:text-rose-400 uppercase">Girls</div>
+                <div className="text-base font-bold text-rose-950 dark:text-rose-200 font-mono mt-1">
                   {statGirls.toLocaleString()}
                 </div>
+                <div className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5">
+                  {statBeneficiaries > 0 ? Math.round((statGirls / statBeneficiaries) * 100) : 0}%
+                </div>
               </div>
-              <div className="p-3 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
-                <div className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300">Men (18+)</div>
-                <div className="text-base font-bold font-mono text-blue-800 dark:text-blue-200 mt-1">
+
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900">
+                <div className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 uppercase">Men</div>
+                <div className="text-base font-bold text-blue-950 dark:text-blue-200 font-mono mt-1">
                   {statMen.toLocaleString()}
                 </div>
-              </div>
-              <div className="p-3 rounded-lg bg-cyan-50/60 dark:bg-cyan-950/30 border border-cyan-100 dark:border-cyan-900/40">
-                <div className="text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-300">Boys (&lt;18)</div>
-                <div className="text-base font-bold font-mono text-cyan-800 dark:text-cyan-200 mt-1">
-                  {statBoys.toLocaleString()}
+                <div className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">
+                  {statBeneficiaries > 0 ? Math.round((statMen / statBeneficiaries) * 100) : 0}%
                 </div>
               </div>
-            </div>
 
-            {/* Combined Gender Proportional Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-gray-500 font-medium">
-                <span>Gender &amp; Age Distribution</span>
-                <span>{femalePct}% Female / {100 - femalePct}% Male</span>
+              <div className="p-3 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-900">
+                <div className="text-[11px] font-semibold text-sky-700 dark:text-sky-400 uppercase">Boys</div>
+                <div className="text-base font-bold text-sky-950 dark:text-sky-200 font-mono mt-1">
+                  {statBoys.toLocaleString()}
+                </div>
+                <div className="text-[10px] text-sky-600 dark:text-sky-400 mt-0.5">
+                  {statBeneficiaries > 0 ? Math.round((statBoys / statBeneficiaries) * 100) : 0}%
+                </div>
               </div>
-              <div className="w-full h-4 rounded-full overflow-hidden flex bg-gray-100 dark:bg-gray-700">
-                <div
-                  style={{ width: `${statBeneficiaries > 0 ? (statWomen / statBeneficiaries) * 100 : 25}%` }}
-                  className="bg-pink-500 h-full"
-                  title={`Women: ${statWomen.toLocaleString()}`}
-                />
-                <div
-                  style={{ width: `${statBeneficiaries > 0 ? (statGirls / statBeneficiaries) * 100 : 25}%` }}
-                  className="bg-purple-500 h-full"
-                  title={`Girls: ${statGirls.toLocaleString()}`}
-                />
-                <div
-                  style={{ width: `${statBeneficiaries > 0 ? (statMen / statBeneficiaries) * 100 : 25}%` }}
-                  className="bg-blue-500 h-full"
-                  title={`Men: ${statMen.toLocaleString()}`}
-                />
-                <div
-                  style={{ width: `${statBeneficiaries > 0 ? (statBoys / statBeneficiaries) * 100 : 25}%` }}
-                  className="bg-cyan-500 h-full"
-                  title={`Boys: ${statBoys.toLocaleString()}`}
-                />
+
+              <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900 col-span-2 sm:col-span-1">
+                <div className="text-[11px] font-semibold text-purple-700 dark:text-purple-400 uppercase">PWD</div>
+                <div className="text-base font-bold text-purple-950 dark:text-purple-200 font-mono mt-1">
+                  {statPwd.toLocaleString()}
+                </div>
+                <div className="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">
+                  {statBeneficiaries > 0 ? Math.round((statPwd / statBeneficiaries) * 100) : 0}%
+                </div>
               </div>
             </div>
           </div>
 
           {/* Chart 4: Implementation Status Breakdown */}
-          <div className="lg:col-span-6 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-teal-900 dark:text-teal-200 uppercase tracking-wider">
-                  Activity Implementation Status
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider font-mono">
+                  Activity Status Distribution
                 </h3>
-                <p className="text-[11px] text-gray-400">Progress against planned milestones</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Delivery progress across all verified records
+                </p>
               </div>
-              <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
                 {statusCounts.Completed} Completed
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-lg border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30 text-center">
-                <div className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-300">Completed</div>
-                <div className="text-2xl font-bold font-mono text-emerald-800 dark:text-emerald-200 mt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200">
+                <div className="text-[11px] font-semibold text-emerald-800 uppercase">Completed</div>
+                <div className="text-xl font-bold text-emerald-900 font-mono mt-1">
                   {statusCounts.Completed}
                 </div>
-                <div className="text-[10px] text-emerald-600 mt-0.5">
-                  {statReports > 0 ? Math.round((statusCounts.Completed / statReports) * 100) : 0}%
-                </div>
               </div>
-              <div className="p-3.5 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 text-center">
-                <div className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300">Ongoing</div>
-                <div className="text-2xl font-bold font-mono text-blue-800 dark:text-blue-200 mt-1">
+
+              <div className="p-3 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200">
+                <div className="text-[11px] font-semibold text-sky-800 uppercase">Ongoing</div>
+                <div className="text-xl font-bold text-sky-900 font-mono mt-1">
                   {statusCounts.Ongoing}
                 </div>
-                <div className="text-[10px] text-blue-600 mt-0.5">
-                  {statReports > 0 ? Math.round((statusCounts.Ongoing / statReports) * 100) : 0}%
-                </div>
               </div>
-              <div className="p-3.5 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30 text-center">
-                <div className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300">Planned</div>
-                <div className="text-2xl font-bold font-mono text-amber-800 dark:text-amber-200 mt-1">
+
+              <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200">
+                <div className="text-[11px] font-semibold text-amber-800 uppercase">Planned</div>
+                <div className="text-xl font-bold text-amber-900 font-mono mt-1">
                   {statusCounts.Planned}
                 </div>
-                <div className="text-[10px] text-amber-600 mt-0.5">
-                  {statReports > 0 ? Math.round((statusCounts.Planned / statReports) * 100) : 0}%
-                </div>
               </div>
-              <div className="p-3.5 rounded-lg border border-rose-200 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30 text-center">
-                <div className="text-[10px] uppercase font-bold text-rose-700 dark:text-rose-300">Suspended</div>
-                <div className="text-2xl font-bold font-mono text-rose-800 dark:text-rose-200 mt-1">
+
+              <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200">
+                <div className="text-[11px] font-semibold text-rose-800 uppercase">Suspended</div>
+                <div className="text-xl font-bold text-rose-900 font-mono mt-1">
                   {statusCounts.Suspended}
-                </div>
-                <div className="text-[10px] text-rose-600 mt-0.5">
-                  {statReports > 0 ? Math.round((statusCounts.Suspended / statReports) * 100) : 0}%
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Aggregated Reports Table Card */}
-        <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-800 shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* ════════════════════════════════════════════════════════════════
+            6. AGGREGATED 5W RESPONSE MATRIX TABLE (Public Read-Only View)
+        ════════════════════════════════════════════════════════════════ */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700 shadow-xs overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-800/50">
             <div>
-              <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>Aggregated Reports</span>
-                <span className="text-xs font-mono font-normal text-gray-500">
-                  ({filteredReports.length} {filteredReports.length === 1 ? "record" : "records"})
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                  5W Operational Response Matrix
+                </h3>
+                <span className="bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-300 text-xs font-mono font-bold px-2 py-0.5 rounded-full">
+                  {filteredReports.length} records
                 </span>
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Direct humanitarian field response log across Borno, Adamawa, and Yobe
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Click any row or view button to inspect the full 5W record breakdown (WHO, WHAT, WHERE, WHEN, FOR WHOM)
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
-              {/* Quick in-table search */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="Filter table..."
-                  className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-1.5 text-xs text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none w-48 sm:w-60"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-
+            <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => exportCsv(filteredReports)}
-                className="rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900/60 px-3.5 py-1.5 text-xs font-bold border border-teal-200 dark:border-teal-800 transition-colors flex items-center gap-1.5"
+                className="text-xs font-bold text-teal-800 hover:text-teal-950 dark:text-teal-300 dark:hover:text-white border border-teal-300 dark:border-teal-700 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>Export CSV</span>
+                <span>Export Filtered (CSV)</span>
               </button>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50/80 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-[11px] uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <table className="w-full text-left text-xs text-gray-600 dark:text-gray-300">
+              <thead className="bg-gray-100/80 dark:bg-gray-700/60 text-gray-700 dark:text-gray-200 uppercase font-mono text-[11px] tracking-wider border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Partner</th>
-                  <th className="py-3.5 px-4 font-semibold">Activity</th>
-                  <th className="py-3.5 px-4 font-semibold">State</th>
-                  <th className="py-3.5 px-4 font-semibold">LGA / Ward</th>
-                  <th className="py-3.5 px-4 font-semibold">Period</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Population Group</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Beneficiaries</th>
-                  <th className="py-3.5 px-4 font-semibold text-center">Actions</th>
+                  <th className="py-3.5 px-4">Partner &amp; Type</th>
+                  <th className="py-3.5 px-4">Activity &amp; Domain</th>
+                  <th className="py-3.5 px-4">Location (LGA, Ward)</th>
+                  <th className="py-3.5 px-4">Period &amp; Status</th>
+                  <th className="py-3.5 px-4">Target Group</th>
+                  <th className="py-3.5 px-4 text-right">Beneficiaries</th>
+                  <th className="py-3.5 px-4 text-center">Inspect Record</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {paginatedReports.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-14 text-center">
-                      <div className="text-gray-400 dark:text-gray-500 text-sm font-medium">
-                        No reports match the current filters yet.
+                    <td colSpan={7} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                      <div className="max-w-sm mx-auto">
+                        <svg className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300">No matching 5W reports found</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Try adjusting or clearing your search and filter options.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={resetFilters}
+                          className="mt-3 text-xs font-bold text-teal-800 dark:text-teal-400 hover:underline"
+                        >
+                          Clear all filters
+                        </button>
                       </div>
-                      <button
-                        onClick={handleClearFilters}
-                        className="mt-2 text-xs font-semibold text-teal-700 hover:text-teal-800 dark:text-teal-400 underline"
-                      >
-                        Clear filters to see all reports
-                      </button>
                     </td>
                   </tr>
                 ) : (
                   paginatedReports.map((r) => (
                     <tr
                       key={r.id}
-                      className="hover:bg-teal-50/30 dark:hover:bg-gray-750 transition-colors cursor-pointer"
                       onClick={() => setSelectedReport(r)}
+                      className="hover:bg-teal-50/40 dark:hover:bg-teal-950/20 cursor-pointer transition-colors"
                     >
                       <td className="py-3.5 px-4 font-medium text-gray-900 dark:text-white">
-                        <div className="font-semibold text-teal-950 dark:text-teal-200">{r.orgName}</div>
-                        <div className="text-[10px] text-gray-400">{r.orgType || "NGO"}</div>
+                        <div className="font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
+                          {r.orgName}
+                        </div>
+                        <div className="text-[10px] text-gray-400 font-mono mt-0.5 uppercase">
+                          {r.orgType || "NGO"} · {r.donor || "Unspecified Donor"}
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-gray-700 dark:text-gray-300">
-                        <div className="font-medium">
+                      <td className="py-3.5 px-4">
+                        <div className="font-medium text-gray-900 dark:text-white truncate max-w-[200px]" title={r.activityType}>
                           {r.activityType === "Other" ? r.activityOther || "Other" : r.activityType}
                         </div>
-                        {r.domain && <div className="text-[10px] text-teal-600 dark:text-teal-400">{r.domain}</div>}
+                        <div className="text-[10px] text-teal-700 dark:text-teal-400 font-medium">
+                          {r.domain || "Water Supply"}
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-gray-800 dark:text-gray-200 font-medium">
-                        {r.state}
-                      </td>
-                      <td className="py-3.5 px-4 text-gray-600 dark:text-gray-400">
-                        <div>{r.lga}</div>
-                        {r.ward && <div className="text-[10px] text-gray-400">{r.ward}</div>}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                        {r.period || "—"}
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-gray-800 dark:text-gray-200">
+                          {r.state}, {r.lga}
+                        </div>
+                        <div className="text-[10px] text-gray-400 font-mono">
+                          {r.ward || r.settlement || "General Ward"}
+                        </div>
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-mono text-xs text-gray-700 dark:text-gray-300 font-semibold mb-1">
+                          {r.period || "Current Cycle"}
+                        </div>
                         {statusBadge(r.status)}
                       </td>
                       <td className="py-3.5 px-4 text-gray-600 dark:text-gray-400">
@@ -884,40 +971,25 @@ export default function CoverageDashboard() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-right font-mono font-bold text-gray-900 dark:text-white">
-                        <div>{(Number(r.total) || 0).toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400 font-normal">
-                          {Number(r.women) || 0}W · {Number(r.men) || 0}M
+                        <div className="text-sm">{(Number(r.total) || 0).toLocaleString()}</div>
+                        <div className="text-[10px] text-gray-400 font-normal mt-0.5">
+                          {Number(r.women) || 0}W · {Number(r.girls) || 0}G · {Number(r.men) || 0}M
                         </div>
                       </td>
+                      {/* PURE PUBLIC VIEW ACTION ONLY - NO DELETE OR EDIT */}
                       <td className="py-3.5 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="inline-flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedReport(r)}
-                            className="p-1 rounded text-teal-700 hover:text-teal-900 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/40"
-                            title="View Full 5W Record"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </button>
-                          {(currentUser?.role === "admin" ||
-                            currentUser?.role === "coordinator" ||
-                            (currentUser?.role === "partner" &&
-                              r.orgName.toLowerCase().includes((currentUser.organization || "").toLowerCase()))) && (
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(r)}
-                              className="p-1 rounded text-rose-600 hover:text-rose-800 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/40"
-                              title="Delete Record"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedReport(r)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-teal-800 hover:text-teal-950 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900 border border-teal-200 dark:border-teal-800 transition-colors"
+                          title="Inspect 5W Metadata"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>Inspect</span>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -927,27 +999,57 @@ export default function CoverageDashboard() {
           </div>
 
           {/* Pagination Controls */}
-          {filteredReports.length > itemsPerPage && (
-            <div className="p-4 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between gap-3 text-xs text-gray-500">
-              <div>
-                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, filteredReports.length)} of {filteredReports.length} records
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between flex-wrap gap-3">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Showing <span className="font-bold text-gray-800 dark:text-gray-200">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
+                <span className="font-bold text-gray-800 dark:text-gray-200">
+                  {Math.min(currentPage * itemsPerPage, filteredReports.length)}
+                </span>{" "}
+                of <span className="font-bold text-gray-800 dark:text-gray-200">{filteredReports.length}</span> reports
               </div>
-              <div className="flex items-center gap-1.5">
+
+              <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  type="button"
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1 text-xs font-semibold rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Previous
                 </button>
-                <span className="px-2 font-mono font-bold text-gray-800 dark:text-white">
-                  {currentPage} / {totalPages}
-                </span>
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const pNum = i + 1;
+                  if (
+                    pNum === 1 ||
+                    pNum === totalPages ||
+                    (pNum >= currentPage - 1 && pNum <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pNum}
+                        type="button"
+                        onClick={() => setCurrentPage(pNum)}
+                        className={`px-3 py-1 text-xs font-semibold rounded border ${
+                          currentPage === pNum
+                            ? "bg-teal-800 text-white border-teal-800"
+                            : "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {pNum}
+                      </button>
+                    );
+                  }
+                  if (pNum === currentPage - 2 || pNum === currentPage + 2) {
+                    return <span key={pNum} className="px-1 text-xs text-gray-400">...</span>;
+                  }
+                  return null;
+                })}
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  type="button"
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 font-medium"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="px-3 py-1 text-xs font-semibold rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Next
                 </button>
@@ -955,216 +1057,249 @@ export default function CoverageDashboard() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Full 5W Record Detail Modal */}
-      {selectedReport && (
-        <div
-          className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-          onClick={() => setSelectedReport(null)}
-        >
-          <div
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 space-y-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-[11px] font-bold text-teal-700 dark:text-teal-300 uppercase">
-                    5W Record Inspection
-                  </span>
-                  <span>·</span>
-                  {statusBadge(selectedReport.status)}
+        {/* ════════════════════════════════════════════════════════════════
+            7. 5W RECORD INSPECTION MODAL (Detailed Humanitarian Breakdown)
+        ════════════════════════════════════════════════════════════════ */}
+        {selectedReport && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-teal-950 via-teal-900 to-teal-800 text-white flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="font-mono text-xs uppercase text-teal-300 tracking-wider">
+                      5W Inspection Record
+                    </span>
+                    <span className="text-teal-400">·</span>
+                    <span className="text-xs font-mono bg-teal-800/80 px-2 py-0.5 rounded text-teal-200">
+                      ID: {selectedReport.id}
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold font-serif">
+                    {selectedReport.orgName} — {selectedReport.activityType}
+                  </h3>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {selectedReport.orgName}
-                </h3>
-                <p className="text-xs text-gray-500">
-                  {selectedReport.activityType} ({selectedReport.state} — {selectedReport.lga})
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Content Sections */}
-            <div className="space-y-4 text-xs">
-              {/* WHO */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/50">
-                <h4 className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 mb-2">
-                  1. WHO — Implementing Agency &amp; Governance
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div>
-                    <span className="text-gray-400 block">Organisation:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.orgName}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Classification:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.orgType || "NGO"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Donor Partner:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.donor || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Focal Person:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.focalPoint || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Contact Email:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.email || "—"}</span>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedReport(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0 ml-3"
+                  aria-label="Close modal"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
 
-              {/* WHAT */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/50">
-                <h4 className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 mb-2">
-                  2. WHAT — Intervention Details &amp; Quantity
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="col-span-2">
-                    <span className="text-gray-400 block">Activity:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.activityType}</span>
+              {/* Modal Body: 5 Official Humanitarian Dimensions */}
+              <div className="p-5 sm:p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                {/* 1. WHO */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">1</span>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
+                      WHO — Reporting &amp; Implementing Agencies
+                    </h4>
                   </div>
-                  {selectedReport.domain && (
-                    <div>
-                      <span className="text-gray-400 block">Domain:</span>
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.domain}</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Reporting Org</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.orgName}</div>
                     </div>
-                  )}
-                  <div>
-                    <span className="text-gray-400 block">Output Quantity:</span>
-                    <span className="font-bold text-teal-700 dark:text-teal-300 font-mono">
-                      {selectedReport.quantity || "—"} {selectedReport.unit || ""}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Delivery Modality:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.modality || "In-kind"}</span>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Org Classification</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.orgType || "NGO"}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Donor Partner</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.donor || "Direct / Cluster"}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Focal Point</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.focalPoint || "Cluster Secretariat"}</div>
+                    </div>
                   </div>
                 </div>
+
+                {/* 2. WHAT */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">2</span>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
+                      WHAT — Domain, Activity &amp; Output Indicators
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Technical Domain</div>
+                      <div className="font-bold text-teal-800 dark:text-teal-300 mt-0.5">{selectedReport.domain || "Water Supply"}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:col-span-2">
+                      <div className="text-gray-400 text-[11px]">Activity Undertaken</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">
+                        {selectedReport.activityType === "Other" ? selectedReport.activityOther : selectedReport.activityType}
+                      </div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Key Indicator</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 truncate" title={selectedReport.indicator}>
+                        {selectedReport.indicator || "Standard 5W Metric"}
+                      </div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Quantity Planned</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">
+                        {selectedReport.qtyPlanned || "—"} {selectedReport.unit || ""}
+                      </div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Quantity Achieved</div>
+                      <div className="font-bold text-teal-800 dark:text-teal-300 mt-0.5 font-mono">
+                        {selectedReport.qtyAchieved || "—"} {selectedReport.unit || ""}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. WHERE */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">3</span>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
+                      WHERE — Geographical Coordinates &amp; Administrative Hierarchy
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">State (Admin 1)</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.state}</div>
+                      {selectedReport.pcode1 && (
+                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode1}</div>
+                      )}
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">LGA (Admin 2)</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.lga}</div>
+                      {selectedReport.pcode2 && (
+                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode2}</div>
+                      )}
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Ward (Admin 3)</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.ward || "—"}</div>
+                      {selectedReport.pcode3 && (
+                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode3}</div>
+                      )}
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Site / Settlement</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">
+                        {selectedReport.settlement || selectedReport.locationType || "Community site"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. WHEN */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">4</span>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
+                      WHEN — Timeline &amp; Delivery Status
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Reporting Period</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.period || "2026 Cycle"}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Activity Status</div>
+                      <div className="mt-1">{statusBadge(selectedReport.status)}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">Start Date</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.startDate || "—"}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[11px]">End Date</div>
+                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.endDate || "—"}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. FOR WHOM */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
+                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">5</span>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
+                      FOR WHOM — Beneficiary Demographics &amp; Population Group
+                    </h4>
+                  </div>
+                  <div className="p-3 bg-teal-50 dark:bg-teal-950/40 rounded-lg border border-teal-200 dark:border-teal-800 text-xs mb-2">
+                    <span className="text-teal-800 dark:text-teal-300 font-semibold">Target Population Group: </span>
+                    <span className="font-bold text-teal-950 dark:text-white">{selectedReport.populationGroup || "Host Community"}</span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
+                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[10px]">Women</div>
+                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.women) || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[10px]">Girls</div>
+                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.girls) || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[10px]">Men</div>
+                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.men) || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="text-gray-400 text-[10px]">Boys</div>
+                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.boys) || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="p-2.5 bg-purple-50 dark:bg-purple-950/40 rounded-lg border border-purple-200">
+                      <div className="text-purple-700 dark:text-purple-300 text-[10px] font-bold">PWD</div>
+                      <div className="font-bold text-purple-900 dark:text-purple-200 font-mono mt-0.5">{(Number(selectedReport.pwd) || 0).toLocaleString()}</div>
+                    </div>
+                    <div className="p-2.5 bg-teal-50 dark:bg-teal-950/60 rounded-lg border border-teal-300">
+                      <div className="text-teal-800 dark:text-teal-300 text-[10px] font-bold">Total Reached</div>
+                      <div className="font-extrabold text-teal-950 dark:text-white font-mono mt-0.5">{(Number(selectedReport.total) || 0).toLocaleString()}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Operational Notes */}
+                {selectedReport.comments && (
+                  <div className="p-3.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl border border-gray-200 dark:border-gray-600 text-xs">
+                    <span className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider font-mono text-[10px]">Field Notes / Constraints:</span>
+                    <p className="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed italic">
+                      "{selectedReport.comments}"
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* WHERE */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/50">
-                <h4 className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 mb-2">
-                  3. WHERE — Location &amp; Settlement
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div>
-                    <span className="text-gray-400 block">State:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.state}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">LGA:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.lga}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Ward:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.ward || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Settlement / Camp:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.settlement || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Location Setting:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.locationType || "Host community"}</span>
-                  </div>
-                </div>
+              {/* Modal Footer */}
+              <div className="p-4 bg-gray-100 dark:bg-gray-700/60 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <span className="text-[11px] text-gray-500 font-mono">
+                  Standard WASH Sector 5W Monitoring Record
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedReport(null)}
+                  className="px-4 py-2 bg-teal-800 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition-colors"
+                >
+                  Close Record
+                </button>
               </div>
-
-              {/* WHEN */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/50">
-                <h4 className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 mb-2">
-                  4. WHEN — Reporting Timeline
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono">
-                  <div>
-                    <span className="text-gray-400 block font-sans">Period:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.period || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block font-sans">Start Date:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.startDate || "—"}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block font-sans">End Date:</span>
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{selectedReport.endDate || "—"}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* FOR WHOM */}
-              <div className="rounded-xl border border-teal-200 dark:border-teal-800 p-4 bg-teal-50/40 dark:bg-teal-950/20">
-                <h4 className="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 mb-2">
-                  5. FOR WHOM — Beneficiary Demographics
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center mb-3">
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-400 block">Women (18+)</span>
-                    <span className="font-bold font-mono text-gray-900 dark:text-white">
-                      {(Number(selectedReport.women) || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-400 block">Girls (&lt;18)</span>
-                    <span className="font-bold font-mono text-gray-900 dark:text-white">
-                      {(Number(selectedReport.girls) || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-400 block">Men (18+)</span>
-                    <span className="font-bold font-mono text-gray-900 dark:text-white">
-                      {(Number(selectedReport.men) || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-400 block">Boys (&lt;18)</span>
-                    <span className="font-bold font-mono text-gray-900 dark:text-white">
-                      {(Number(selectedReport.boys) || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-400 block">PWD</span>
-                    <span className="font-bold font-mono text-gray-900 dark:text-white">
-                      {(Number(selectedReport.pwd) || 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-teal-200 dark:border-teal-800">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">Total Individuals Reached:</span>
-                  <span className="text-base font-bold font-mono text-teal-700 dark:text-teal-300">
-                    {(Number(selectedReport.total) || 0).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
-              <span className="text-[11px] text-gray-400 font-mono">
-                ID: {selectedReport.id}
-              </span>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs transition-colors"
-              >
-                Close Inspection
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }

@@ -47,13 +47,11 @@ function MainRoutes() {
 
   return (
     <Routes>
-      {/* 1. Standalone Public Pages (Landing, Coverage Dashboard, 5W Reporting) */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/home" element={<LandingPage />} />
-      <Route path="/landing" element={<LandingPage />} />
-
-      {/* Public Pages with Dedicated Top Navbar (Home, Dashboard, 5W Reporting) - NO Sidebar */}
+      {/* 1. Standalone Public Pages with Shared Top Navbar & Layout (Home, Dashboard, 5W Reporting) - NO Sidebar */}
       <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/dashboard" element={<CoverageDashboard />} />
         <Route path="/coverage-dashboard" element={<CoverageDashboard />} />
         <Route path="/submit-report" element={<SubmitReport />} />
