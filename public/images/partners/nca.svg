@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 150" role="img" aria-labelledby="title desc">
+  <title id="title">Norwegian Church Aid Act Alliance</title>
+  <desc id="desc">Norwegian Church Aid logo with hands and a dove</desc>
+  <g fill="none" stroke="#ffffff" stroke-width="7" stroke-linejoin="round">
+    <circle cx="210" cy="54" r="48" fill="#70005f"/>
+    <path d="M174 72c-17-9-26-29-28-47 17 4 31 13 40 28 6-9 15-17 25-22 10 5 19 13 25 22 9-15 23-24 40-28-2 18-11 38-28 47-6 3-12 5-18 6v26h-36V78c-7-1-14-3-20-6z" fill="#fff" stroke="#fff"/>
+    <path d="M168 80l-20-8-14-28 10-5 21 27 28 15M252 80l20-8 14-28-10-5-21 27-28 15" stroke="#70005f"/>
+  </g>
+  <text x="210" y="126" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="1.5" fill="#202025">NORWEGIAN CHURCH AID</text>
+  <text x="210" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#70005f">act alliance</text>
+</svg>
