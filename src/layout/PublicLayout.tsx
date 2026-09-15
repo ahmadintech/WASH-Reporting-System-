@@ -711,7 +711,7 @@ export default function PublicLayout() {
                     fontFamily: FONT_PRIMARY,
                   }}
                 >
-                  Admin & Coordinator Console <IcoArrowRight size={15} />
+                  Admin & Coordinator Dashboard <IcoArrowRight size={15} />
                 </button>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

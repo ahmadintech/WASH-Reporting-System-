@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import { useAuth } from "../../context/AuthContext";
 import { UserRole } from "../../types/wash";
@@ -56,21 +56,40 @@ export default function SignInForm() {
 
   return (
     <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 backdrop-blur-md">
+      {/* Back to Home Button */}
+      <div className="mb-4">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors group cursor-pointer"
+        >
+          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Back to Home</span>
+        </Link>
+      </div>
+
       {/* Brand Header */}
       <div className="flex flex-col items-center text-center mb-6">
-        <div className="p-3 rounded-2xl bg-[#F0F7F7] dark:bg-gray-800/80 border border-[#C9E1DF] dark:border-gray-700 shadow-sm mb-3">
+        <Link
+          to="/"
+          title="Return to Home"
+          className="p-3 rounded-2xl bg-[#F0F7F7] dark:bg-gray-800/80 border border-[#C9E1DF] dark:border-gray-700 shadow-sm mb-3 hover:scale-105 hover:shadow-md transition-all cursor-pointer block"
+        >
           <img
             src="/images/logo/wash-logo.png"
             alt="WASH Sector Nigeria"
-            className="h-14 sm:h-16 w-auto object-contain"
+            className="h-14 sm:h-16 w-auto object-contain pointer-events-none"
             onError={(e) => {
               (e.target as HTMLImageElement).src = "./images/logo/wash-logo.png";
             }}
           />
-        </div>
-        <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-          WASH 5W Reporting System
-        </h1>
+        </Link>
+        <Link to="/" title="Return to Home" className="hover:opacity-85 transition-opacity">
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+            WASH 5W Reporting System
+          </h1>
+        </Link>
         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">
           North East Nigeria Humanitarian Response · Borno, Adamawa & Yobe States
         </p>

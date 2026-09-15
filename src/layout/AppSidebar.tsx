@@ -70,7 +70,7 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
       return [
         {
           icon: <GridIcon />,
-          name: "Coordinator Console",
+          name: "Dashboard",
           path: "/admin/dashboard",
         },
         {
