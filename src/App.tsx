@@ -14,6 +14,7 @@ import ReportsList from "./pages/Wash/ReportsList";
 import PartnersDirectory from "./pages/Wash/PartnersDirectory";
 import SectorSettings from "./pages/Admin/SectorSettings";
 import UserManagement from "./pages/Admin/UserManagement";
+import PowerBiExport from "./pages/Admin/PowerBiExport";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { WashDataProvider } from "./context/WashDataContext";
 import LandingPage from "./pages/Landing/LandingPage";
@@ -77,10 +78,26 @@ function MainRoutes() {
             </AdminOrCoordinatorRoute>
           }
         />
+        <Route
+          path="powerbi"
+          element={
+            <AdminRoute>
+              <PowerBiExport />
+            </AdminRoute>
+          }
+        />
       </Route>
 
       {/* Internal Management Routes (with AppSidebar) */}
       <Route element={<AppLayout />}>
+        <Route
+          path="/powerbi"
+          element={
+            <AdminRoute>
+              <PowerBiExport />
+            </AdminRoute>
+          }
+        />
         <Route path="/coordinator/dashboard" element={<Home />} />
         <Route path="/reports-list" element={<ReportsList />} />
         <Route path="/profile" element={<UserProfiles />} />

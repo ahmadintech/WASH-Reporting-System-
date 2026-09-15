@@ -5,23 +5,36 @@ import { useAuth } from "../../context/AuthContext";
 import { UserRole } from "../../types/wash";
 
 export default function SignInForm() {
-  const [selectedRole, setSelectedRole] = useState<UserRole>("admin");
+  const { login, loginAsRole, loginAsCoordinatorState } = useAuth();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("admin@washsector-ne.org");
   const [password, setPassword] = useState("admin2026");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loggingRole, setLoggingRole] = useState<UserRole | null>(null);
-
-  const { login, loginAsRole } = useAuth();
-  const navigate = useNavigate();
+  const [loggingRole, setLoggingRole] = useState<string | null>(null);
+  const [loggingCoordinatorState, setLoggingCoordinatorState] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("coordinator");
 
   const handleQuickLogin = (role: UserRole) => {
     setLoggingRole(role);
+    setLoggingCoordinatorState(null);
     setLoading(true);
     setTimeout(() => {
       loginAsRole(role);
+      setLoading(false);
+      navigate("/admin/dashboard");
+    }, 250);
+  };
+
+  const handleQuickCoordinatorLogin = (state: "Adamawa" | "Borno" | "Yobe") => {
+    setLoggingCoordinatorState(state);
+    setLoggingRole("coordinator");
+    setLoading(true);
+    setTimeout(() => {
+      loginAsCoordinatorState(state);
       setLoading(false);
       navigate("/admin/dashboard");
     }, 250);
@@ -137,7 +150,7 @@ export default function SignInForm() {
           disabled={loading}
           className="w-full h-11 rounded-xl bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-bold text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
         >
-          {loading && !loggingRole ? (
+          {loading && !loggingRole && !loggingCoordinatorState ? (
             <>
               <svg className="animate-spin h-4 w-4 text-current" viewBox="0 0 24 24" fill="none">
                 <circle
@@ -166,16 +179,17 @@ export default function SignInForm() {
           <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
             Quick Demo Access
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {/* Sector Admin */}
             <button
               type="button"
               disabled={loading}
               onClick={() => handleQuickLogin("admin")}
-              title="Sign in instantly as Sector Administrator"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300 hover:shadow-xs active:scale-95 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/80 dark:hover:bg-rose-900/60 disabled:opacity-50 cursor-pointer"
+              title="Sign in instantly as Sector Administrator (All BAY States)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300 hover:shadow-xs active:scale-95 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/80 dark:hover:bg-rose-900/60 disabled:opacity-50 cursor-pointer"
             >
               {loading && loggingRole === "admin" ? (
-                <svg className="animate-spin h-3.5 w-3.5 text-rose-600" viewBox="0 0 24 24" fill="none">
+                <svg className="animate-spin h-3 w-3 text-rose-600" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
@@ -185,40 +199,61 @@ export default function SignInForm() {
               <span>Sector Admin</span>
             </button>
 
+            {/* Coordinator of Adamawa */}
             <button
               type="button"
               disabled={loading}
-              onClick={() => handleQuickLogin("coordinator")}
-              title="Sign in instantly as WASH Coordinator"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border bg-brand-50 text-brand-700 border-brand-200 hover:bg-brand-100 hover:border-brand-300 hover:shadow-xs active:scale-95 dark:bg-brand-950/40 dark:text-brand-300 dark:border-brand-800/80 dark:hover:bg-brand-900/60 disabled:opacity-50 cursor-pointer"
+              onClick={() => handleQuickCoordinatorLogin("Adamawa")}
+              title="Sign in as Adamawa State WASH Coordinator (Adamawa Data Only)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100 hover:border-teal-300 hover:shadow-xs active:scale-95 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/80 dark:hover:bg-teal-900/60 disabled:opacity-50 cursor-pointer"
             >
-              {loading && loggingRole === "coordinator" ? (
-                <svg className="animate-spin h-3.5 w-3.5 text-brand-600" viewBox="0 0 24 24" fill="none">
+              {loading && loggingCoordinatorState === "Adamawa" ? (
+                <svg className="animate-spin h-3 w-3 text-teal-600" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               ) : (
-                <span className="w-2 h-2 rounded-full bg-brand-500"></span>
+                <span className="w-2 h-2 rounded-full bg-teal-500"></span>
               )}
-              <span>WASH Coordinator</span>
+              <span>Coordinator of Adamawa</span>
             </button>
 
+            {/* Coordinator of Borno */}
             <button
               type="button"
               disabled={loading}
-              onClick={() => handleQuickLogin("partner")}
-              title="Sign in instantly as Implementing Partner"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-xs active:scale-95 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/80 dark:hover:bg-emerald-900/60 disabled:opacity-50 cursor-pointer"
+              onClick={() => handleQuickCoordinatorLogin("Borno")}
+              title="Sign in as Borno State WASH Coordinator (Borno Data Only)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 hover:border-amber-300 hover:shadow-xs active:scale-95 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/80 dark:hover:bg-amber-900/60 disabled:opacity-50 cursor-pointer"
             >
-              {loading && loggingRole === "partner" ? (
-                <svg className="animate-spin h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none">
+              {loading && loggingCoordinatorState === "Borno" ? (
+                <svg className="animate-spin h-3 w-3 text-amber-600" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              )}
+              <span>Coordinator of Borno</span>
+            </button>
+
+            {/* Coordinator of Yobe */}
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => handleQuickCoordinatorLogin("Yobe")}
+              title="Sign in as Yobe State WASH Coordinator (Yobe Data Only)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-xs active:scale-95 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/80 dark:hover:bg-emerald-900/60 disabled:opacity-50 cursor-pointer"
+            >
+              {loading && loggingCoordinatorState === "Yobe" ? (
+                <svg className="animate-spin h-3 w-3 text-emerald-600" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               ) : (
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               )}
-              <span>Implementing Partner</span>
+              <span>Coordinator of Yobe</span>
             </button>
           </div>
         </div>

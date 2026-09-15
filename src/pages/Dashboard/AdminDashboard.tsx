@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useWashData } from "../../context/WashDataContext";
@@ -10,6 +10,7 @@ import CountryMap from "../../components/ecommerce/CountryMap";
 export default function AdminDashboard() {
   const { reports, deleteReport, exportCsv, resetToSampleData, stats } = useWashData();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   // Local approval tracking state
   const [approvedIds, setApprovedIds] = useState<Set<string>>(() => {
@@ -253,6 +254,19 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {currentUser?.role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/powerbi")}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-300 dark:border-amber-700/70 bg-amber-50 dark:bg-amber-950/40 px-3.5 py-2 text-xs font-bold text-amber-800 dark:text-amber-200 shadow-xs hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-all cursor-pointer"
+              title="Connect or export live 5W data to Microsoft Power BI"
+            >
+              <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.5 2h-3c-.28 0-.5.22-.5.5v19c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-19c0-.28-.22-.5-.5-.5zm-6 7h-3c-.28 0-.5.22-.5.5v12c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-12c0-.28-.22-.5-.5-.5zm12-4h-3c-.28 0-.5.22-.5.5v16c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-16c0-.28-.22-.5-.5-.5z" />
+              </svg>
+              <span>Power BI Connector</span>
+            </button>
+          )}
+
           <button
             onClick={() => exportCsv()}
             className="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all cursor-pointer"
@@ -423,7 +437,55 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Microsoft Power BI Live Sync Banner (Admin only) */}
+      {currentUser?.role === "admin" && (
+        <div className="rounded-2xl border border-amber-300/80 dark:border-amber-700/60 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-amber-500 text-gray-950 flex items-center justify-center font-bold shrink-0 shadow-md">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.5 2h-3c-.28 0-.5.22-.5.5v19c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-19c0-.28-.22-.5-.5-.5zm-6 7h-3c-.28 0-.5.22-.5.5v12c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-12c0-.28-.22-.5-.5-.5zm12-4h-3c-.28 0-.5.22-.5.5v16c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-16c0-.28-.22-.5-.5-.5z" />
+              </svg>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                  Microsoft Power BI Intelligence Connector
+                </h3>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                  LIVE 5W ODATA
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                Connect or export all {reports.length} verified 5W records to Power BI Desktop &amp; Service for multi-cluster dashboards.
+              </p>
+            </div>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => window.open("https://app.powerbi.com", "_blank", "noopener,noreferrer")}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-gray-950 text-xs font-bold shadow-xs transition-all cursor-pointer"
+            >
+              <span>Open Power BI</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/admin/powerbi")}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all cursor-pointer"
+            >
+              <span>Connect &amp; Export</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* --- ANALYTICS & OPERATIONAL SIDEBAR GRID --- */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
@@ -683,14 +745,20 @@ export default function AdminDashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                BAY States Geographic Coverage & Vector Density
+                {currentUser?.role === "coordinator" && currentUser?.state
+                  ? `${currentUser.state} State Geographic Coverage & Interventions`
+                  : "BAY States Geographic Coverage & Vector Density"}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Spatial footprint of active humanitarian interventions across Borno, Adamawa, and Yobe
+                {currentUser?.role === "coordinator" && currentUser?.state
+                  ? `Spatial footprint of active humanitarian interventions across ${currentUser.state} State`
+                  : "Spatial footprint of active humanitarian interventions across Borno, Adamawa, and Yobe"}
               </p>
             </div>
             <span className="text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/40 px-3 py-1 rounded-full shrink-0">
-              65 Operational LGAs Mapped
+              {currentUser?.role === "coordinator" && currentUser?.state
+                ? `${currentUser.state} State Desk Active`
+                : "65 Operational LGAs Mapped"}
             </span>
           </div>
 
@@ -702,45 +770,51 @@ export default function AdminDashboard() {
           </div>
 
           {/* State-by-State Operational Matrix Pills */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-            <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-gray-900 dark:text-white">Borno State</span>
-                <span className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded">
-                  High Need
-                </span>
+          <div className={`grid gap-3 mt-4 ${currentUser?.role === "coordinator" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3"}`}>
+            {(!currentUser || currentUser.role === "admin" || currentUser.state?.toLowerCase().includes("borno")) && (
+              <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-gray-900 dark:text-white">Borno State</span>
+                  <span className="text-[10px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded">
+                    High Need
+                  </span>
+                </div>
+                <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
+                  28,450 <span className="text-[11px] font-normal text-gray-400">Reached</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">27 LGAs · 18 Active Partners</p>
               </div>
-              <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
-                28,450 <span className="text-[11px] font-normal text-gray-400">Reached</span>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1">27 LGAs · 18 Active Partners</p>
-            </div>
+            )}
 
-            <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-gray-900 dark:text-white">Adamawa State</span>
-                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">
-                  Medium
-                </span>
+            {(!currentUser || currentUser.role === "admin" || currentUser.state?.toLowerCase().includes("adamawa")) && (
+              <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-gray-900 dark:text-white">Adamawa State</span>
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded">
+                    Medium
+                  </span>
+                </div>
+                <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
+                  12,850 <span className="text-[11px] font-normal text-gray-400">Reached</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">21 LGAs · 14 Active Partners</p>
               </div>
-              <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
-                12,850 <span className="text-[11px] font-normal text-gray-400">Reached</span>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1">21 LGAs · 14 Active Partners</p>
-            </div>
+            )}
 
-            <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-gray-900 dark:text-white">Yobe State</span>
-                <span className="text-[10px] font-bold text-brand-600 bg-brand-50 dark:bg-brand-950/40 px-1.5 py-0.5 rounded">
-                  Medium
-                </span>
+            {(!currentUser || currentUser.role === "admin" || currentUser.state?.toLowerCase().includes("yobe")) && (
+              <div className="p-3.5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-gray-900 dark:text-white">Yobe State</span>
+                  <span className="text-[10px] font-bold text-brand-600 bg-brand-50 dark:bg-brand-950/40 px-1.5 py-0.5 rounded">
+                    Medium
+                  </span>
+                </div>
+                <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
+                  8,250 <span className="text-[11px] font-normal text-gray-400">Reached</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">17 LGAs · 11 Active Partners</p>
               </div>
-              <div className="mt-2 text-xl font-black text-gray-900 dark:text-white font-mono">
-                8,250 <span className="text-[11px] font-normal text-gray-400">Reached</span>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1">17 LGAs · 11 Active Partners</p>
-            </div>
+            )}
           </div>
         </div>
 

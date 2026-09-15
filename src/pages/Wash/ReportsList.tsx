@@ -12,7 +12,9 @@ export default function ReportsList() {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [stateFilter, setStateFilter] = useState<string>("");
+  const [stateFilter, setStateFilter] = useState<string>(() =>
+    currentUser.role === "coordinator" && currentUser.state ? currentUser.state : ""
+  );
 
   // Role based view toggle for partners
   const [showOnlyMine, setShowOnlyMine] = useState<boolean>(currentUser.role === "partner");
@@ -147,16 +149,23 @@ export default function ReportsList() {
                 />
               </div>
 
-              <select
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-white focus:border-brand-500 outline-none"
-              >
-                <option value="">All States</option>
-                <option value="Borno">Borno</option>
-                <option value="Adamawa">Adamawa</option>
-                <option value="Yobe">Yobe</option>
-              </select>
+              {currentUser.role === "coordinator" && currentUser.state ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs font-semibold text-blue-700 dark:text-blue-300">
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  <span>State: {currentUser.state} (Cluster Assigned)</span>
+                </div>
+              ) : (
+                <select
+                  value={stateFilter}
+                  onChange={(e) => setStateFilter(e.target.value)}
+                  className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900 px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-white focus:border-brand-500 outline-none"
+                >
+                  <option value="">All States</option>
+                  <option value="Borno">Borno</option>
+                  <option value="Adamawa">Adamawa</option>
+                  <option value="Yobe">Yobe</option>
+                </select>
+              )}
 
               <select
                 value={statusFilter}

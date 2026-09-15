@@ -50,6 +50,17 @@ const getRoleNavItems = (role: UserRole): NavItem[] => {
           badgeColor: "bg-purple-600",
         },
         {
+          icon: (
+            <svg className="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14.5 2h-3c-.28 0-.5.22-.5.5v19c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-19c0-.28-.22-.5-.5-.5zm-6 7h-3c-.28 0-.5.22-.5.5v12c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-12c0-.28-.22-.5-.5-.5zm12-4h-3c-.28 0-.5.22-.5.5v16c0 .28.22.5.5.5h3c.28 0 .5-.22.5-.5v-16c0-.28-.22-.5-.5-.5z" />
+            </svg>
+          ),
+          name: "Power BI Export",
+          path: "/admin/powerbi",
+          badge: "Live",
+          badgeColor: "bg-amber-500",
+        },
+        {
           icon: <PlugInIcon />,
           name: "Sector Settings",
           path: "/admin/settings",

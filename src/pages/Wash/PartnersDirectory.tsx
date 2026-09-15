@@ -101,7 +101,9 @@ export default function PartnersDirectory() {
   const filteredPartners = useMemo(() => {
     let result = partners;
 
-    if (stateTab !== "All") {
+    if (isCoordinator) {
+      result = result.filter((p) => p.states.has(userStateScope));
+    } else if (stateTab !== "All") {
       result = result.filter((p) => p.states.has(stateTab));
     }
 
@@ -114,7 +116,7 @@ export default function PartnersDirectory() {
       );
     }
     return result;
-  }, [partners, searchTerm, stateTab]);
+  }, [partners, searchTerm, stateTab, isCoordinator, userStateScope]);
 
   const handleRegisterPartner = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,36 +211,30 @@ export default function PartnersDirectory() {
           </div>
         </div>
 
-        {/* State Desk Filter Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-2xl w-fit">
-          {isCoordinator && (
-            <button
-              onClick={() => setStateTab(userStateScope)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                stateTab === userStateScope
-                  ? "bg-brand-600 text-white shadow-xs"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              My State ({userStateScope})
-            </button>
+        {/* State Desk Filter Tabs / Locked scope for coordinator */}
+        <div className="flex items-center gap-2">
+          {isCoordinator ? (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 text-xs font-bold text-brand-700 dark:text-brand-300">
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+              <span>State Scope: {userStateScope} State (Restricted Desk Access)</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-2xl w-fit">
+              {["All", "Borno", "Adamawa", "Yobe"].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setStateTab(st)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    stateTab === st
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-xs"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                >
+                  {st === "All" ? "All BAY States" : `${st} State`}
+                </button>
+              ))}
+            </div>
           )}
-          {["All", "Borno", "Adamawa", "Yobe"].map((st) => {
-            if (isCoordinator && st === userStateScope) return null; // Avoid duplicate tab
-            return (
-              <button
-                key={st}
-                onClick={() => setStateTab(st)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  stateTab === st
-                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-xs"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                {st === "All" ? "All BAY States" : `${st} State`}
-              </button>
-            );
-          })}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

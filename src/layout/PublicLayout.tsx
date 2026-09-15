@@ -1008,7 +1008,7 @@ export default function PublicLayout() {
             flexWrap: "wrap",
             gap: 18,
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 15 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
               <span style={{
                 fontFamily: FONT_MONO,
                 fontWeight: 700,
@@ -1016,17 +1016,31 @@ export default function PublicLayout() {
                 letterSpacing: "0.06em",
                 color: "#4EAAB6",
                 background: "rgba(78, 170, 182, 0.14)",
-                padding: "4px 10px",
-                borderRadius: 5,
-                fontSize: 12.5,
+                padding: "6px 12px",
+                borderRadius: 6,
+                fontSize: 13,
               }}>
-                Co-led by:
+                Supported by
               </span>
-              <span style={{ color: T.white, fontWeight: 600 }}>Federal Ministry of Water Resources</span>
-              <span style={{ color: "#4EAAB6", opacity: 0.6 }}>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UNICEF Nigeria</span>
-              <span style={{ color: "#4EAAB6", opacity: 0.6 }}>·</span>
-              <span style={{ color: T.white, fontWeight: 600 }}>UN OCHA</span>
+              <div style={{
+                background: "#ffffff",
+                padding: "6px 14px",
+                borderRadius: 8,
+                display: "inline-flex",
+                alignItems: "center",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+              }}>
+                <img
+                  src="/images/norwegian-church-aid-logo.svg"
+                  alt="Norwegian Church Aid"
+                  style={{
+                    height: 38,
+                    width: "auto",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              </div>
             </div>
 
             {/* Social Media Links */}

@@ -19,6 +19,7 @@ interface AuthContextType {
   currentUser: UserProfile;
   login: (email: string, role?: UserRole) => boolean;
   loginAsRole: (role: UserRole) => boolean;
+  loginAsCoordinatorState: (state: "Adamawa" | "Borno" | "Yobe") => boolean;
   logout: () => void;
   switchRole: (role: UserRole) => void;
   isAuthenticated: boolean;
@@ -29,6 +30,45 @@ interface AuthContextType {
   deleteUser: (id: string) => void;
   toggleUserStatus: (id: string) => void;
 }
+
+export const PRESET_COORDINATORS: Record<"Adamawa" | "Borno" | "Yobe", UserProfile> = {
+  Adamawa: {
+    id: "usr_coord_adamawa",
+    name: "WASH Coordinator — Adamawa",
+    email: "coordinator-adamawa@washsector-ne.org",
+    role: "coordinator",
+    roleTitle: "Adamawa State Coordinator",
+    organization: "WASH Sub-Cluster Yola Desk",
+    organizationType: "UN / Coordination Desk",
+    state: "Adamawa",
+    lga: "Yola North",
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=AdamawaCoord",
+  },
+  Borno: {
+    id: "usr_coord_borno",
+    name: "WASH Coordinator — Borno",
+    email: "coordinator-borno@washsector-ne.org",
+    role: "coordinator",
+    roleTitle: "Borno State Coordinator",
+    organization: "WASH Cluster Maiduguri Hub",
+    organizationType: "UN / Coordination Desk",
+    state: "Borno",
+    lga: "Maiduguri",
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=BornoCoord",
+  },
+  Yobe: {
+    id: "usr_coord_yobe",
+    name: "WASH Coordinator — Yobe",
+    email: "coordinator-yobe@washsector-ne.org",
+    role: "coordinator",
+    roleTitle: "Yobe State Coordinator",
+    organization: "WASH Sub-Cluster Damaturu Desk",
+    organizationType: "UN / Coordination Desk",
+    state: "Yobe",
+    lga: "Damaturu",
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=YobeCoord",
+  },
+};
 
 export const PRESET_USERS: Record<UserRole, UserProfile> = {
   admin: {
@@ -41,20 +81,9 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organizationType: "Government / UN Co-Lead",
     state: "Borno",
     lga: "Maiduguri",
-    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Admin"
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Admin",
   },
-  coordinator: {
-    id: "usr_coordinator",
-    name: "WASH State Coordinator",
-    email: "coordinator@washsector-ne.org",
-    role: "coordinator",
-    roleTitle: "State Coordinator",
-    organization: "WASH Cluster Coordination Desk",
-    organizationType: "UN / Coordination Desk",
-    state: "Borno",
-    lga: "Maiduguri",
-    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Coordinator"
-  },
+  coordinator: PRESET_COORDINATORS.Borno,
   partner: {
     id: "usr_partner",
     name: "WASH Partner",
@@ -65,8 +94,8 @@ export const PRESET_USERS: Record<UserRole, UserProfile> = {
     organizationType: "International NGO",
     state: "Borno",
     lga: "Maiduguri",
-    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Partner"
-  }
+    avatar: "https://api.dicebear.com/9.x/avataaars/svg?seed=Partner",
+  },
 };
 
 export const INITIAL_MANAGED_USERS: ManagedUser[] = [
@@ -189,7 +218,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       else chosenRole = "partner";
     }
 
-    const base = PRESET_USERS[chosenRole];
+    let base = PRESET_USERS[chosenRole];
+    if (chosenRole === "coordinator") {
+      if (lower.includes("adamawa")) base = PRESET_COORDINATORS.Adamawa;
+      else if (lower.includes("yobe")) base = PRESET_COORDINATORS.Yobe;
+      else base = PRESET_COORDINATORS.Borno;
+    }
+
     const user: UserProfile = {
       ...base,
       email: email || base.email,
@@ -197,11 +232,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(user);
     setIsAuthenticated(true);
     localStorage.setItem("wash-auth-token", "true");
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
     return true;
   };
 
   const loginAsRole = (role: UserRole): boolean => {
     const user = PRESET_USERS[role];
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    localStorage.setItem("wash-auth-token", "true");
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    return true;
+  };
+
+  const loginAsCoordinatorState = (state: "Adamawa" | "Borno" | "Yobe"): boolean => {
+    const user = PRESET_COORDINATORS[state];
     setCurrentUser(user);
     setIsAuthenticated(true);
     localStorage.setItem("wash-auth-token", "true");
@@ -301,6 +346,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentUser,
         login,
         loginAsRole,
+        loginAsCoordinatorState,
         logout,
         switchRole,
         isAuthenticated,

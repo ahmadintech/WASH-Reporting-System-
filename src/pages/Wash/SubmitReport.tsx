@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { useWashData } from "../../context/WashDataContext";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityRecord } from "../../types/wash";
 import WashLogo from "../../components/common/WashLogo";
 import {
   WASH_5W_ORGS,
@@ -23,557 +22,597 @@ import {
   WASH_5W_WARDS_BY_LGA,
   cleanIndicator,
   cleanUnit,
-  getStatePcode,
-  getLgaPcode,
-  getWardPcode,
 } from "../../data/wash5wData";
 
+export interface MatrixEntry {
+  id: string;
+  reportMonth: string;
+  reportDate: string;
+  orgName: string;
+  acronym: string;
+  orgType: string;
+  donor: string;
+  implPartners: string;
+  state: string;
+  pcode1: string;
+  lga: string;
+  pcode2: string;
+  ward: string;
+  pcode3: string;
+  siteType: string;
+  locationName: string;
+  locationPop: string;
+  latlong: string;
+  emergType: string;
+  domain: string;
+  activity: string;
+  indicator: string;
+  unit: string;
+  hrp: string;
+  qtyPlanned: string;
+  qtyAchieved: string;
+  benefType: string;
+  boys: string;
+  girls: string;
+  men: string;
+  women: string;
+  totalBenef: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  comments: string;
+}
+
+const REQUIRED_FIELDS: (keyof MatrixEntry)[] = [
+  "reportMonth",
+  "orgName",
+  "state",
+  "lga",
+  "ward",
+  "domain",
+  "activity",
+  "status",
+];
+
+const COLUMNS = [
+  { key: "reportMonth", label: "Reporting Month" },
+  { key: "reportDate", label: "Date of Reporting" },
+  { key: "orgName", label: "Organisation Name" },
+  { key: "acronym", label: "Acronym" },
+  { key: "orgType", label: "Type" },
+  { key: "donor", label: "Donor" },
+  { key: "implPartners", label: "Implementing Partners" },
+  { key: "state", label: "State" },
+  { key: "pcode1", label: "Pcode_ADM1" },
+  { key: "lga", label: "LGA" },
+  { key: "pcode2", label: "Pcode_ADM2" },
+  { key: "ward", label: "Ward" },
+  { key: "pcode3", label: "Pcode_ADM3" },
+  { key: "siteType", label: "Type of Location" },
+  { key: "locationName", label: "Location Name" },
+  { key: "locationPop", label: "Location Population" },
+  { key: "latlong", label: "Latitude, Longitude" },
+  { key: "emergType", label: "Intervention / Emergency Type" },
+  { key: "domain", label: "WASH Domain" },
+  { key: "activity", label: "Activity" },
+  { key: "indicator", label: "Indicators" },
+  { key: "unit", label: "Unit" },
+  { key: "hrp", label: "Is HRP activity?" },
+  { key: "qtyPlanned", label: "Quantity Planned" },
+  { key: "qtyAchieved", label: "Quantity Achieved" },
+  { key: "benefType", label: "Beneficiary Type" },
+  { key: "boys", label: "#Beneficiary Boys" },
+  { key: "girls", label: "#Beneficiary Girls" },
+  { key: "men", label: "#Beneficiary Men" },
+  { key: "women", label: "#Beneficiary Women" },
+  { key: "totalBenef", label: "# Total Beneficiary" },
+  { key: "startDate", label: "Starting date" },
+  { key: "endDate", label: "End date" },
+  { key: "status", label: "Status" },
+  { key: "comments", label: "Comments" },
+];
+
 export default function SubmitReport() {
-  const { addReport, reportingConfig } = useWashData();
+  const { addReport } = useWashData();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [toastMessage, setToastMessage] = useState<{ title: string; subtitle?: string } | null>(null);
+  const [toastMessage, setToastMessage] = useState<{
+    title: string;
+    subtitle?: string;
+    isError?: boolean;
+  } | null>(null);
+
   const [showInstructions, setShowInstructions] = useState(false);
-  const [activeTabRecordId, setActiveTabRecordId] = useState<string>("rec-1");
+  const [showForm, setShowForm] = useState<boolean>(() => {
+    return (
+      location.search.includes("form=true") ||
+      location.search.includes("start=true") ||
+      location.hash === "#form"
+    );
+  });
 
-  // ==========================================
-  // 01 WHO — REPORTING ORGANISATION (SHARED)
-  // ==========================================
-  const initialOrg = currentUser.organization || "Action Against Hunger";
+  // ========================================================
+  // 1. PARTNER CONTACT CARD (WHO)
+  // ========================================================
+  const initialOrg = currentUser.organization || "";
   const matchedOrg = WASH_5W_ORGS.find(
     (o) => o.name.toLowerCase() === initialOrg.toLowerCase()
   );
 
-  const [orgName, setOrgName] = useState(initialOrg);
-  const [acronym, setAcronym] = useState(matchedOrg ? matchedOrg.acronym : "AAH");
-  const [orgType, setOrgType] = useState(currentUser.organizationType || "International NGO");
-  const [focalPoint, setFocalPoint] = useState(currentUser.name || "");
-  const [phone, setPhone] = useState("+234 ");
-  const [email, setEmail] = useState(currentUser.email || "");
-  const [donor, setDonor] = useState("USAID - BHA");
-  const [implPartners, setImplPartners] = useState("");
-  const [reportMonth, setReportMonth] = useState(
-    WASH_5W_MONTHS.find((m) => m.includes("2026")) || "January 2026"
-  );
-  const [reportDate, setReportDate] = useState(new Date().toISOString().slice(0, 10));
+  const [pcOrg, setPcOrg] = useState(initialOrg);
+  const [pcAcronym, setPcAcronym] = useState(matchedOrg ? matchedOrg.acronym : "");
+  const [pcType, setPcType] = useState(currentUser.organizationType || "");
+  const [pcContact, setPcContact] = useState("");
+  const [pcPhone, setPcPhone] = useState("+234 ");
+  const [pcEmail, setPcEmail] = useState("");
 
-  // Handle Org change & autofill acronym
-  const handleOrgChange = (newOrgName: string) => {
-    setOrgName(newOrgName);
+  const handlePcOrgChange = (newOrgName: string) => {
+    setPcOrg(newOrgName);
     const found = WASH_5W_ORGS.find((o) => o.name === newOrgName);
-    if (found) {
-      setAcronym(found.acronym);
-    }
+    setPcAcronym(found ? found.acronym : "");
   };
 
-  // ==========================================
-  // ACTIVITY RECORDS (WHERE, WHAT, FOR WHOM, WHEN)
-  // ==========================================
-  const userAssignedState: "Borno" | "Adamawa" | "Yobe" = (() => {
-    if (currentUser.state) {
-      const match = WASH_5W_STATES.find(
-        (s) => s.name.toLowerCase() === currentUser.state?.toLowerCase()
-      );
-      if (match) return match.name;
+  // ========================================================
+  // 2. ENTRY FORM STATE & CASCADING DROPDOWNS
+  // ========================================================
+  const createBlankFormData = (): MatrixEntry => ({
+    id: `entry-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    reportMonth: "",
+    reportDate: new Date().toISOString().slice(0, 10),
+    orgName: "",
+    acronym: "",
+    orgType: "",
+    donor: "",
+    implPartners: "",
+    state: "",
+    pcode1: "",
+    lga: "",
+    pcode2: "",
+    ward: "",
+    pcode3: "",
+    siteType: "",
+    locationName: "",
+    locationPop: "",
+    latlong: "",
+    emergType: "",
+    domain: "",
+    activity: "",
+    indicator: "",
+    unit: "",
+    hrp: "",
+    qtyPlanned: "",
+    qtyAchieved: "",
+    benefType: "",
+    boys: "",
+    girls: "",
+    men: "",
+    women: "",
+    totalBenef: "",
+    startDate: new Date().toISOString().slice(0, 10),
+    endDate: "",
+    status: "",
+    comments: "",
+  });
+
+  const [formData, setFormData] = useState<MatrixEntry>(createBlankFormData());
+  const [invalidFields, setInvalidFields] = useState<Record<string, boolean>>({});
+  const [entries, setEntries] = useState<MatrixEntry[]>([]);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  // Apply Partner Contact Org to Entry Form
+  const handleApplyOrgToForm = () => {
+    if (!pcOrg && !pcType) {
+      showToast("Fill in the reporting organisation details first.", undefined, true);
+      return;
     }
-    return "Borno";
-  })();
-
-  const createBlankRecord = (index: number): ActivityRecord => {
-    const defaultState = userAssignedState;
-    const p1 = getStatePcode(defaultState);
-    const lgas = WASH_5W_LGAS_BY_STATE[defaultState] || [];
-    const defaultLgaObj =
-      lgas.find((l) => l.name.toLowerCase() === currentUser.lga?.toLowerCase()) ||
-      lgas[0] || { name: "Maiduguri", pcode: "NG008021" };
-    const p2 = defaultLgaObj.pcode;
-    const wards = WASH_5W_WARDS_BY_LGA[defaultLgaObj.name] || [];
-    const defaultWardObj = wards[0] || { name: "", pcode: "" };
-
-    const defaultDomain = "Water";
-    const defaultActs = WASH_5W_ACTIVITIES_BY_DOMAIN[defaultDomain] || [];
-    const defaultAct = defaultActs[0] || "Borehole Construction";
-    const details = WASH_5W_ACTIVITY_DETAILS[`${defaultDomain}|||${defaultAct}`];
-
-    return {
-      id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      recordNumber: index,
-      isExpanded: true,
-
-      // WHERE
-      state: defaultState,
-      pcode1: p1,
-      lga: defaultLgaObj.name,
-      pcode2: p2,
-      ward: defaultWardObj.name,
-      pcode3: defaultWardObj.pcode,
-      siteType: "IDPs Camp",
-      locationName: "",
-      locationPop: "",
-      latlong: "",
-
-      // WHAT
-      emergType: "Conflict",
-      domain: defaultDomain,
-      activityType: defaultAct,
-      indicator: details ? cleanIndicator(details.indicator) : "",
-      unit: details ? cleanUnit(details.unit) : "Boreholes",
-      hrp: "Yes",
-      qtyPlanned: 1,
-      qtyAchieved: 1,
-
-      // FOR WHOM
-      benefType: "IDPs",
-      populationGroup: "IDPs in camps",
-      boys: 0,
-      girls: 0,
-      men: 0,
-      women: 0,
-      pwd: 0,
-      total: 0,
-
-      // WHEN
-      startDate: new Date().toISOString().slice(0, 10),
-      endDate: "",
-      status: "Completed",
-      comments: "",
-    };
-  };
-
-  const [records, setRecords] = useState<ActivityRecord[]>([createBlankRecord(1)]);
-
-  // Add new record
-  const handleAddNewRecord = () => {
-    const nextNumber = records.length + 1;
-    const newRec = createBlankRecord(nextNumber);
-    setRecords((prev) => [...prev, newRec]);
-    setActiveTabRecordId(newRec.id);
-    setToastMessage({
-      title: `Record #${nextNumber} added`,
-      subtitle: "WHO details are automatically carried over. Fill the activity fields below.",
+    setFormData((prev) => ({
+      ...prev,
+      orgName: pcOrg || prev.orgName,
+      acronym: pcAcronym || prev.acronym,
+      orgType: pcType || prev.orgType,
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      if (pcOrg) delete next.orgName;
+      return next;
     });
-    setTimeout(() => setToastMessage(null), 3000);
+    showToast("Organisation details applied to the entry form.");
+  };
 
-    // Scroll to the new record form smoothly
+  // Toast trigger
+  const showToast = (title: string, subtitle?: string, isError?: boolean) => {
+    setToastMessage({ title, subtitle, isError });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Available LGAs, Wards, and Activities based on current form selection
+  const availableLgas = formData.state ? WASH_5W_LGAS_BY_STATE[formData.state] || [] : [];
+  const availableWards = formData.lga ? WASH_5W_WARDS_BY_LGA[formData.lga] || [] : [];
+  const availableActivities = formData.domain ? WASH_5W_ACTIVITIES_BY_DOMAIN[formData.domain] || [] : [];
+
+  // Cascading Handler: Organisation change in Entry Form
+  const handleFormOrgChange = (newOrg: string) => {
+    const orgObj = WASH_5W_ORGS.find((o) => o.name === newOrg);
+    setFormData((prev) => ({
+      ...prev,
+      orgName: newOrg,
+      acronym: orgObj ? orgObj.acronym : "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.orgName;
+      return next;
+    });
+  };
+
+  // Cascading Handler: State change
+  const handleStateChange = (newState: string) => {
+    const stateObj = WASH_5W_STATES.find((s) => s.name === newState);
+    setFormData((prev) => ({
+      ...prev,
+      state: newState,
+      pcode1: stateObj ? stateObj.pcode : "",
+      lga: "",
+      pcode2: "",
+      ward: "",
+      pcode3: "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.state;
+      return next;
+    });
+  };
+
+  // Cascading Handler: LGA change
+  const handleLgaChange = (newLga: string) => {
+    const lgas = WASH_5W_LGAS_BY_STATE[formData.state] || [];
+    const lgaObj = lgas.find((l) => l.name === newLga);
+    setFormData((prev) => ({
+      ...prev,
+      lga: newLga,
+      pcode2: lgaObj ? lgaObj.pcode : "",
+      ward: "",
+      pcode3: "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.lga;
+      return next;
+    });
+  };
+
+  // Cascading Handler: Ward change
+  const handleWardChange = (newWard: string) => {
+    const wards = WASH_5W_WARDS_BY_LGA[formData.lga] || [];
+    const wardObj = wards.find((w) => w.name === newWard);
+    setFormData((prev) => ({
+      ...prev,
+      ward: newWard,
+      pcode3: wardObj ? wardObj.pcode : "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.ward;
+      return next;
+    });
+  };
+
+  // Cascading Handler: Domain change
+  const handleDomainChange = (newDomain: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      domain: newDomain,
+      activity: "",
+      indicator: "",
+      unit: "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.domain;
+      return next;
+    });
+  };
+
+  // Cascading Handler: Activity change
+  const handleActivityChange = (newActivity: string) => {
+    const details = WASH_5W_ACTIVITY_DETAILS[`${formData.domain}|||${newActivity}`];
+    setFormData((prev) => ({
+      ...prev,
+      activity: newActivity,
+      indicator: details ? cleanIndicator(details.indicator) : "",
+      unit: details ? cleanUnit(details.unit) : "",
+    }));
+    setInvalidFields((prev) => {
+      const next = { ...prev };
+      delete next.activity;
+      return next;
+    });
+  };
+
+  // Demographic reach & recalculate total
+  const handleDemographicChange = (field: "boys" | "girls" | "men" | "women", val: string) => {
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: val };
+      const b = parseInt(field === "boys" ? val : prev.boys) || 0;
+      const g = parseInt(field === "girls" ? val : prev.girls) || 0;
+      const m = parseInt(field === "men" ? val : prev.men) || 0;
+      const w = parseInt(field === "women" ? val : prev.women) || 0;
+      const sum = b + g + m + w;
+      if (sum > 0) {
+        updated.totalBenef = String(sum);
+      }
+      return updated;
+    });
+  };
+
+  // Validation function
+  const validateForm = (): boolean => {
+    const newInvalid: Record<string, boolean> = {};
+    let ok = true;
+
+    REQUIRED_FIELDS.forEach((key) => {
+      const val = formData[key];
+      if (!val || String(val).trim() === "") {
+        newInvalid[key] = true;
+        ok = false;
+      }
+    });
+
+    setInvalidFields(newInvalid);
+    return ok;
+  };
+
+  // Reset form
+  const handleResetForm = () => {
+    setFormData(createBlankFormData());
+    setInvalidFields({});
+    setEditIndex(null);
+  };
+
+  // Add / Save entry to matrix
+  const handleAddOrSaveEntry = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      showToast(
+        "Please complete the highlighted required fields.",
+        "Missing: Month, Org, State, LGA, Ward, Domain, Activity, or Status",
+        true
+      );
+      return;
+    }
+
+    if (editIndex !== null) {
+      // Edit existing entry
+      setEntries((prev) => {
+        const copy = [...prev];
+        copy[editIndex] = { ...formData };
+        return copy;
+      });
+      setEditIndex(null);
+      showToast("Changes saved to matrix entry.");
+    } else {
+      // Add new entry
+      setEntries((prev) => [...prev, { ...formData }]);
+      showToast("Entry saved to the matrix below.");
+    }
+
+    handleResetForm();
+
+    // Scroll to matrix table smoothly
     setTimeout(() => {
-      const el = document.getElementById(`record-card-${newRec.id}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const tableEl = document.getElementById("session-matrix-table");
+      if (tableEl) tableEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  };
+
+  // Edit existing entry from matrix
+  const handleEditEntry = (idx: number) => {
+    const target = entries[idx];
+    if (!target) return;
+
+    setFormData({ ...target });
+    setEditIndex(idx);
+    setInvalidFields({});
+
+    // Scroll smoothly to entry form
+    setTimeout(() => {
+      const formEl = document.getElementById("entry-form");
+      if (formEl) formEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
   };
 
-  // Duplicate record
-  const handleDuplicateRecord = (recToDup: ActivityRecord) => {
-    const nextNumber = records.length + 1;
-    const duplicated: ActivityRecord = {
-      ...recToDup,
-      id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      recordNumber: nextNumber,
-      isExpanded: true,
-      comments: recToDup.comments ? `${recToDup.comments} (Copy)` : "",
-    };
-    setRecords((prev) => [...prev, duplicated]);
-    setActiveTabRecordId(duplicated.id);
-    setToastMessage({
-      title: `Record #${recToDup.recordNumber} Duplicated`,
-      subtitle: `Created Record #${nextNumber}. You can now modify location or quantities.`,
-    });
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  // Delete record
-  const handleDeleteRecord = (id: string) => {
-    if (records.length <= 1) {
-      alert("At least one activity record is required.");
-      return;
-    }
-    const target = records.find((r) => r.id === id);
-    if (!target) return;
-
-    if (window.confirm(`Are you sure you want to remove Record #${target.recordNumber}?`)) {
-      setRecords((prev) => {
-        const filtered = prev.filter((r) => r.id !== id);
-        return filtered.map((r, idx) => ({ ...r, recordNumber: idx + 1 }));
-      });
-      if (activeTabRecordId === id) {
-        const remaining = records.filter((r) => r.id !== id);
-        if (remaining.length > 0) {
-          setActiveTabRecordId(remaining[0].id);
-        }
+  // Delete entry from matrix
+  const handleDeleteEntry = (idx: number) => {
+    if (window.confirm(`Are you sure you want to remove entry #${idx + 1}?`)) {
+      setEntries((prev) => prev.filter((_, i) => i !== idx));
+      if (editIndex === idx) {
+        handleResetForm();
       }
-      setToastMessage({
-        title: "Record removed",
-      });
-      setTimeout(() => setToastMessage(null), 2500);
+      showToast(`Entry #${idx + 1} removed from matrix.`);
     }
   };
 
-  // Update specific record field
-  const updateRecord = <K extends keyof ActivityRecord>(
-    id: string,
-    field: K,
-    value: ActivityRecord[K]
-  ) => {
-    setRecords((prev) =>
-      prev.map((rec) => {
-        if (rec.id !== id) return rec;
-
-        const updated = { ...rec, [field]: value };
-
-        // Cascading State Change
-        if (field === "state") {
-          const stateName = value as string;
-          updated.pcode1 = getStatePcode(stateName);
-          const lgas = WASH_5W_LGAS_BY_STATE[stateName] || [];
-          updated.lga = lgas[0]?.name || "";
-          updated.pcode2 = lgas[0]?.pcode || "";
-          const wards = WASH_5W_WARDS_BY_LGA[updated.lga] || [];
-          updated.ward = wards[0]?.name || "";
-          updated.pcode3 = wards[0]?.pcode || "";
-        }
-
-        // Cascading LGA Change
-        if (field === "lga") {
-          const lgaName = value as string;
-          updated.pcode2 = getLgaPcode(updated.state, lgaName);
-          const wards = WASH_5W_WARDS_BY_LGA[lgaName] || [];
-          updated.ward = wards[0]?.name || "";
-          updated.pcode3 = wards[0]?.pcode || "";
-        }
-
-        // Cascading Ward Change
-        if (field === "ward") {
-          const wardName = value as string;
-          updated.pcode3 = getWardPcode(updated.lga, wardName);
-        }
-
-        // Cascading Domain Change
-        if (field === "domain") {
-          const domName = value as string;
-          const acts = WASH_5W_ACTIVITIES_BY_DOMAIN[domName] || [];
-          updated.activityType = acts[0] || "";
-          const details = WASH_5W_ACTIVITY_DETAILS[`${domName}|||${updated.activityType}`];
-          updated.indicator = details ? cleanIndicator(details.indicator) : "";
-          updated.unit = details ? cleanUnit(details.unit) : "Items";
-        }
-
-        // Cascading Activity Change
-        if (field === "activityType") {
-          const actName = value as string;
-          const details = WASH_5W_ACTIVITY_DETAILS[`${updated.domain}|||${actName}`];
-          updated.indicator = details ? cleanIndicator(details.indicator) : "";
-          updated.unit = details ? cleanUnit(details.unit) : "Items";
-        }
-
-        // Auto-calculate Total Beneficiaries
-        if (["boys", "girls", "men", "women"].includes(field as string)) {
-          const b = Number(field === "boys" ? value : rec.boys) || 0;
-          const g = Number(field === "girls" ? value : rec.girls) || 0;
-          const m = Number(field === "men" ? value : rec.men) || 0;
-          const w = Number(field === "women" ? value : rec.women) || 0;
-          updated.total = b + g + m + w;
-        }
-
-        return updated;
-      })
-    );
+  // Clear all entries
+  const handleClearAllEntries = () => {
+    if (entries.length === 0) return;
+    if (
+      window.confirm(
+        `Remove all ${entries.length} entries from this session? This cannot be undone.`
+      )
+    ) {
+      setEntries([]);
+      handleResetForm();
+      showToast("All matrix entries cleared.");
+    }
   };
 
-  const toggleExpand = (id: string) => {
-    setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, isExpanded: !r.isExpanded } : r))
-    );
-  };
-
-  // Grand totals across all records
-  const totalBeneficiariesAll = records.reduce((sum, r) => sum + (Number(r.total) || 0), 0);
-
-  // Validation
-  const isWhoValid = Boolean(orgName.trim() && orgType && focalPoint.trim() && email.trim());
-
-  // Form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isWhoValid) {
-      alert("Please complete all required fields in the Reporting Organisation (WHO) section.");
-      const el = document.getElementById("sec-who");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (entries.length === 0) {
+      showToast("No entries to export yet.", undefined, true);
       return;
     }
 
-    for (let i = 0; i < records.length; i++) {
-      const r = records[i];
-      if (!r.state || !r.lga) {
-        alert(`Record #${r.recordNumber}: Please select a valid State and LGA.`);
-        setActiveTabRecordId(r.id);
-        const el = document.getElementById(`record-card-${r.id}`);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
-      if (!r.domain || !r.activityType) {
-        alert(`Record #${r.recordNumber}: Please select a WASH Domain and Activity.`);
-        setActiveTabRecordId(r.id);
-        const el = document.getElementById(`record-card-${r.id}`);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-        return;
-      }
-    }
-
-    if (totalBeneficiariesAll <= 0) {
-      if (
-        !window.confirm(
-          "Total beneficiaries across records is 0. Are you sure you want to submit without demographic reach figures?"
-        )
-      ) {
-        return;
-      }
-    }
-
-    // Submit all records to WashDataContext
-    records.forEach((rec) => {
-      addReport({
-        // WHO (Shared)
-        orgName: orgName.trim(),
-        acronym: acronym.trim(),
-        orgType,
-        focalPoint: focalPoint.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        donor: donor.trim(),
-        implPartners: implPartners.trim(),
-        reportMonth,
-        reportDate,
-
-        // WHAT
-        domain: rec.domain,
-        emergType: rec.emergType,
-        activityType: rec.activityType,
-        indicator: rec.indicator,
-        indicatorDesc: rec.indicator,
-        unit: rec.unit,
-        hrp: rec.hrp,
-        qtyPlanned: Number(rec.qtyPlanned) || 0,
-        qtyAchieved: Number(rec.qtyAchieved) || 0,
-        quantity: Number(rec.qtyAchieved) || 0,
-
-        // WHERE
-        state: rec.state,
-        pcode1: rec.pcode1,
-        lga: rec.lga,
-        pcode2: rec.pcode2,
-        ward: rec.ward,
-        pcode3: rec.pcode3,
-        siteType: rec.siteType,
-        locationType: rec.siteType,
-        locationName: rec.locationName,
-        settlement: rec.locationName,
-        locationPop: rec.locationPop,
-        latlong: rec.latlong,
-
-        // WHEN
-        period: reportMonth || reportingConfig.activeCycle,
-        status: rec.status,
-        startDate: rec.startDate,
-        endDate: rec.endDate,
-        comments: rec.comments,
-
-        // FOR WHOM
-        benefType: rec.benefType,
-        populationGroup: rec.populationGroup,
-        pwd: Number(rec.pwd) || 0,
-        men: Number(rec.men) || 0,
-        women: Number(rec.women) || 0,
-        boys: Number(rec.boys) || 0,
-        girls: Number(rec.girls) || 0,
-        total: Number(rec.total) || 0,
-
-        submittedByRole: currentUser.role,
-        submittedByEmail: currentUser.email,
-      });
+    const rows = [COLUMNS.map((c) => c.label)];
+    entries.forEach((e) => {
+      rows.push(COLUMNS.map((c) => String(e[c.key as keyof MatrixEntry] || "")));
     });
-
-    setToastMessage({
-      title: `${records.length} 5W Activity ${records.length === 1 ? "Record" : "Records"} Submitted!`,
-      subtitle: "Synchronized with Borno, Adamawa & Yobe 5W response monitoring matrix.",
-    });
-
-    setTimeout(() => {
-      navigate("/reports-list");
-    }, 1200);
-  };
-
-  // Save drafts
-  const handleSaveDraft = () => {
-    records.forEach((rec) => {
-      addReport({
-        orgName: orgName.trim() || currentUser.organization,
-        acronym: acronym.trim(),
-        orgType: orgType || currentUser.organizationType,
-        focalPoint: focalPoint.trim() || currentUser.name,
-        phone: phone.trim(),
-        email: email.trim() || currentUser.email,
-        donor: donor.trim(),
-        implPartners: implPartners.trim(),
-        reportMonth,
-        reportDate,
-
-        domain: rec.domain,
-        emergType: rec.emergType,
-        activityType: rec.activityType || "Emergency WASH intervention",
-        indicator: rec.indicator,
-        indicatorDesc: rec.indicator,
-        unit: rec.unit || "Items",
-        hrp: rec.hrp,
-        qtyPlanned: Number(rec.qtyPlanned) || 0,
-        qtyAchieved: Number(rec.qtyAchieved) || 0,
-        quantity: Number(rec.qtyAchieved) || 0,
-
-        state: rec.state,
-        pcode1: rec.pcode1,
-        lga: rec.lga || "Maiduguri",
-        pcode2: rec.pcode2,
-        ward: rec.ward,
-        pcode3: rec.pcode3,
-        siteType: rec.siteType,
-        locationType: rec.siteType,
-        locationName: rec.locationName,
-        settlement: rec.locationName,
-        locationPop: rec.locationPop,
-        latlong: rec.latlong,
-
-        period: reportMonth || reportingConfig.activeCycle,
-        status: "Planned",
-        startDate: rec.startDate,
-        endDate: rec.endDate,
-        comments: rec.comments,
-
-        benefType: rec.benefType,
-        populationGroup: rec.populationGroup || "IDPs",
-        pwd: Number(rec.pwd) || 0,
-        men: Number(rec.men) || 0,
-        women: Number(rec.women) || 0,
-        boys: Number(rec.boys) || 0,
-        girls: Number(rec.girls) || 0,
-        total: Number(rec.total) || 0,
-
-        submittedByRole: currentUser.role,
-        submittedByEmail: currentUser.email,
-      });
-    });
-
-    setToastMessage({
-      title: `${records.length} Draft ${records.length === 1 ? "Record" : "Records"} Saved`,
-      subtitle: "Saved to local drafts. You can edit and submit at any time.",
-    });
-
-    setTimeout(() => {
-      navigate("/reports-list");
-    }, 1200);
-  };
-
-  // Clear all
-  const handleClearAll = () => {
-    if (window.confirm("Clear all activity records and reset form?")) {
-      setRecords([createBlankRecord(1)]);
-      setActiveTabRecordId("rec-1");
-      setImplPartners("");
-    }
-  };
-
-  // Export Matrix CSV
-  const handleExportSessionCsv = () => {
-    const headers = [
-      "Record #",
-      "Reporting Month",
-      "Reporting Date",
-      "Organisation",
-      "Acronym",
-      "Type",
-      "Donor",
-      "State",
-      "Pcode_ADM1",
-      "LGA",
-      "Pcode_ADM2",
-      "Ward",
-      "Pcode_ADM3",
-      "Location Type",
-      "Location Name",
-      "Domain",
-      "Activity",
-      "Indicator",
-      "Unit",
-      "Qty Planned",
-      "Qty Achieved",
-      "Beneficiary Type",
-      "Boys",
-      "Girls",
-      "Men",
-      "Women",
-      "Total Beneficiaries",
-      "PWD",
-      "Status",
-      "Start Date",
-      "End Date",
-      "Comments",
-    ];
-
-    const rows = records.map((r) => [
-      r.recordNumber,
-      `"${reportMonth}"`,
-      `"${reportDate}"`,
-      `"${orgName}"`,
-      `"${acronym}"`,
-      `"${orgType}"`,
-      `"${donor}"`,
-      `"${r.state}"`,
-      `"${r.pcode1}"`,
-      `"${r.lga}"`,
-      `"${r.pcode2}"`,
-      `"${r.ward}"`,
-      `"${r.pcode3}"`,
-      `"${r.siteType}"`,
-      `"${r.locationName}"`,
-      `"${r.domain}"`,
-      `"${r.activityType}"`,
-      `"${(r.indicator || "").replace(/"/g, '""')}"`,
-      `"${r.unit}"`,
-      r.qtyPlanned,
-      r.qtyAchieved,
-      `"${r.benefType}"`,
-      r.boys,
-      r.girls,
-      r.men,
-      r.women,
-      r.total,
-      r.pwd,
-      `"${r.status}"`,
-      `"${r.startDate}"`,
-      `"${r.endDate}"`,
-      `"${(r.comments || "").replace(/"/g, '""')}"`,
-    ]);
 
     const csvContent =
-      "data:text/csv;charset=utf-8,\uFEFF" +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+      "\uFEFF" +
+      rows
+        .map((r) =>
+          r
+            .map((v) => {
+              const s = String(v).replace(/"/g, '""');
+              return /[",\n]/.test(s) ? `"${s}"` : s;
+            })
+            .join(",")
+        )
+        .join("\n");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `WASH_5W_Matrix_${acronym || "Session"}_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wash_5w_matrix_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
-    setToastMessage({
-      title: "Matrix CSV Downloaded",
-      subtitle: `${records.length} records exported in standard 5W format`,
-    });
-    setTimeout(() => setToastMessage(null), 3000);
+    showToast("CSV downloaded successfully.");
   };
+
+  // Export to XLSX using SheetJS
+  const handleExportXLSX = () => {
+    if (entries.length === 0) {
+      showToast("No entries to export yet.", undefined, true);
+      return;
+    }
+
+    const XLSX = (window as any).XLSX;
+    if (!XLSX) {
+      handleExportCSV();
+      showToast("Excel export library unavailable — exported as CSV instead.", undefined, true);
+      return;
+    }
+
+    try {
+      const rows = [COLUMNS.map((c) => c.label)];
+      entries.forEach((e) => {
+        rows.push(COLUMNS.map((c) => String(e[c.key as keyof MatrixEntry] || "")));
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws["!cols"] = COLUMNS.map(() => ({ wch: 20 }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "1_MATRIX");
+
+      const pcRows = [
+        ["Response Monitoring (5W)"],
+        [],
+        ["Organisation Name:", pcOrg],
+        ["Acronym:", pcAcronym],
+        ["Type of organisation:", pcType],
+        ["Contact Name:", pcContact],
+        ["Phone Number:", pcPhone],
+        ["Email of the contact:", pcEmail],
+      ];
+      const ws2 = XLSX.utils.aoa_to_sheet(pcRows);
+      XLSX.utils.book_append_sheet(wb, ws2, "1_Partner Contact");
+
+      XLSX.writeFile(wb, `wash_5w_matrix_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      showToast("Excel workbook (.xlsx) downloaded successfully.");
+    } catch (err) {
+      console.error(err);
+      handleExportCSV();
+    }
+  };
+
+  // Submit all matrix records into the central platform context
+  const handleSubmitAllToPlatform = () => {
+    if (entries.length === 0) {
+      showToast("Please add at least one entry to the matrix first.", undefined, true);
+      return;
+    }
+
+    entries.forEach((e) => {
+      addReport({
+        orgName: e.orgName || pcOrg,
+        acronym: e.acronym || pcAcronym,
+        orgType: e.orgType || pcType,
+        focalPoint: pcContact || currentUser.name,
+        phone: pcPhone,
+        email: pcEmail || currentUser.email,
+        donor: e.donor,
+        implPartners: e.implPartners,
+        reportMonth: e.reportMonth,
+        reportDate: e.reportDate,
+
+        domain: e.domain,
+        emergType: e.emergType,
+        activityType: e.activity,
+        indicator: e.indicator,
+        indicatorDesc: e.indicator,
+        unit: e.unit,
+        hrp: e.hrp,
+        qtyPlanned: Number(e.qtyPlanned) || 0,
+        qtyAchieved: Number(e.qtyAchieved) || 0,
+        quantity: Number(e.qtyAchieved) || 0,
+
+        state: (e.state as "Borno" | "Adamawa" | "Yobe") || "Borno",
+        pcode1: e.pcode1,
+        lga: e.lga,
+        pcode2: e.pcode2,
+        ward: e.ward,
+        pcode3: e.pcode3,
+        siteType: e.siteType,
+        locationType: e.siteType || "Community",
+        locationName: e.locationName,
+        settlement: e.locationName,
+        locationPop: e.locationPop,
+        latlong: e.latlong,
+
+        period: e.reportMonth || "2026-01",
+        status: (e.status as any) || "Completed",
+        startDate: e.startDate,
+        endDate: e.endDate,
+        comments: e.comments,
+
+        benefType: e.benefType,
+        populationGroup: e.benefType || "IDPs",
+        pwd: 0,
+        boys: Number(e.boys) || 0,
+        girls: Number(e.girls) || 0,
+        men: Number(e.men) || 0,
+        women: Number(e.women) || 0,
+        total: Number(e.totalBenef) || 0,
+
+        submittedByRole: currentUser.role,
+        submittedByEmail: currentUser.email,
+      });
+    });
+
+    showToast(
+      `${entries.length} 5W Activity ${entries.length === 1 ? "Record" : "Records"} Submitted!`,
+      "Synchronized with central Borno, Adamawa & Yobe 5W response monitoring matrix."
+    );
+
+    setTimeout(() => {
+      navigate("/reports-list");
+    }, 1200);
+  };
+
+  // Calculate total beneficiaries in current session
+  const sessionTotalBeneficiaries = entries.reduce(
+    (sum, e) => sum + (parseInt(e.totalBenef) || 0),
+    0
+  );
 
   return (
     <>
@@ -582,1212 +621,1276 @@ export default function SubmitReport() {
         description="Official WASH Sector Response Monitoring Matrix (5W) reporting tool for Adamawa, Borno & Yobe"
       />
 
-      <div className="w-full space-y-6 max-w-[1440px] mx-auto pb-16 font-sans">
-        {/* Toast Alert */}
+      <div className="w-full space-y-6 max-w-[1340px] mx-auto pb-16 font-sans">
+        {/* Floating Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-6 right-6 z-99999 rounded-xl bg-teal-800 text-white px-5 py-4 shadow-2xl flex items-center gap-3 border border-teal-500 animate-in fade-in slide-in-from-top duration-300">
-            <div className="w-9 h-9 rounded-lg bg-teal-700/80 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
+          <div
+            className={`fixed top-6 right-6 z-99999 rounded-xl px-5 py-4 shadow-2xl flex items-center gap-3 border animate-in fade-in slide-in-from-top duration-300 ${
+              toastMessage.isError
+                ? "bg-rose-900 text-white border-rose-500"
+                : "bg-teal-900 text-white border-teal-500"
+            }`}
+          >
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                toastMessage.isError ? "bg-rose-800" : "bg-teal-800"
+              }`}
+            >
+              {toastMessage.isError ? (
+                <svg className="w-5 h-5 text-rose-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </div>
             <div>
               <div className="text-sm font-bold">{toastMessage.title}</div>
               {toastMessage.subtitle && (
-                <div className="text-xs text-teal-100 mt-0.5">{toastMessage.subtitle}</div>
+                <div className="text-xs text-teal-100/90 mt-0.5">{toastMessage.subtitle}</div>
               )}
             </div>
           </div>
         )}
 
-        {/* Top Header Card matching the official 5W Reporting Tool style */}
-        <header className="rounded-2xl bg-gradient-to-r from-teal-900 via-[#0e5450] to-[#0a3b39] text-white p-6 sm:p-8 shadow-md border border-teal-800/80">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-teal-950/60 border border-teal-600/40 text-[11px] font-mono tracking-wider text-teal-200 uppercase font-semibold">
-                <span>WASH SECTOR · NIGERIA — ADAMAWA, BORNO &amp; YOBE (BAY STATES)</span>
-              </div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-medium tracking-tight text-white">
-                5W Response Monitoring Matrix
-              </h1>
-              <p className="text-xs sm:text-sm text-teal-100/90 max-w-3xl leading-relaxed">
-                Log monthly response activities — who delivered what, where, when, and for whom —
-                using the sector-standard operational monitoring matrix.
-              </p>
-            </div>
+        {!showForm ? (
+          /* ================================================================
+             HOW THE 5W FRAMEWORK OPERATES (INTRODUCTORY LANDING SCREEN)
+             ================================================================ */
+          <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Top Banner / Hero Card */}
+            <div className="rounded-2xl bg-gradient-to-r from-teal-950 via-[#0B3C46] to-[#12707E] text-white p-8 sm:p-12 shadow-xl border border-teal-800/80 relative overflow-hidden">
+              <div className="relative z-10 max-w-4xl space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-teal-900/90 border border-teal-500/40 text-xs font-mono tracking-wider text-teal-300 uppercase font-bold">
+                  <span>Inter-Agency Information Management</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-serif">
+                  How the 5W Framework Operates
+                </h1>
+                <p className="text-base sm:text-lg text-teal-100/90 leading-relaxed font-sans max-w-3xl">
+                  The 5W matrix is the globally recognized humanitarian cluster standard that ensures accountability, prevents overlap, and directs emergency resources to the most vulnerable individuals.
+                </p>
 
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <div className="bg-white/95 backdrop-blur-sm p-2 rounded-xl shadow-inner border border-teal-200/50">
-                <WashLogo className="h-10 w-auto" />
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowInstructions(!showInstructions)}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-semibold transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{showInstructions ? "Hide Instructions" : "Partner Instructions"}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Collapsible Partner Instructions */}
-          {showInstructions && (
-            <div className="mt-6 pt-5 border-t border-teal-700/60 text-xs sm:text-sm text-teal-50 space-y-2 bg-teal-950/40 p-4 rounded-xl border border-teal-600/30">
-              <div className="font-bold text-amber-300 flex items-center gap-2">
-                <span>Instructions for implementing partners:</span>
-              </div>
-              <ul className="list-disc list-inside space-y-1 text-teal-100/90 pl-1">
-                <li>
-                  <strong className="text-white">Reporting Organisation (WHO):</strong> Filled in once at the top. It automatically applies to all activity records submitted in this session.
-                </li>
-                <li>
-                  <strong className="text-white">Multiple Activity Records:</strong> Click the <span className="bg-teal-700 px-1.5 py-0.5 rounded text-white font-mono">+ Add New Record</span> button to add more entries (e.g. multiple sites, boreholes, latrines, or hygiene kits).
-                </li>
-                <li>
-                  <strong className="text-white">Autofill Fields:</strong> P-Codes, Sector Indicators, and Units of Measurement are automatically calculated when you select a State, LGA, Domain, and Activity.
-                </li>
-                <li>
-                  <strong className="text-white">Disaggregated Reach:</strong> Enter boys, girls, men, and women beneficiaries. The total is calculated automatically.
-                </li>
-              </ul>
-            </div>
-          )}
-        </header>
-
-        {/* Global Action & Summary Sticky Strip */}
-        <div className="sticky top-16 z-30 rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200/90 dark:border-gray-700 shadow-sm p-3.5 transition-all">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            {/* Records Summary Pills */}
-            <div className="flex flex-wrap items-center gap-2 flex-1">
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300 mr-1 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
-                <span>Active Entries ({records.length}):</span>
-              </span>
-
-              {records.map((rec) => {
-                const isActive = activeTabRecordId === rec.id;
-                const hasValidLocation = Boolean(rec.state && rec.lga);
-                const hasValidActivity = Boolean(rec.domain && rec.activityType);
-                const isReady = hasValidLocation && hasValidActivity;
-
-                return (
+                <div className="pt-4 flex flex-wrap items-center gap-4">
                   <button
-                    key={rec.id}
                     type="button"
                     onClick={() => {
-                      setActiveTabRecordId(rec.id);
-                      const el = document.getElementById(`record-card-${rec.id}`);
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      setShowForm(true);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                      isActive
-                        ? "bg-teal-700 text-white shadow-sm ring-2 ring-teal-600/30"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                    }`}
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-base shadow-lg hover:shadow-amber-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                   >
-                    <span
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                        isActive ? "bg-teal-800 text-white" : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200"
-                      }`}
-                    >
-                      {rec.recordNumber}
-                    </span>
-                    <span className="max-w-[130px] truncate">
-                      {rec.activityType || rec.domain || `Record #${rec.recordNumber}`}
-                    </span>
-                    <span
-                      title={isReady ? "Activity entry complete" : "Pending required fields"}
-                      className={`w-2 h-2 rounded-full ${
-                        isReady ? "bg-emerald-400" : "bg-amber-400"
-                      }`}
-                    />
+                    <svg className="w-5 h-5 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Open 5W Reporting Form</span>
+                    <svg className="w-5 h-5 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </button>
-                );
-              })}
 
-              {/* Add New Record Button in Top Strip */}
-              <button
-                type="button"
-                onClick={handleAddNewRecord}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 border border-teal-600/40 text-teal-800 dark:text-teal-200 text-xs font-bold hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-all active:scale-[0.98]"
-              >
-                <svg className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add Record</span>
-              </button>
-            </div>
-
-            {/* Quick Metrics & Matrix Button */}
-            <div className="flex items-center justify-between lg:justify-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-3.5 py-1.5 rounded-xl">
-                <div className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-                  Total Reached:
-                </div>
-                <div className="font-mono text-sm font-extrabold text-emerald-900 dark:text-emerald-100">
-                  {totalBeneficiariesAll.toLocaleString()}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/coverage-dashboard")}
+                    className="inline-flex items-center gap-2 px-5 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm transition-all cursor-pointer"
+                  >
+                    <i className="fa-solid fa-chart-pie mr-1"></i>
+                    <span>Response Coverage Dashboard</span>
+                  </button>
                 </div>
               </div>
 
-              <a
-                href="#session-matrix-table"
-                className="text-xs font-semibold text-teal-700 dark:text-teal-300 hover:underline flex items-center gap-1"
-              >
-                <span>View Matrix</span>
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </a>
+              <div className="absolute right-6 top-6 hidden lg:block opacity-10 pointer-events-none">
+                <WashLogo className="h-56 w-auto" />
+              </div>
+            </div>
+
+            {/* 5W Interactive Step Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+              {[
+                {
+                  num: "01",
+                  code: "WHO",
+                  title: "The Lead & Partner",
+                  desc: "Accredited humanitarian agency, implementing NGO, donor, and operational field focal point.",
+                  accent: "#12707E",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  ),
+                },
+                {
+                  num: "02",
+                  code: "WHAT",
+                  title: "The Intervention",
+                  desc: "Specific sector activity: water supply construction, latrine desludging, or hygiene kit distribution.",
+                  accent: "#1D8A99",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  ),
+                },
+                {
+                  num: "03",
+                  code: "WHERE",
+                  title: "The Exact Location",
+                  desc: "State, LGA, ward, IDP camp or host community, accompanied by validated GPS coordinates.",
+                  accent: "#C1722F",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  ),
+                },
+                {
+                  num: "04",
+                  code: "WHEN",
+                  title: "The Implementation Period",
+                  desc: "Active monthly cycle, project start and completion dates, and continuous activity status.",
+                  accent: "#2E7D47",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  ),
+                },
+                {
+                  num: "05",
+                  code: "FOR WHOM",
+                  title: "The Beneficiaries",
+                  desc: "Target population: IDPs, returnees, host communities with disaggregated sex and age indicators.",
+                  accent: "#7E3A9E",
+                  icon: (
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  ),
+                },
+              ].map((step) => (
+                <div
+                  key={step.code}
+                  className="relative rounded-2xl bg-white dark:bg-gray-800 border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between shadow-xs hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 overflow-hidden"
+                >
+                  <div
+                    className="absolute top-2 right-4 font-serif font-extrabold text-5xl select-none opacity-10"
+                    style={{ color: step.accent }}
+                  >
+                    {step.num}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-xs"
+                        style={{ background: step.accent }}
+                      >
+                        {step.icon}
+                      </div>
+                      <span
+                        className="text-xs font-mono font-bold px-2.5 py-1 rounded-md"
+                        style={{
+                          color: step.accent,
+                          backgroundColor: `${step.accent}15`,
+                        }}
+                      >
+                        {step.code}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2 font-serif">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-sans">
+                      {step.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SECTION 1: WHO — REPORTING ORGANISATION (CARRIES OVER TO ALL RECORDS)   */}
-        {/* ========================================================================= */}
-        <section
-          id="sec-who"
-          className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden"
-        >
-          <div className="px-6 py-5 bg-gradient-to-r from-gray-50 to-teal-50/30 dark:from-gray-800 dark:to-teal-950/20 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-teal-800 text-white font-mono text-sm font-bold flex items-center justify-center shadow-xs">
-                WHO
-              </div>
+        ) : (
+          /* ================================================================
+             5W REPORTING FORM INTERFACE (MATCHES REFERENCE TEMPLATE EXACTLY)
+             ================================================================ */
+          <div className="space-y-7 animate-in fade-in duration-300">
+            {/* Top Toolbar / Instructions Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0a3b39] text-[#eef6f4] px-6 py-4 rounded-xl shadow-sm">
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>Reporting Organisation &amp; Focal Point</span>
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Filled once — automatically carries over into all activity records below
+                <h1 className="text-lg sm:text-xl font-serif font-semibold text-white">
+                  Complete each section — Who, What, Where, When, For Whom — to submit a valid 5W report.
+                </h1>
+                <p className="text-xs text-[#a9d6cd] mt-0.5">
+                  Official Sector Response Monitoring Matrix (5W) — Adamawa, Borno &amp; Yobe
                 </p>
               </div>
-            </div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-900 dark:bg-teal-950/60 dark:text-teal-200 border border-teal-300 dark:border-teal-800">
-              <span className="w-2 h-2 rounded-full bg-teal-600"></span>
-              <span>Common to all records</span>
-            </div>
-          </div>
-
-          <div className="p-6 sm:p-7 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Reporting Month */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Reporting Month <span className="text-amber-600 dark:text-amber-400">*</span>
-                </label>
-                <select
-                  value={reportMonth}
-                  onChange={(e) => setReportMonth(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all font-medium"
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowInstructions((prev) => !prev)}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-800/80 hover:bg-teal-700/80 border border-teal-600/40 text-xs font-semibold text-teal-100 transition-colors"
                 >
-                  {WASH_5W_MONTHS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{showInstructions ? "Hide instructions" : "Instructions for partners"}</span>
+                </button>
 
-              {/* Date of Reporting */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Date of Reporting <span className="text-gray-400 text-[11px] font-normal">(DD/MM/YYYY)</span>
-                </label>
-                <input
-                  type="date"
-                  value={reportDate}
-                  onChange={(e) => setReportDate(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                />
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-teal-200 transition-colors"
+                >
+                  <i className="fa-solid fa-arrow-left"></i>
+                  <span>5W Overview</span>
+                </button>
               </div>
+            </div>
 
-              {/* Organisation Name */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Organisation Name <span className="text-amber-600 dark:text-amber-400">*</span>
-                  <span className="text-gray-400 text-[11px] font-normal ml-1">(141 accredited partners or custom)</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    list="wash-orgs-list"
-                    required
-                    value={orgName}
-                    onChange={(e) => handleOrgChange(e.target.value)}
-                    placeholder="Search or select organisation name..."
-                    className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all font-semibold"
-                  />
-                  <datalist id="wash-orgs-list">
-                    {WASH_5W_ORGS.map((o) => (
-                      <option key={o.name} value={o.name}>
-                        {o.acronym ? `${o.acronym} — ${o.name}` : o.name}
-                      </option>
-                    ))}
-                  </datalist>
+            {/* Collapsible Instructions Box */}
+            {showInstructions && (
+              <div className="rounded-xl border border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/30 p-5 text-xs text-teal-900 dark:text-teal-200 space-y-2">
+                <h4 className="font-bold text-sm text-teal-950 dark:text-teal-100">Instructions for partners:</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Please fill in the details carefully — this data feeds the sector's response monitoring and advocacy.</li>
+                  <li>Use the provided dropdowns rather than typing free text where one is offered.</li>
+                  <li>Fields marked &ldquo;autofill&rdquo; are calculated for you once you make a selection — you don't need to edit them.</li>
+                  <li>After filling an activity entry, click <strong>&ldquo;Add entry to matrix&rdquo;</strong> to save it into the matrix table below.</li>
+                </ul>
+              </div>
+            )}
+
+            {/* ======================================================== */}
+            {/* PARTNER CONTACT CARD (REPORTING ORGANISATION)            */}
+            {/* ======================================================== */}
+            <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-base font-serif font-bold text-[#0a3b39] dark:text-teal-300">
+                    Reporting organisation
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Filled in once — carries over into new activity entries below.
+                  </p>
                 </div>
               </div>
 
-              {/* Acronym */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Acronym <span className="text-gray-400 text-[11px] font-normal">(Autofill)</span>
-                </label>
-                <input
-                  type="text"
-                  value={acronym}
-                  onChange={(e) => setAcronym(e.target.value)}
-                  placeholder="e.g. AAH"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2.5 text-sm font-mono font-bold text-gray-800 dark:text-gray-200 focus:border-teal-600 focus:outline-none"
-                />
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* pc-org */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Organisation Name <span className="text-gray-400 font-normal">(Select in the dropdown list)</span>
+                    </label>
+                    <select
+                      value={pcOrg}
+                      onChange={(e) => handlePcOrgChange(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                    >
+                      <option value="">Select organisation...</option>
+                      {WASH_5W_ORGS.map((o) => (
+                        <option key={o.name} value={o.name}>
+                          {o.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* pc-acronym */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Acronym <span className="text-gray-400 font-normal">(Autofill)</span>
+                    </label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={pcAcronym}
+                      placeholder="Autofilled"
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-mono text-gray-700 dark:text-gray-300"
+                    />
+                  </div>
+
+                  {/* pc-type */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Type of organisation <span className="text-gray-400 font-normal">(Select in the dropdown list)</span>
+                    </label>
+                    <select
+                      value={pcType}
+                      onChange={(e) => setPcType(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                    >
+                      <option value="">Select type...</option>
+                      {WASH_5W_ORG_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* pc-contact */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Contact Name
+                    </label>
+                    <input
+                      type="text"
+                      value={pcContact}
+                      onChange={(e) => setPcContact(e.target.value)}
+                      placeholder="Full name"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* pc-phone */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={pcPhone}
+                      onChange={(e) => setPcPhone(e.target.value)}
+                      placeholder="+234..."
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* pc-email */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Email of the contact
+                    </label>
+                    <input
+                      type="email"
+                      value={pcEmail}
+                      onChange={(e) => setPcEmail(e.target.value)}
+                      placeholder="name@organisation.org"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Apply button */}
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+                  <button
+                    type="button"
+                    onClick={handleApplyOrgToForm}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#0e5450] text-[#0e5450] dark:text-teal-300 dark:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-xs font-bold transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    <span>Use for new entries</span>
+                  </button>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Copies organisation, acronym and type into the form below.
+                  </span>
+                </div>
               </div>
+            </section>
 
-              {/* Type of Organisation */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Type of Organisation <span className="text-amber-600 dark:text-amber-400">*</span>
-                </label>
-                <select
-                  required
-                  value={orgType}
-                  onChange={(e) => setOrgType(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                >
-                  {WASH_5W_ORG_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Contact Name */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Focal Point Contact Name <span className="text-amber-600 dark:text-amber-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={focalPoint}
-                  onChange={(e) => setFocalPoint(e.target.value)}
-                  placeholder="Full name of reporting officer"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Contact Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+234 800 000 0000"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all font-mono"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Focal Point Official Email <span className="text-amber-600 dark:text-amber-400">*</span>
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="focalpoint@organisation.org"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                />
-              </div>
-
-              {/* Donor */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Donor / Funding Stream
-                </label>
-                <select
-                  value={donor}
-                  onChange={(e) => setDonor(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                >
-                  <option value="">Select Donor...</option>
-                  {WASH_5W_DONORS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Implementing Partners */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                  Implementing Partners <span className="text-gray-400 text-[11px] font-normal">(Free text)</span>
-                </label>
-                <input
-                  type="text"
-                  value={implPartners}
-                  onChange={(e) => setImplPartners(e.target.value)}
-                  placeholder="e.g. RUWASSA, Local CBOs"
-                  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:bg-white dark:focus:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-600/20 transition-all"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* SECTION 2: ACTIVITY RECORDS (WHERE, WHAT, FOR WHOM, WHEN)                */}
-        {/* ========================================================================= */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>Activity Records ({records.length})</span>
-                <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                  — Each record represents one activity entry in the 5W matrix
-                </span>
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                WHO organisation details above are automatically tied to all records.
-              </p>
-            </div>
-
-            {/* Prominent "+ Add New Record" button */}
-            <button
-              type="button"
-              id="btn-add-record"
-              onClick={handleAddNewRecord}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] shrink-0"
+            {/* ======================================================== */}
+            {/* ENTRY FORM (NEW / EDIT ACTIVITY ENTRY)                   */}
+            {/* ======================================================== */}
+            <section
+              id="entry-form"
+              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs overflow-hidden"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>+ Add New Record</span>
-            </button>
-          </div>
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-base font-serif font-bold text-[#0a3b39] dark:text-teal-300 flex items-center gap-2">
+                    <span>{editIndex !== null ? `Edit activity entry (#${editIndex + 1})` : "New activity entry"}</span>
+                    {editIndex !== null && (
+                      <span className="px-2 py-0.5 rounded text-[11px] font-sans font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+                        Editing Mode
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    One row of the matrix — repeat for every activity, location, and reporting month.
+                  </p>
+                </div>
+              </div>
 
-          {/* Render each Activity Record Form Card */}
-          {records.map((rec) => {
-            const availableLgas = WASH_5W_LGAS_BY_STATE[rec.state] || [];
-            const availableWards = WASH_5W_WARDS_BY_LGA[rec.lga] || [];
-            const availableActivities = WASH_5W_ACTIVITIES_BY_DOMAIN[rec.domain] || [];
-
-            // Disaggregation percentages
-            const pctMen = rec.total > 0 ? Math.round(((Number(rec.men) || 0) / rec.total) * 100) : 0;
-            const pctWomen = rec.total > 0 ? Math.round(((Number(rec.women) || 0) / rec.total) * 100) : 0;
-            const pctBoys = rec.total > 0 ? Math.round(((Number(rec.boys) || 0) / rec.total) * 100) : 0;
-            const pctGirls = rec.total > 0 ? Math.max(0, 100 - (pctMen + pctWomen + pctBoys)) : 0;
-
-            return (
-              <div
-                key={rec.id}
-                id={`record-card-${rec.id}`}
-                className={`rounded-2xl border transition-all duration-200 bg-white dark:bg-gray-800 overflow-hidden shadow-sm ${
-                  activeTabRecordId === rec.id
-                    ? "border-teal-600 ring-2 ring-teal-600/15 shadow-md"
-                    : "border-gray-200 dark:border-gray-700"
-                }`}
-                onClick={() => setActiveTabRecordId(rec.id)}
-              >
-                {/* Record Card Header with controls */}
-                <div className="px-6 py-4 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <form onSubmit={handleAddOrSaveEntry} className="p-6 space-y-7">
+                {/* ---------- WHO ---------- */}
+                <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl bg-teal-700 text-white font-mono text-sm font-bold flex items-center justify-center shrink-0">
-                      #{rec.recordNumber}
+                    <span className="font-mono text-xs font-bold text-[#0e5450] dark:text-teal-300 bg-[#dcece9] dark:bg-teal-950/80 border border-[#bfdcd6] dark:border-teal-800 px-2.5 py-1 rounded">
+                      WHO
                     </span>
-                    <div>
-                      <div className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <span>
-                          {rec.activityType || "New 5W Activity"}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 font-medium">
-                          {rec.domain}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                          {rec.state} · {rec.lga || "Select LGA"}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Reach: <strong className="text-emerald-700 dark:text-emerald-300">{rec.total.toLocaleString()}</strong> beneficiaries
-                        {rec.qtyAchieved ? ` · Achieved: ${rec.qtyAchieved} ${rec.unit}` : ""}
-                      </div>
-                    </div>
+                    <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
                   </div>
 
-                  {/* Actions for this record */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      title="Duplicate this record (makes an exact copy of location & activity)"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDuplicateRecord(rec);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
-                    >
-                      <svg className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                      </svg>
-                      <span>Duplicate</span>
-                    </button>
-
-                    {records.length > 1 && (
-                      <button
-                        type="button"
-                        title="Remove this record"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteRecord(rec.id);
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* f-month */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Reporting Month <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        value={formData.reportMonth}
+                        onChange={(e) => {
+                          setFormData((prev) => ({ ...prev, reportMonth: e.target.value }));
+                          setInvalidFields((prev) => {
+                            const next = { ...prev };
+                            delete next.reportMonth;
+                            return next;
+                          });
                         }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition-all"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span>Delete</span>
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleExpand(rec.id);
-                      }}
-                      className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      title={rec.isExpanded !== false ? "Collapse" : "Expand"}
-                    >
-                      <svg
-                        className={`w-4 h-4 transform transition-transform ${
-                          rec.isExpanded !== false ? "rotate-180" : ""
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                          invalidFields.reportMonth
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
                         }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
+                        <option value="">Select month...</option>
+                        {WASH_5W_MONTHS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-date */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Date of Reporting <span className="text-gray-400 font-normal">(DD/MM/YYYY)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.reportDate}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, reportDate: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-org */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Organisation Name <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        value={formData.orgName}
+                        onChange={(e) => handleFormOrgChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                          invalidFields.orgName
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">Select organisation...</option>
+                        {WASH_5W_ORGS.map((o) => (
+                          <option key={o.name} value={o.name}>
+                            {o.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-acronym */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Acronym <span className="text-gray-400 font-normal">(Autofill)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.acronym}
+                        placeholder="Autofill"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-mono text-gray-700 dark:text-gray-300"
+                      />
+                    </div>
+
+                    {/* f-orgtype */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Type
+                      </label>
+                      <select
+                        value={formData.orgType}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, orgType: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select type...</option>
+                        {WASH_5W_ORG_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-donor */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Donor
+                      </label>
+                      <select
+                        value={formData.donor}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, donor: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select donor...</option>
+                        {WASH_5W_DONORS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-implpartners (wide) */}
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Implementing Partners
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.implPartners}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, implPartners: e.target.value }))}
+                        placeholder="Free text"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Form fields body (collapsible) */}
-                {rec.isExpanded !== false && (
-                  <div className="p-6 sm:p-7 space-y-7">
-                    {/* Notice in each record */}
-                    <div className="rounded-xl bg-teal-50/50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800/50 px-4 py-2.5 flex items-center justify-between text-xs text-teal-900 dark:text-teal-200">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">Record #{rec.recordNumber} Organisation:</span>
-                        <span>{orgName} ({acronym}) · {orgType} · Donor: {donor || "Not specified"}</span>
-                      </div>
-                      <span className="text-[11px] text-teal-700 dark:text-teal-300 font-medium">Auto-linked to WHO</span>
+                {/* ---------- WHERE ---------- */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-[#0e5450] dark:text-teal-300 bg-[#dcece9] dark:bg-teal-950/80 border border-[#bfdcd6] dark:border-teal-800 px-2.5 py-1 rounded">
+                      WHERE
+                    </span>
+                    <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* f-state */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        State <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        value={formData.state}
+                        onChange={(e) => handleStateChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                          invalidFields.state
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">Select state...</option>
+                        {WASH_5W_STATES.map((s) => (
+                          <option key={s.name} value={s.name}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {/* ---------- WHERE ---------- */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                        <span className="px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 font-mono text-xs">
-                          WHERE
-                        </span>
-                        <span>Geographic Location &amp; Settlement Site</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* State */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            State <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            required
-                            value={rec.state}
-                            onChange={(e) => updateRecord(rec.id, "state", e.target.value as any)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_STATES.map((s) => (
-                              <option key={s.name} value={s.name}>
-                                {s.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Pcode1 */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Pcode_ADM1 <span className="text-gray-400 font-normal text-[11px]">(Autofill)</span>
-                          </label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={rec.pcode1}
-                            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2 text-sm font-mono text-gray-600 dark:text-gray-300"
-                          />
-                        </div>
-
-                        {/* LGA */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            LGA <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            required
-                            value={rec.lga}
-                            onChange={(e) => updateRecord(rec.id, "lga", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none font-medium"
-                          >
-                            <option value="">Select LGA...</option>
-                            {availableLgas.map((l) => (
-                              <option key={l.name} value={l.name}>
-                                {l.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Pcode2 */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Pcode_ADM2 <span className="text-gray-400 font-normal text-[11px]">(Autofill)</span>
-                          </label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={rec.pcode2}
-                            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2 text-sm font-mono text-gray-600 dark:text-gray-300"
-                          />
-                        </div>
-
-                        {/* Ward */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Ward <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            value={rec.ward}
-                            onChange={(e) => updateRecord(rec.id, "ward", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            <option value="">Select Ward...</option>
-                            {availableWards.map((w) => (
-                              <option key={w.name} value={w.name}>
-                                {w.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Pcode3 */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Pcode_ADM3 <span className="text-gray-400 font-normal text-[11px]">(Autofill)</span>
-                          </label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={rec.pcode3}
-                            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2 text-sm font-mono text-gray-600 dark:text-gray-300"
-                          />
-                        </div>
-
-                        {/* Location Type */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Type of Location
-                          </label>
-                          <select
-                            value={rec.siteType}
-                            onChange={(e) => updateRecord(rec.id, "siteType", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_SITE_TYPES.map((st) => (
-                              <option key={st} value={st}>
-                                {st}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Location Name */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Location Name / Settlement
-                          </label>
-                          <input
-                            type="text"
-                            value={rec.locationName}
-                            onChange={(e) => updateRecord(rec.id, "locationName", e.target.value)}
-                            placeholder="e.g. Stadium Camp, Muna Garage"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Location Population */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Location Population
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.locationPop}
-                            onChange={(e) => updateRecord(rec.id, "locationPop", e.target.value)}
-                            placeholder="e.g. 15000"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Latitude, Longitude */}
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Latitude, Longitude <span className="text-gray-400 font-normal text-[11px]">(GPS coordinates for facilities)</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={rec.latlong}
-                            onChange={(e) => updateRecord(rec.id, "latlong", e.target.value)}
-                            placeholder="e.g. 11.8464, 13.1603"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-                      </div>
+                    {/* f-pcode1 */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Pcode_ADM1 <span className="text-gray-400 font-normal">(Automatically filled)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.pcode1}
+                        placeholder="Autofilled"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-mono text-gray-700 dark:text-gray-300"
+                      />
                     </div>
 
-                    {/* ---------- WHAT ---------- */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                        <span className="px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 font-mono text-xs">
-                          WHAT
-                        </span>
-                        <span>WASH Technical Domain &amp; Activity Output</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Emergency Type */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Intervention / Emergency Type
-                          </label>
-                          <select
-                            value={rec.emergType}
-                            onChange={(e) => updateRecord(rec.id, "emergType", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_EMERGENCY_TYPES.map((et) => (
-                              <option key={et} value={et}>
-                                {et}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* WASH Domain */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            WASH Domain <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            required
-                            value={rec.domain}
-                            onChange={(e) => updateRecord(rec.id, "domain", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm font-bold text-teal-800 dark:text-teal-300 focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_DOMAINS.map((dm) => (
-                              <option key={dm} value={dm}>
-                                {dm}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Activity */}
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Standard Activity <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            required
-                            value={rec.activityType}
-                            onChange={(e) => updateRecord(rec.id, "activityType", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm font-medium text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {availableActivities.map((act) => (
-                              <option key={act} value={act}>
-                                {act}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Indicator */}
-                        <div className="md:col-span-3">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Sector Indicator <span className="text-gray-400 font-normal text-[11px]">(Autofill)</span>
-                          </label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={rec.indicator}
-                            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2 text-xs text-gray-700 dark:text-gray-300"
-                          />
-                        </div>
-
-                        {/* Unit */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Unit <span className="text-gray-400 font-normal text-[11px]">(Autofill)</span>
-                          </label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={rec.unit}
-                            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300"
-                          />
-                        </div>
-
-                        {/* Is HRP */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Is HRP Activity?
-                          </label>
-                          <select
-                            value={rec.hrp}
-                            onChange={(e) => updateRecord(rec.id, "hrp", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_HRP_LIST.map((h) => (
-                              <option key={h} value={h}>
-                                {h}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Quantity Planned */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Quantity Planned
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.qtyPlanned}
-                            onChange={(e) => updateRecord(rec.id, "qtyPlanned", e.target.value)}
-                            placeholder="0"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Quantity Achieved */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Quantity Achieved / Delivered <span className="text-amber-600">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            required
-                            value={rec.qtyAchieved}
-                            onChange={(e) => updateRecord(rec.id, "qtyAchieved", e.target.value)}
-                            placeholder="0"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm font-bold text-teal-800 dark:text-teal-300 focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-                      </div>
+                    {/* f-lga */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        LGA <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        disabled={!formData.state || availableLgas.length === 0}
+                        value={formData.lga}
+                        onChange={(e) => handleLgaChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 ${
+                          invalidFields.lga
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">
+                          {!formData.state ? "Select state first" : "Select LGA..."}
+                        </option>
+                        {availableLgas.map((l) => (
+                          <option key={l.name} value={l.name}>
+                            {l.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
-                    {/* ---------- FOR WHOM ---------- */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                        <span className="px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 font-mono text-xs">
-                          FOR WHOM
-                        </span>
-                        <span>Disaggregated Beneficiaries Reached</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                        {/* Beneficiary Type */}
-                        <div className="lg:col-span-2">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Beneficiary Type
-                          </label>
-                          <select
-                            value={rec.benefType}
-                            onChange={(e) => updateRecord(rec.id, "benefType", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          >
-                            {WASH_5W_BENEFICIARY_TYPES.map((bt) => (
-                              <option key={bt} value={bt}>
-                                {bt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Men (18+) */}
-                        <div>
-                          <label className="block text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
-                            Men (18+)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.men}
-                            onChange={(e) => updateRecord(rec.id, "men", Number(e.target.value) || 0)}
-                            className="w-full rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Women (18+) */}
-                        <div>
-                          <label className="block text-xs font-semibold text-rose-800 dark:text-rose-300 mb-1">
-                            Women (18+)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.women}
-                            onChange={(e) => updateRecord(rec.id, "women", Number(e.target.value) || 0)}
-                            className="w-full rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50/40 dark:bg-rose-950/20 px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:border-rose-500 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Boys (<18) */}
-                        <div>
-                          <label className="block text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">
-                            Boys (&lt;18)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.boys}
-                            onChange={(e) => updateRecord(rec.id, "boys", Number(e.target.value) || 0)}
-                            className="w-full rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:border-amber-500 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Girls (<18) */}
-                        <div>
-                          <label className="block text-xs font-semibold text-purple-800 dark:text-purple-300 mb-1">
-                            Girls (&lt;18)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.girls}
-                            onChange={(e) => updateRecord(rec.id, "girls", Number(e.target.value) || 0)}
-                            className="w-full rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50/40 dark:bg-purple-950/20 px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:border-purple-500 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Total Beneficiaries for this record */}
-                        <div className="lg:col-span-4 bg-gray-50 dark:bg-gray-900/60 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col justify-center">
-                          <div className="flex items-center justify-between text-xs mb-1.5">
-                            <span className="font-bold text-gray-700 dark:text-gray-300">
-                              Calculated Total:
-                            </span>
-                            <span className="font-mono text-base font-extrabold text-teal-800 dark:text-teal-200">
-                              {rec.total.toLocaleString()}
-                            </span>
-                          </div>
-                          {rec.total > 0 && (
-                            <div className="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex">
-                              <div style={{ width: `${pctMen}%` }} className="bg-blue-500 h-full" title={`Men: ${pctMen}%`} />
-                              <div style={{ width: `${pctWomen}%` }} className="bg-rose-500 h-full" title={`Women: ${pctWomen}%`} />
-                              <div style={{ width: `${pctBoys}%` }} className="bg-amber-500 h-full" title={`Boys: ${pctBoys}%`} />
-                              <div style={{ width: `${pctGirls}%` }} className="bg-purple-500 h-full" title={`Girls: ${pctGirls}%`} />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* PWD */}
-                        <div className="lg:col-span-2">
-                          <label className="block text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">
-                            People with Disabilities (PWD)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={rec.pwd}
-                            onChange={(e) => updateRecord(rec.id, "pwd", Number(e.target.value) || 0)}
-                            placeholder="0"
-                            className="w-full rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
+                    {/* f-pcode2 */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Pcode_ADM2 <span className="text-gray-400 font-normal">(Automatically filled)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.pcode2}
+                        placeholder="Autofilled"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-mono text-gray-700 dark:text-gray-300"
+                      />
                     </div>
 
-                    {/* ---------- WHEN ---------- */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-                        <span className="px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 font-mono text-xs">
-                          WHEN
-                        </span>
-                        <span>Implementation Timeline &amp; Status</span>
-                      </div>
+                    {/* f-ward */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Ward <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        disabled={!formData.lga || availableWards.length === 0}
+                        value={formData.ward}
+                        onChange={(e) => handleWardChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 ${
+                          invalidFields.ward
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">
+                          {!formData.lga
+                            ? "Select LGA first"
+                            : availableWards.length === 0
+                            ? "No ward available"
+                            : "Select Ward..."}
+                        </option>
+                        {availableWards.map((w) => (
+                          <option key={w.name} value={w.name}>
+                            {w.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Start Date */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Starting Date
-                          </label>
-                          <input
-                            type="date"
-                            value={rec.startDate}
-                            onChange={(e) => updateRecord(rec.id, "startDate", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
+                    {/* f-pcode3 */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Pcode_ADM3 <span className="text-gray-400 font-normal">(Automatically filled)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.pcode3}
+                        placeholder="Autofilled"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-mono text-gray-700 dark:text-gray-300"
+                      />
+                    </div>
 
-                        {/* End Date */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            End Date
-                          </label>
-                          <input
-                            type="date"
-                            value={rec.endDate}
-                            onChange={(e) => updateRecord(rec.id, "endDate", e.target.value)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
+                    {/* f-sitetype */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Type of Location
+                      </label>
+                      <select
+                        value={formData.siteType}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, siteType: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select location type...</option>
+                        {WASH_5W_SITE_TYPES.map((st) => (
+                          <option key={st} value={st}>
+                            {st}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                        {/* Status */}
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Status <span className="text-amber-600">*</span>
-                          </label>
-                          <select
-                            required
-                            value={rec.status}
-                            onChange={(e) => updateRecord(rec.id, "status", e.target.value as any)}
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none font-semibold"
-                          >
-                            {WASH_5W_STATUS_LIST.map((st) => (
-                              <option key={st} value={st}>
-                                {st}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                    {/* f-locname */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Location Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.locationName}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, locationName: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
 
-                        {/* Comments */}
-                        <div className="md:col-span-2 lg:col-span-4">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Comments / Operational Notes
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={rec.comments}
-                            onChange={(e) => updateRecord(rec.id, "comments", e.target.value)}
-                            placeholder="Add any specific context, handover details, or water testing results..."
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3.5 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
-                          />
-                        </div>
-                      </div>
+                    {/* f-locpop */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Location Population
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.locationPop}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, locationPop: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-latlong */}
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Latitude, Longitude <span className="text-gray-400 font-normal">(Boreholes, wells &amp; sanitation facilities)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.latlong}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, latlong: e.target.value }))}
+                        placeholder="e.g. 11.8464, 13.1603"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
                     </div>
                   </div>
+                </div>
+
+                {/* ---------- WHAT ---------- */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-[#0e5450] dark:text-teal-300 bg-[#dcece9] dark:bg-teal-950/80 border border-[#bfdcd6] dark:border-teal-800 px-2.5 py-1 rounded">
+                      WHAT
+                    </span>
+                    <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* f-emerg */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Intervention / Emergency Type
+                      </label>
+                      <select
+                        value={formData.emergType}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, emergType: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select type...</option>
+                        {WASH_5W_EMERGENCY_TYPES.map((et) => (
+                          <option key={et} value={et}>
+                            {et}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-domain */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        WASH Domain <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        value={formData.domain}
+                        onChange={(e) => handleDomainChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                          invalidFields.domain
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600 font-semibold"
+                        }`}
+                      >
+                        <option value="">Select domain...</option>
+                        {WASH_5W_DOMAINS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-activity */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Activity <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        disabled={!formData.domain || availableActivities.length === 0}
+                        value={formData.activity}
+                        onChange={(e) => handleActivityChange(e.target.value)}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 ${
+                          invalidFields.activity
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">
+                          {!formData.domain ? "Select domain first" : "Select activity..."}
+                        </option>
+                        {availableActivities.map((act) => (
+                          <option key={act} value={act}>
+                            {act}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-indicator (wide) */}
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Indicators <span className="text-gray-400 font-normal">(Automatically filled)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.indicator}
+                        placeholder="Autofilled from activity selection"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs text-gray-700 dark:text-gray-300"
+                      />
+                    </div>
+
+                    {/* f-unit */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Unit <span className="text-gray-400 font-normal">(Automatically filled)</span>
+                      </label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={formData.unit}
+                        placeholder="Autofilled"
+                        className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
+                      />
+                    </div>
+
+                    {/* f-hrp */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Is HRP activity?
+                      </label>
+                      <select
+                        value={formData.hrp}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, hrp: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select...</option>
+                        {WASH_5W_HRP_LIST.map((h) => (
+                          <option key={h} value={h}>
+                            {h}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-qtyplanned */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Quantity Planned
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.qtyPlanned}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, qtyPlanned: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-qtyachieved */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Quantity Achieved
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.qtyAchieved}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, qtyAchieved: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ---------- WHOM ---------- */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-[#0e5450] dark:text-teal-300 bg-[#dcece9] dark:bg-teal-950/80 border border-[#bfdcd6] dark:border-teal-800 px-2.5 py-1 rounded">
+                      WHOM
+                    </span>
+                    <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    {/* f-beneftype */}
+                    <div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Beneficiary Type
+                      </label>
+                      <select
+                        value={formData.benefType}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, benefType: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      >
+                        <option value="">Select type...</option>
+                        {WASH_5W_BENEFICIARY_TYPES.map((bt) => (
+                          <option key={bt} value={bt}>
+                            {bt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-boys */}
+                    <div>
+                      <label className="block text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">
+                        #Beneficiary Boys
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.boys}
+                        onChange={(e) => handleDemographicChange("boys", e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-girls */}
+                    <div>
+                      <label className="block text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                        #Beneficiary Girls
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.girls}
+                        onChange={(e) => handleDemographicChange("girls", e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-men */}
+                    <div>
+                      <label className="block text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                        #Beneficiary Men
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.men}
+                        onChange={(e) => handleDemographicChange("men", e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-women */}
+                    <div>
+                      <label className="block text-xs font-semibold text-rose-700 dark:text-rose-300 mb-1">
+                        #Beneficiary Women
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.women}
+                        onChange={(e) => handleDemographicChange("women", e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm font-mono text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-total */}
+                    <div className="sm:col-span-2 lg:col-span-3 xl:col-span-6">
+                      <label className="block text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">
+                        # Total Beneficiary{" "}
+                        <span className="text-gray-400 font-normal">
+                          (Auto-calculated — edit if disaggregation unavailable)
+                        </span>
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.totalBenef}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, totalBenef: e.target.value }))}
+                        className="w-full max-w-sm rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/20 px-3 py-2 text-sm font-mono font-bold text-emerald-950 dark:text-emerald-200 focus:border-emerald-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ---------- WHEN ---------- */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-[#0e5450] dark:text-teal-300 bg-[#dcece9] dark:bg-teal-950/80 border border-[#bfdcd6] dark:border-teal-800 px-2.5 py-1 rounded">
+                      WHEN
+                    </span>
+                    <div className="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* f-startdate */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Starting date <span className="text-gray-400 font-normal">(DD/MM/YYYY)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-enddate */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        End date <span className="text-gray-400 font-normal">(DD/MM/YYYY)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, endDate: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* f-status */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Status <span className="text-rose-600 font-bold">*</span>
+                      </label>
+                      <select
+                        value={formData.status}
+                        onChange={(e) => {
+                          setFormData((prev) => ({ ...prev, status: e.target.value }));
+                          setInvalidFields((prev) => {
+                            const next = { ...prev };
+                            delete next.status;
+                            return next;
+                          });
+                        }}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                          invalidFields.status
+                            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20"
+                            : "border-gray-300 dark:border-gray-600 focus:border-teal-600"
+                        }`}
+                      >
+                        <option value="">Select status...</option>
+                        {WASH_5W_STATUS_LIST.map((st) => (
+                          <option key={st} value={st}>
+                            {st}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* f-comments (wide) */}
+                    <div className="md:col-span-2 lg:col-span-3">
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Comments
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.comments}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, comments: e.target.value }))}
+                        placeholder="Additional operational context or notes..."
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions row */}
+                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <button
+                    type="submit"
+                    id="add-entry-btn"
+                    className="px-5 py-2.5 rounded-lg bg-[#0e5450] hover:bg-[#0a3b39] text-white text-sm font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
+                  >
+                    {editIndex !== null ? "Save changes to entry" : "Add entry to matrix"}
+                  </button>
+
+                  <button
+                    type="button"
+                    id="reset-form-btn"
+                    onClick={handleResetForm}
+                    className="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-semibold transition-colors cursor-pointer"
+                  >
+                    Clear form
+                  </button>
+
+                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                    Required fields are marked <span className="text-rose-600 font-bold">*</span>
+                  </span>
+                </div>
+              </form>
+            </section>
+
+            {/* ======================================================== */}
+            {/* LIVE 5W RESPONSE MATRIX TABLE                            */}
+            {/* ======================================================== */}
+            <section
+              id="session-matrix-table"
+              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-base font-serif font-bold text-[#0a3b39] dark:text-teal-300 flex items-center gap-2">
+                    <span>Response Monitoring Matrix (5W)</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-200">
+                      {entries.length} {entries.length === 1 ? "entry" : "entries"}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Total Reached: <strong className="text-emerald-700 dark:text-emerald-300">{sessionTotalBeneficiaries.toLocaleString()}</strong> beneficiaries across entries
+                  </p>
+                </div>
+
+                {/* Toolbar Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportCSV}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Download CSV</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleExportXLSX}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-200 hover:bg-teal-100 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-teal-700 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download XLSX</span>
+                  </button>
+
+                  {entries.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearAllEntries}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span>Clear All</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleSubmitAllToPlatform}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#0e5450] hover:bg-[#0a3b39] text-white text-xs font-bold shadow-xs hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Submit Matrix to Platform ({entries.length})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Table Body */}
+              <div className="overflow-x-auto">
+                {entries.length === 0 ? (
+                  <div className="p-12 text-center text-gray-500 dark:text-gray-400 space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto text-gray-400">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="font-semibold text-sm">No entries in the matrix yet</div>
+                    <div className="text-xs max-w-sm mx-auto">
+                      Fill in the activity details above and click <strong>&ldquo;Add entry to matrix&rdquo;</strong> to build your monthly response dataset.
+                    </div>
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-xs border-collapse min-w-[2200px]">
+                    <thead className="bg-[#0a3b39] text-[#eef6f4] font-mono text-[11px] uppercase tracking-wider sticky top-0">
+                      <tr>
+                        {COLUMNS.map((col) => (
+                          <th key={col.key} className="px-3.5 py-3 border-r border-teal-800/50 whitespace-nowrap">
+                            {col.label}
+                          </th>
+                        ))}
+                        <th className="px-3.5 py-3 text-center sticky right-0 bg-[#0a3b39] shadow-l">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 font-sans">
+                      {entries.map((entry, idx) => (
+                        <tr
+                          key={entry.id || idx}
+                          className="hover:bg-teal-50/50 dark:hover:bg-teal-950/20 transition-colors"
+                        >
+                          {COLUMNS.map((col) => {
+                            const val = entry[col.key as keyof MatrixEntry] || "";
+                            const isNum = [
+                              "locationPop",
+                              "qtyPlanned",
+                              "qtyAchieved",
+                              "boys",
+                              "girls",
+                              "men",
+                              "women",
+                              "totalBenef",
+                            ].includes(col.key);
+                            const isCode = ["pcode1", "pcode2", "pcode3"].includes(col.key);
+
+                            return (
+                              <td
+                                key={col.key}
+                                className={`px-3.5 py-2.5 border-r border-gray-100 dark:border-gray-700/60 ${
+                                  isNum
+                                    ? "text-right font-mono font-medium"
+                                    : isCode
+                                    ? "font-mono text-gray-500 text-[11px]"
+                                    : "text-gray-800 dark:text-gray-200 whitespace-nowrap"
+                                }`}
+                              >
+                                {val}
+                              </td>
+                            );
+                          })}
+
+                          {/* Row Action buttons (sticky right) */}
+                          <td className="px-3.5 py-2.5 text-center sticky right-0 bg-white dark:bg-gray-800 shadow-l">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleEditEntry(idx)}
+                                className="px-2.5 py-1 rounded bg-teal-50 dark:bg-teal-950/60 hover:bg-teal-100 text-[#0e5450] dark:text-teal-300 text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteEntry(idx)}
+                                className="px-2.5 py-1 rounded bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-300 text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </div>
-            );
-          })}
+            </section>
 
-          {/* Bottom Button to Add Record */}
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={handleAddNewRecord}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-50 dark:bg-teal-950/60 border-2 border-dashed border-teal-600/50 hover:border-teal-600 text-teal-800 dark:text-teal-200 font-bold text-sm shadow-xs hover:shadow-md transition-all active:scale-[0.99] w-full sm:w-auto justify-center"
-            >
-              <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>+ Add Another Activity Record</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SECTION 3: LIVE 5W RESPONSE MATRIX TABLE                                 */}
-        {/* ========================================================================= */}
-        <section
-          id="session-matrix-table"
-          className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden"
-        >
-          <div className="px-6 py-5 bg-gradient-to-r from-gray-50 to-teal-50/20 dark:from-gray-800 dark:to-teal-950/20 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base sm:text-lg font-serif font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>Response Monitoring Matrix (5W) — Live Preview</span>
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Summary of all {records.length} activity entries prepared for submission
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={handleExportSessionCsv}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-xs"
-              >
-                <svg className="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Export CSV</span>
-              </button>
+            {/* Sector Footer Note */}
+            <div className="text-center text-xs text-gray-500 dark:text-gray-400 py-4">
+              Built from the official WASH Sector 5W reporting template — Adamawa, Borno &amp; Yobe.
             </div>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-gray-700 dark:text-gray-300 min-w-[1200px]">
-              <thead className="bg-[#0a3b39] text-[#dff0eb] font-mono text-[11px] uppercase tracking-wider">
-                <tr>
-                  <th className="px-3.5 py-3">#</th>
-                  <th className="px-3.5 py-3">State</th>
-                  <th className="px-3.5 py-3">LGA</th>
-                  <th className="px-3.5 py-3">Ward</th>
-                  <th className="px-3.5 py-3">Location Type</th>
-                  <th className="px-3.5 py-3">Domain</th>
-                  <th className="px-3.5 py-3">Activity</th>
-                  <th className="px-3.5 py-3 text-right">Achieved</th>
-                  <th className="px-3.5 py-3">Unit</th>
-                  <th className="px-3.5 py-3 text-right">Beneficiaries</th>
-                  <th className="px-3.5 py-3">Status</th>
-                  <th className="px-3.5 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700 font-sans">
-                {records.map((rec) => (
-                  <tr
-                    key={rec.id}
-                    className="hover:bg-teal-50/50 dark:hover:bg-teal-950/20 transition-colors"
-                  >
-                    <td className="px-3.5 py-3 font-mono font-bold text-teal-700 dark:text-teal-400">
-                      {rec.recordNumber}
-                    </td>
-                    <td className="px-3.5 py-3 font-semibold">{rec.state}</td>
-                    <td className="px-3.5 py-3">{rec.lga}</td>
-                    <td className="px-3.5 py-3 text-gray-500 dark:text-gray-400">{rec.ward || "—"}</td>
-                    <td className="px-3.5 py-3">{rec.siteType}</td>
-                    <td className="px-3.5 py-3">
-                      <span className="px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 font-medium text-[11px]">
-                        {rec.domain}
-                      </span>
-                    </td>
-                    <td className="px-3.5 py-3 font-medium max-w-[200px] truncate" title={rec.activityType}>
-                      {rec.activityType}
-                    </td>
-                    <td className="px-3.5 py-3 text-right font-mono font-bold">
-                      {rec.qtyAchieved || 0}
-                    </td>
-                    <td className="px-3.5 py-3 text-gray-500">{rec.unit}</td>
-                    <td className="px-3.5 py-3 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                      {rec.total.toLocaleString()}
-                    </td>
-                    <td className="px-3.5 py-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                          rec.status === "Completed"
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-                            : rec.status === "In progress"
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
-                        }`}
-                      >
-                        {rec.status}
-                      </span>
-                    </td>
-                    <td className="px-3.5 py-3 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTabRecordId(rec.id);
-                            const el = document.getElementById(`record-card-${rec.id}`);
-                            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                          }}
-                          className="px-2 py-1 rounded text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-950 text-xs font-semibold"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDuplicateRecord(rec)}
-                          className="px-2 py-1 rounded text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs"
-                        >
-                          Copy
-                        </button>
-                        {records.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteRecord(rec.id)}
-                            className="px-2 py-1 rounded text-rose-600 dark:text-rose-400 hover:bg-rose-50 text-xs"
-                          >
-                            Del
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* SUBMISSION BAR                                                            */}
-        {/* ========================================================================= */}
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            <span>
-              Submitting saves <strong>{records.length} activity {records.length === 1 ? "record" : "records"}</strong> for <strong>{orgName}</strong> ({acronym}) into the North East Nigeria WASH 5W database.
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              Clear Form
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSaveDraft}
-              className="px-5 py-3 rounded-xl border border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-200 text-sm font-bold hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-all flex items-center justify-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              <span>Save Draft ({records.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="px-8 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 flex-1 sm:flex-initial"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>Submit All Records ({records.length})</span>
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </>
   );

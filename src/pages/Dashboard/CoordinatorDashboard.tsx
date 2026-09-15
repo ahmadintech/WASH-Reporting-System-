@@ -101,7 +101,6 @@ export default function CoordinatorDashboard() {
   const { stats, exportCsv } = useWashData();
   const { currentUser, addUser } = useAuth();
 
-  const [stateFilter, setStateFilter] = useState<string>("All");
   const [selectedLgaForReview, setSelectedLgaForReview] = useState<LgaGap | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -115,12 +114,15 @@ export default function CoordinatorDashboard() {
 
   const sanitizeState = (st?: string): "Borno" | "Adamawa" | "Yobe" => {
     if (!st) return "Borno";
-    if (st.includes("Adamawa")) return "Adamawa";
-    if (st.includes("Yobe")) return "Yobe";
+    const lower = st.toLowerCase();
+    if (lower.includes("adamawa")) return "Adamawa";
+    if (lower.includes("yobe")) return "Yobe";
     return "Borno";
   };
 
   const coordState = sanitizeState(currentUser?.state);
+  const isCoordinator = currentUser?.role === "coordinator";
+  const [stateFilter, setStateFilter] = useState<string>(isCoordinator ? coordState : "All");
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -161,6 +163,9 @@ export default function CoordinatorDashboard() {
   };
 
   const filteredGaps = SAMPLE_LGA_GAPS.filter((g) => {
+    if (isCoordinator) {
+      return g.state.toLowerCase() === coordState.toLowerCase();
+    }
     if (stateFilter !== "All" && g.state !== stateFilter) return false;
     return true;
   });
@@ -373,22 +378,31 @@ export default function CoordinatorDashboard() {
 
       {/* 5W Submissions & Priority Gap Table */}
       <div className="rounded-3xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-        {/* State filter buttons */}
+        {/* State filter buttons / Coordinator locked scope */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2">Filter State:</span>
-          {["All", "Borno", "Adamawa", "Yobe"].map((st) => (
-            <button
-              key={st}
-              onClick={() => setStateFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                stateFilter === st
-                  ? "bg-brand-600 text-white shadow-xs"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
-            >
-              {st}
-            </button>
-          ))}
+          <span className="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2">
+            {isCoordinator ? "Cluster Jurisdiction:" : "Filter State:"}
+          </span>
+          {isCoordinator ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 text-xs font-bold text-brand-700 dark:text-brand-300">
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+              <span>{coordState} State Desk (Access Restricted to {coordState})</span>
+            </div>
+          ) : (
+            ["All", "Borno", "Adamawa", "Yobe"].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStateFilter(st)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  stateFilter === st
+                    ? "bg-brand-600 text-white shadow-xs"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                }`}
+              >
+                {st}
+              </button>
+            ))
+          )}
         </div>
 
         <div className="overflow-x-auto">

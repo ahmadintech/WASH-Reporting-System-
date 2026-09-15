@@ -9,6 +9,7 @@ import {
   LGA_BY_STATE,
   INITIAL_WARDS_BY_LGA,
 } from "../types/wash";
+import { useAuth } from "./AuthContext";
 
 export interface ProgramCategory {
   category: string;
@@ -112,7 +113,9 @@ const SETTINGS_STORAGE_KEY = "wash-sector-settings";
 const WashDataContext = createContext<WashDataContextType | undefined>(undefined);
 
 export const WashDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [reports, setReports] = useState<WashReport[]>(() => {
+  const { currentUser, isAuthenticated } = useAuth();
+
+  const [allReports, setAllReports] = useState<WashReport[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -129,29 +132,44 @@ export const WashDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allReports));
     } catch {
       // ignore
     }
-  }, [reports]);
+  }, [allReports]);
+
+  // Scoped reports: if coordinator is logged in, strictly filter reports to their assigned state (Adamawa, Borno, or Yobe)
+  const reports = React.useMemo(() => {
+    if (isAuthenticated && currentUser?.role === "coordinator" && currentUser?.state) {
+      const targetState = currentUser.state.toLowerCase();
+      return allReports.filter((r) => r.state && r.state.toLowerCase() === targetState);
+    }
+    return allReports;
+  }, [allReports, isAuthenticated, currentUser]);
 
   const addReport = (reportData: Omit<WashReport, "id" | "submittedAt">): WashReport => {
+    const assignedState =
+      currentUser?.role === "coordinator" && currentUser?.state
+        ? (currentUser.state as "Borno" | "Adamawa" | "Yobe")
+        : reportData.state;
+
     const newReport: WashReport = {
       ...reportData,
+      state: assignedState,
       id: "r_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
       submittedAt: new Date().toISOString(),
     };
-    setReports((prev) => [newReport, ...prev]);
+    setAllReports((prev) => [newReport, ...prev]);
     return newReport;
   };
 
   const deleteReport = (id: string): boolean => {
-    setReports((prev) => prev.filter((r) => r.id !== id));
+    setAllReports((prev) => prev.filter((r) => r.id !== id));
     return true;
   };
 
   const resetToSampleData = () => {
-    setReports(INITIAL_WASH_REPORTS);
+    setAllReports(INITIAL_WASH_REPORTS);
   };
 
   const exportCsv = (customReports?: WashReport[]) => {
