@@ -56,19 +56,6 @@ export default function SignInForm() {
 
   return (
     <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 backdrop-blur-md">
-      {/* Back to Home Button */}
-      <div className="mb-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors group cursor-pointer"
-        >
-          <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span>Back to Home</span>
-        </Link>
-      </div>
-
       {/* Brand Header */}
       <div className="flex flex-col items-center text-center mb-6">
         <Link
