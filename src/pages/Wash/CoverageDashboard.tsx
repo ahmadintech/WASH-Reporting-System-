@@ -50,9 +50,6 @@ export default function CoverageDashboard() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 15;
 
-  // Record Inspection Modal state
-  const [selectedReport, setSelectedReport] = useState<WashReport | null>(null);
-
   // Dynamic LGAs based on selected state
   const availableLgas = useMemo(() => {
     if (filterState && WASH_5W_LGAS_BY_STATE[filterState]) {
@@ -875,21 +872,8 @@ export default function CoverageDashboard() {
                 </span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Click any row or view button to inspect the full 5W record breakdown (WHO, WHAT, WHERE, WHEN, FOR WHOM)
+                Monthly sector-wide humanitarian interventions across Borno, Adamawa, and Yobe
               </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => exportCsv(filteredReports)}
-                className="text-xs font-bold text-teal-800 hover:text-teal-950 dark:text-teal-300 dark:hover:text-white border border-teal-300 dark:border-teal-700 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Export Filtered (CSV)</span>
-              </button>
             </div>
           </div>
 
@@ -903,13 +887,12 @@ export default function CoverageDashboard() {
                   <th className="py-3.5 px-4">Period &amp; Status</th>
                   <th className="py-3.5 px-4">Target Group</th>
                   <th className="py-3.5 px-4 text-right">Beneficiaries</th>
-                  <th className="py-3.5 px-4 text-center">Inspect Record</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {paginatedReports.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan={6} className="py-12 text-center text-gray-500 dark:text-gray-400">
                       <div className="max-w-sm mx-auto">
                         <svg className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -932,8 +915,7 @@ export default function CoverageDashboard() {
                   paginatedReports.map((r) => (
                     <tr
                       key={r.id}
-                      onClick={() => setSelectedReport(r)}
-                      className="hover:bg-teal-50/40 dark:hover:bg-teal-950/20 cursor-pointer transition-colors"
+                      className="hover:bg-teal-50/40 dark:hover:bg-teal-950/20 transition-colors"
                     >
                       <td className="py-3.5 px-4 font-medium text-gray-900 dark:text-white">
                         <div className="font-bold text-teal-950 dark:text-teal-200 flex items-center gap-1.5">
@@ -975,21 +957,6 @@ export default function CoverageDashboard() {
                         <div className="text-[10px] text-gray-400 font-normal mt-0.5">
                           {Number(r.women) || 0}W · {Number(r.girls) || 0}G · {Number(r.men) || 0}M
                         </div>
-                      </td>
-                      {/* PURE PUBLIC VIEW ACTION ONLY - NO DELETE OR EDIT */}
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedReport(r)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-teal-800 hover:text-teal-950 bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900 border border-teal-200 dark:border-teal-800 transition-colors"
-                          title="Inspect 5W Metadata"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                          <span>Inspect</span>
-                        </button>
                       </td>
                     </tr>
                   ))
@@ -1057,248 +1024,6 @@ export default function CoverageDashboard() {
             </div>
           )}
         </div>
-
-        {/* ════════════════════════════════════════════════════════════════
-            7. 5W RECORD INSPECTION MODAL (Detailed Humanitarian Breakdown)
-        ════════════════════════════════════════════════════════════════ */}
-        {selectedReport && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
-            <div
-              className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="p-5 sm:p-6 bg-gradient-to-r from-teal-950 via-teal-900 to-teal-800 text-white flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="font-mono text-xs uppercase text-teal-300 tracking-wider">
-                      5W Inspection Record
-                    </span>
-                    <span className="text-teal-400">·</span>
-                    <span className="text-xs font-mono bg-teal-800/80 px-2 py-0.5 rounded text-teal-200">
-                      ID: {selectedReport.id}
-                    </span>
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold font-serif">
-                    {selectedReport.orgName} — {selectedReport.activityType}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedReport(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0 ml-3"
-                  aria-label="Close modal"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Modal Body: 5 Official Humanitarian Dimensions */}
-              <div className="p-5 sm:p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-                {/* 1. WHO */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">1</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
-                      WHO — Reporting &amp; Implementing Agencies
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Reporting Org</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.orgName}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Org Classification</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.orgType || "NGO"}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Donor Partner</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.donor || "Direct / Cluster"}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Focal Point</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.focalPoint || "Cluster Secretariat"}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. WHAT */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">2</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
-                      WHAT — Domain, Activity &amp; Output Indicators
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Technical Domain</div>
-                      <div className="font-bold text-teal-800 dark:text-teal-300 mt-0.5">{selectedReport.domain || "Water Supply"}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg sm:col-span-2">
-                      <div className="text-gray-400 text-[11px]">Activity Undertaken</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">
-                        {selectedReport.activityType === "Other" ? selectedReport.activityOther : selectedReport.activityType}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Key Indicator</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 truncate" title={selectedReport.indicator}>
-                        {selectedReport.indicator || "Standard 5W Metric"}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Quantity Planned</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">
-                        {selectedReport.qtyPlanned || "—"} {selectedReport.unit || ""}
-                      </div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Quantity Achieved</div>
-                      <div className="font-bold text-teal-800 dark:text-teal-300 mt-0.5 font-mono">
-                        {selectedReport.qtyAchieved || "—"} {selectedReport.unit || ""}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. WHERE */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">3</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
-                      WHERE — Geographical Coordinates &amp; Administrative Hierarchy
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">State (Admin 1)</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.state}</div>
-                      {selectedReport.pcode1 && (
-                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode1}</div>
-                      )}
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">LGA (Admin 2)</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.lga}</div>
-                      {selectedReport.pcode2 && (
-                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode2}</div>
-                      )}
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Ward (Admin 3)</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedReport.ward || "—"}</div>
-                      {selectedReport.pcode3 && (
-                        <div className="text-[10px] font-mono text-teal-700 dark:text-teal-400 mt-0.5">P-Code: {selectedReport.pcode3}</div>
-                      )}
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Site / Settlement</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5">
-                        {selectedReport.settlement || selectedReport.locationType || "Community site"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. WHEN */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">4</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
-                      WHEN — Timeline &amp; Delivery Status
-                    </h4>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Reporting Period</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.period || "2026 Cycle"}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Activity Status</div>
-                      <div className="mt-1">{statusBadge(selectedReport.status)}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">Start Date</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.startDate || "—"}</div>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[11px]">End Date</div>
-                      <div className="font-bold text-gray-900 dark:text-white mt-0.5 font-mono">{selectedReport.endDate || "—"}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 5. FOR WHOM */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-1.5">
-                    <span className="w-5 h-5 rounded-full bg-teal-800 text-white text-[10px] font-bold flex items-center justify-center font-mono">5</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-teal-900 dark:text-teal-300 font-mono">
-                      FOR WHOM — Beneficiary Demographics &amp; Population Group
-                    </h4>
-                  </div>
-                  <div className="p-3 bg-teal-50 dark:bg-teal-950/40 rounded-lg border border-teal-200 dark:border-teal-800 text-xs mb-2">
-                    <span className="text-teal-800 dark:text-teal-300 font-semibold">Target Population Group: </span>
-                    <span className="font-bold text-teal-950 dark:text-white">{selectedReport.populationGroup || "Host Community"}</span>
-                  </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
-                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[10px]">Women</div>
-                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.women) || 0).toLocaleString()}</div>
-                    </div>
-                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[10px]">Girls</div>
-                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.girls) || 0).toLocaleString()}</div>
-                    </div>
-                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[10px]">Men</div>
-                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.men) || 0).toLocaleString()}</div>
-                    </div>
-                    <div className="p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <div className="text-gray-400 text-[10px]">Boys</div>
-                      <div className="font-bold text-gray-900 dark:text-white font-mono mt-0.5">{(Number(selectedReport.boys) || 0).toLocaleString()}</div>
-                    </div>
-                    <div className="p-2.5 bg-purple-50 dark:bg-purple-950/40 rounded-lg border border-purple-200">
-                      <div className="text-purple-700 dark:text-purple-300 text-[10px] font-bold">PWD</div>
-                      <div className="font-bold text-purple-900 dark:text-purple-200 font-mono mt-0.5">{(Number(selectedReport.pwd) || 0).toLocaleString()}</div>
-                    </div>
-                    <div className="p-2.5 bg-teal-50 dark:bg-teal-950/60 rounded-lg border border-teal-300">
-                      <div className="text-teal-800 dark:text-teal-300 text-[10px] font-bold">Total Reached</div>
-                      <div className="font-extrabold text-teal-950 dark:text-white font-mono mt-0.5">{(Number(selectedReport.total) || 0).toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Operational Notes */}
-                {selectedReport.comments && (
-                  <div className="p-3.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl border border-gray-200 dark:border-gray-600 text-xs">
-                    <span className="font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider font-mono text-[10px]">Field Notes / Constraints:</span>
-                    <p className="mt-1 text-gray-600 dark:text-gray-300 leading-relaxed italic">
-                      "{selectedReport.comments}"
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 bg-gray-100 dark:bg-gray-700/60 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <span className="text-[11px] text-gray-500 font-mono">
-                  Standard WASH Sector 5W Monitoring Record
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedReport(null)}
-                  className="px-4 py-2 bg-teal-800 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition-colors"
-                >
-                  Close Record
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
